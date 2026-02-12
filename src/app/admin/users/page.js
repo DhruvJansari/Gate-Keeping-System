@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { PanelLayout } from "@/components/PanelLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UserModal } from "@/components/UserModal";
-import { useTheme } from "@/context/ThemeContext";
 import { EyeIcon, EditIcon, DeleteIcon } from "@/components/Icons";
 
 // Icons for consistent dark mode
@@ -83,7 +82,6 @@ function ShieldIcon({ className }) {
 
 function UsersManagement() {
   const { user } = useAuth();
-  const { theme } = useTheme(); // Get theme
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
@@ -197,19 +195,9 @@ function UsersManagement() {
     <PanelLayout title="Users Management" roleName={user?.role_name || "User"}>
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
-        <div
-          className={`rounded-t-xl px-6 py-5 ${
-            theme === "dark"
-              ? "bg-amber-700 text-white"
-              : "bg-amber-600 text-white"
-          }`}
-        >
+        <div className="rounded-t-xl px-6 py-5 bg-amber-600 text-white">
           <h2 className="text-xl font-semibold">Users Management</h2>
-          <p
-            className={`text-sm ${
-              theme === "dark" ? "text-amber-200" : "text-amber-100"
-            }`}
-          >
+          <p className="text-sm text-amber-100">
             Manage system users and their roles
           </p>
         </div>
@@ -218,42 +206,26 @@ function UsersManagement() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             onClick={handleAdd}
-            className={`flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-              theme === "dark"
-                ? "bg-amber-700 hover:bg-amber-800"
-                : "bg-amber-600 hover:bg-amber-700"
-            }`}
+            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
           >
             <UserIcon className="h-4 w-4" />
             Create New User
           </button>
           <div className="flex flex-wrap gap-3">
             <div className="relative">
-              <SearchIcon
-                className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-                  theme === "dark" ? "text-zinc-500" : "text-zinc-400"
-                }`}
-              />
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search users..."
-                className={`w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  theme === "dark"
-                    ? "border-zinc-600 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500"
-                    : "border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
-                } sm:w-48`}
+                className="w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 sm:w-48"
               />
             </div>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className={`rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                theme === "dark"
-                  ? "border-zinc-600 bg-zinc-800 text-zinc-100"
-                  : "border-zinc-300 bg-white text-zinc-900"
-              }`}
+              className="rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900"
             >
               <option value="all">Filter by Role: All</option>
               {roles.map((r) => (
@@ -266,23 +238,11 @@ function UsersManagement() {
         </div>
 
         {/* Table */}
-        <div
-          className={`overflow-hidden rounded-xl border shadow-sm ${
-            theme === "dark"
-              ? "border-zinc-700 bg-zinc-800"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
+        <div className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px]">
               <thead>
-                <tr
-                  className={`text-left text-sm ${
-                    theme === "dark"
-                      ? "bg-zinc-900 text-white"
-                      : "bg-zinc-800 text-white"
-                  }`}
-                >
+                <tr className="text-left text-sm bg-zinc-800 text-white">
                   <th className="px-4 py-3">#</th>
                   <th className="px-4 py-3">USER DETAILS</th>
                   <th className="px-4 py-3">CONTACT</th>
@@ -294,13 +254,7 @@ function UsersManagement() {
                 {loading && (
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center">
-                      <div
-                        className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 ${
-                          theme === "dark"
-                            ? "border-zinc-600 border-t-zinc-400"
-                            : "border-zinc-300 border-t-zinc-700"
-                        }`}
-                      />
+                      <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700" />
                     </td>
                   </tr>
                 )}
@@ -308,69 +262,33 @@ function UsersManagement() {
                   users.map((u, idx) => (
                     <tr
                       key={u.user_id}
-                      className={`border-b hover:transition-colors ${
-                        theme === "dark"
-                          ? "border-zinc-700 hover:bg-zinc-700/50"
-                          : "border-zinc-100 hover:bg-zinc-50"
-                      }`}
+                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
                     >
-                      <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
-                      >
+                      <td className="px-4 py-3 text-sm text-zinc-600">
                         {idx + 1}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                              theme === "dark"
-                                ? "bg-amber-900/50 text-amber-300"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold bg-amber-100 text-amber-800">
                             {getInitials(u.full_name, u.username)}
                           </div>
                           <div>
-                            <p
-                              className={`font-medium ${
-                                theme === "dark"
-                                  ? "text-zinc-100"
-                                  : "text-zinc-900"
-                              }`}
-                            >
+                            <p className="font-medium text-zinc-900">
                               {u.username}
                             </p>
-                            <p
-                              className={`text-xs ${
-                                theme === "dark"
-                                  ? "text-zinc-400"
-                                  : "text-zinc-500"
-                              }`}
-                            >
+                            <p className="text-xs text-zinc-500">
                               ID: {u.user_id}
                             </p>
                             <span
                               className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                                 u.is_active
-                                  ? theme === "dark"
-                                    ? "bg-emerald-900/50 text-emerald-400"
-                                    : "bg-emerald-100 text-emerald-700"
-                                  : theme === "dark"
-                                  ? "bg-zinc-700 text-zinc-400"
+                                  ? "bg-emerald-100 text-emerald-700"
                                   : "bg-zinc-100 text-zinc-600"
                               }`}
                             >
                               {u.is_active ? (
                                 <>
-                                  <span
-                                    className={`h-1.5 w-1.5 rounded-full ${
-                                      theme === "dark"
-                                        ? "bg-emerald-400"
-                                        : "bg-emerald-500"
-                                    }`}
-                                  />{" "}
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{" "}
                                   Active
                                 </>
                               ) : (
@@ -381,18 +299,8 @@ function UsersManagement() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div
-                          className={`flex items-center gap-2 text-sm ${
-                            theme === "dark" ? "text-zinc-300" : "text-zinc-700"
-                          }`}
-                        >
-                          <MailIcon
-                            className={`h-4 w-4 ${
-                              theme === "dark"
-                                ? "text-zinc-500"
-                                : "text-zinc-400"
-                            }`}
-                          />
+                        <div className="flex items-center gap-2 text-sm text-zinc-700">
+                          <MailIcon className="h-4 w-4 text-zinc-400" />
                           {u.email}
                         </div>
                       </td>
@@ -400,11 +308,7 @@ function UsersManagement() {
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                             u.role_name === "Admin"
-                              ? theme === "dark"
-                                ? "bg-red-900/50 text-red-400"
-                                : "bg-red-100 text-red-700"
-                              : theme === "dark"
-                              ? "bg-zinc-700 text-zinc-400"
+                              ? "bg-red-100 text-red-700"
                               : "bg-zinc-100 text-zinc-700"
                           }`}
                         >
@@ -416,22 +320,14 @@ function UsersManagement() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(u)}
-                            className={`rounded p-2 transition-colors ${
-                              theme === "dark"
-                                ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
-                                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                            }`}
+                            className="rounded p-2 transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
                             title="View Details"
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleEdit(u)}
-                            className={`rounded p-2 transition-colors ${
-                              theme === "dark"
-                                ? "bg-amber-900/50 text-amber-400 hover:bg-amber-900"
-                                : "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                            }`}
+                            className="rounded p-2 transition-colors bg-amber-100 text-amber-700 hover:bg-amber-200"
                             title="Edit User"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -442,11 +338,7 @@ function UsersManagement() {
                               deletingId === u.user_id ||
                               u.user_id === user?.user_id
                             }
-                            className={`rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                              theme === "dark"
-                                ? "bg-red-900/50 text-red-400 hover:bg-red-900"
-                                : "bg-red-100 text-red-700 hover:bg-red-200"
-                            }`}
+                            className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
                             title={
                               u.user_id === user?.user_id
                                 ? "Cannot delete own account"
@@ -463,33 +355,17 @@ function UsersManagement() {
             </table>
           </div>
           {!loading && users.length > 0 && (
-            <div
-              className={`border-t px-4 py-2 text-sm ${
-                theme === "dark"
-                  ? "border-zinc-700 text-zinc-400"
-                  : "border-zinc-200 text-zinc-500"
-              }`}
-            >
+            <div className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500">
               Showing 1 to {users.length} of {users.length} entries
             </div>
           )}
           {!loading && users.length === 0 && !error && (
-            <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-              }`}
-            >
+            <p className="py-12 text-center text-sm text-zinc-500">
               No users found
             </p>
           )}
           {error && (
-            <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-red-400" : "text-red-600"
-              }`}
-            >
-              {error}
-            </p>
+            <p className="py-12 text-center text-sm text-red-600">{error}</p>
           )}
         </div>
       </div>
@@ -512,70 +388,36 @@ function UsersManagement() {
           onClick={() => setViewingUser(null)}
         >
           <div
-            className={`w-full max-w-lg rounded-xl border p-6 shadow-xl ${
-              theme === "dark"
-                ? "border-zinc-700 bg-zinc-800"
-                : "border-zinc-200 bg-white"
-            }`}
+            className="w-full max-w-lg rounded-xl border p-6 shadow-xl border-zinc-200 bg-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3
-                className={`text-lg font-semibold ${
-                  theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                }`}
-              >
+              <h3 className="text-lg font-semibold text-zinc-900">
                 User Details
               </h3>
               <button
                 onClick={() => setViewingUser(null)}
-                className={`rounded p-2 transition-colors ${
-                  theme === "dark"
-                    ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-                }`}
+                className="rounded p-2 transition-colors text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
-            <div
-              className={`flex items-center gap-4 border-b pb-4 ${
-                theme === "dark" ? "border-zinc-700" : "border-zinc-200"
-              }`}
-            >
-              <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold ${
-                  theme === "dark"
-                    ? "bg-amber-900/50 text-amber-300"
-                    : "bg-amber-100 text-amber-800"
-                }`}
-              >
+            <div className="flex items-center gap-4 border-b pb-4 border-zinc-200">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold bg-amber-100 text-amber-800">
                 {getInitials(viewingUser.full_name, viewingUser.username)}
               </div>
               <div>
-                <p
-                  className={`font-semibold ${
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }`}
-                >
+                <p className="font-semibold text-zinc-900">
                   {viewingUser.username}
                 </p>
-                <p
-                  className={`text-sm ${
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }`}
-                >
+                <p className="text-sm text-zinc-500">
                   ID: {viewingUser.user_id}
                 </p>
                 <span
                   className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
                     viewingUser.is_active
-                      ? theme === "dark"
-                        ? "bg-emerald-900/50 text-emerald-400"
-                        : "bg-emerald-100 text-emerald-700"
-                      : theme === "dark"
-                      ? "bg-zinc-700 text-zinc-400"
+                      ? "bg-emerald-100 text-emerald-700"
                       : "bg-zinc-100 text-zinc-600"
                   }`}
                 >
@@ -585,54 +427,22 @@ function UsersManagement() {
             </div>
             <dl className="mt-4 space-y-3 text-sm">
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Full Name
-                </dt>
-                <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
-                >
+                <dt className="text-zinc-500">Full Name</dt>
+                <dd className="text-zinc-900">
                   {viewingUser.full_name || "—"}
                 </dd>
               </div>
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Email
-                </dt>
-                <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
-                >
-                  {viewingUser.email}
-                </dd>
+                <dt className="text-zinc-500">Email</dt>
+                <dd className="text-zinc-900">{viewingUser.email}</dd>
               </div>
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Role
-                </dt>
+                <dt className="text-zinc-500">Role</dt>
                 <dd>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                       viewingUser.role_name === "Admin"
-                        ? theme === "dark"
-                          ? "bg-red-900/50 text-red-400"
-                          : "bg-red-100 text-red-700"
-                        : theme === "dark"
-                        ? "bg-zinc-700 text-zinc-400"
+                        ? "bg-red-100 text-red-700"
                         : "bg-zinc-100 text-zinc-700"
                     }`}
                   >
@@ -644,11 +454,7 @@ function UsersManagement() {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setViewingUser(null)}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  theme === "dark"
-                    ? "border-zinc-700 text-zinc-300 hover:bg-zinc-700"
-                    : "border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-                }`}
+                className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors border-zinc-300 text-zinc-700 hover:bg-zinc-50"
               >
                 Close
               </button>
@@ -657,11 +463,7 @@ function UsersManagement() {
                   setViewingUser(null);
                   handleEdit(viewingUser);
                 }}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-                  theme === "dark"
-                    ? "bg-amber-700 hover:bg-amber-800"
-                    : "bg-amber-600 hover:bg-amber-700"
-                }`}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
               >
                 Edit User
               </button>

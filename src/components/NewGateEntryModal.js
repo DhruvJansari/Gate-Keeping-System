@@ -3,26 +3,14 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { TruckIcon as TruckSvgIcon, CloseIcon } from "@/components/Icons";
-import { useTheme } from "@/context/ThemeContext";
-
-const STAGES = [
-  "parking",
-  "gate_in",
-  "first_weighbridge",
-  "campus_in",
-  "campus_out",
-  "second_weighbridge",
-  "gate_pass",
-  "gate_out",
-];
 
 export function TruckIcon({ completed }) {
   return (
     <span
       className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 ${
         completed
-          ? "bg-emerald-500/20 dark:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/20"
-          : "bg-zinc-200/70 dark:bg-zinc-700/70 text-zinc-500 dark:text-zinc-400 backdrop-blur-sm"
+          ? "bg-emerald-100 text-emerald-600 shadow-sm border border-emerald-200"
+          : "bg-zinc-100 text-zinc-400 border border-zinc-200"
       }`}
       title={completed ? "Completed" : "Pending"}
     >
@@ -38,7 +26,6 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
   const [transporters, setTransporters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { theme } = useTheme();
 
   const [form, setForm] = useState({
     po_do_number: "",
@@ -207,74 +194,31 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
 
   if (!open) return null;
 
-  const getThemeColors = () => {
-    if (theme === "dark") {
-      return {
-        bg: "bg-zinc-900/95 backdrop-blur-lg",
-        cardBg: "bg-zinc-900",
-        border: "border-zinc-800",
-        text: "text-zinc-100",
-        textMuted: "text-zinc-400",
-        headerBg: "bg-amber-900/20 border-b border-amber-900/30",
-        buttonPrimary: "bg-amber-600 hover:bg-amber-700",
-        buttonSecondary:
-          "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700",
-        inputBg: "bg-zinc-800/50 border-zinc-700 hover:border-zinc-600",
-        errorBg: "bg-red-900/20 border border-red-800/30",
-      };
-    }
-    return {
-      bg: "bg-black/40 backdrop-blur-sm",
-      cardBg: "bg-white",
-      border: "border-zinc-200",
-      text: "text-zinc-900",
-      textMuted: "text-zinc-600",
-      headerBg: "bg-amber-50 border-b border-amber-200",
-      buttonPrimary: "bg-amber-600 hover:bg-amber-700",
-      buttonSecondary:
-        "bg-white hover:bg-zinc-50 text-zinc-700 border-zinc-300",
-      inputBg: "bg-white border-zinc-300 hover:border-zinc-400",
-      errorBg: "bg-red-50 border border-red-200",
-    };
-  };
-
-  const colors = getThemeColors();
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4 animate-in fade-in duration-300">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-4xl max-h-[95vh] overflow-hidden rounded-2xl ${colors.cardBg} ${colors.border} border shadow-2xl animate-in slide-in-from-bottom-10 duration-300`}
+        className="relative w-full max-w-4xl max-h-[95vh] overflow-hidden rounded-2xl bg-white border border-zinc-200 shadow-2xl animate-in slide-in-from-bottom-10 duration-300 ring-1 ring-black/5"
       >
         {/* Header */}
-        <div
-          className={`sticky top-0 z-10 px-4 md:px-6 py-4 ${colors.headerBg}`}
-        >
+        <div className="sticky top-0 z-10 px-4 md:px-6 py-4 bg-zinc-50/80 backdrop-blur-md border-b border-zinc-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                  theme === "dark" ? "bg-amber-900/40" : "bg-amber-100"
-                } transition-colors`}
-              >
-                <TruckSvgIcon
-                  className={`h-5 w-5 ${
-                    theme === "dark" ? "text-amber-400" : "text-amber-600"
-                  }`}
-                />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-sm border border-blue-200">
+                <TruckSvgIcon className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                <h2 className="text-lg font-bold text-zinc-900">
                   New Gate Entry
                 </h2>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm font-medium text-zinc-500">
                   {type === "Loading"
                     ? "Loading Goods (Inward)"
                     : "Unloading Goods (Outward)"}
@@ -283,7 +227,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
             </div>
             <button
               onClick={onClose}
-              className={`rounded-xl p-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${colors.textMuted}`}
+              className="rounded-xl p-2 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700 transition-colors"
               aria-label="Close"
             >
               <CloseIcon className="h-5 w-5" />
@@ -292,31 +236,25 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(95vh-120px)]">
-          <form onSubmit={handleSubmit} className="p-4 md:p-6">
+        <div className="overflow-y-auto max-h-[calc(95vh-90px)]">
+          <form onSubmit={handleSubmit} className="p-4 md:p-6 bg-white">
             {/* Transaction Type Selector */}
-            <div className="mb-6">
-              <label className="mb-3 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="mb-8">
+              <label className="mb-3 block text-sm font-bold text-zinc-700">
                 Transaction Type
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setType("Loading")}
-                  className={`relative flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  className={`relative flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ${
                     type === "Loading"
-                      ? `${colors.buttonPrimary} text-white border-transparent shadow-lg shadow-amber-600/20`
-                      : `${colors.buttonSecondary} border`
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2"
+                      : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-sm"
                   }`}
                 >
-                  {type === "Loading" && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-5 w-5 bg-amber-500"></span>
-                    </span>
-                  )}
                   <svg
-                    className="h-4 w-4"
+                    className={`h-4 w-4 ${type === "Loading" ? "text-blue-200" : "text-zinc-400"}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -333,20 +271,14 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                 <button
                   type="button"
                   onClick={() => setType("Unloading")}
-                  className={`relative flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  className={`relative flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ${
                     type === "Unloading"
-                      ? `${colors.buttonPrimary} text-white border-transparent shadow-lg shadow-amber-600/20`
-                      : `${colors.buttonSecondary} border`
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2"
+                      : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-sm"
                   }`}
                 >
-                  {type === "Unloading" && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-5 w-5 bg-amber-500"></span>
-                    </span>
-                  )}
                   <svg
-                    className="h-4 w-4"
+                    className={`h-4 w-4 ${type === "Unloading" ? "text-blue-200" : "text-zinc-400"}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -365,260 +297,297 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
 
             {/* Form Grid */}
             <div className="space-y-6">
-              {/* First Row - PO/DO and Product Name */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    PO / DO Number
-                  </label>
-                  <input
-                    type="text"
-                    value={form.po_do_number}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, po_do_number: e.target.value }))
-                    }
-                    placeholder="PO-12345"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Product Name <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={form.item_id}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, item_id: e.target.value }))
-                    }
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                    required
-                  >
-                    <option value="" className="text-zinc-500">
-                      Select Product
-                    </option>
-                    {items.map((i) => (
-                      <option
-                        key={i.item_id}
-                        value={i.item_id}
-                        className="text-zinc-900 dark:text-zinc-100"
-                      >
-                        {i.item_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Second Row - Party and Truck */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Party Name <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={form.party_id}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, party_id: e.target.value }))
-                    }
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                    required
-                  >
-                    <option value="" className="text-zinc-500">
-                      Select Party
-                    </option>
-                    {parties.map((p) => (
-                      <option
-                        key={p.party_id}
-                        value={p.party_id}
-                        className="text-zinc-900 dark:text-zinc-100"
-                      >
-                        {p.party_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Truck Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.truck_no}
-                    onChange={(e) => handleFieldChange("truck_no", e.target.value)}
-                    onBlur={() => handleFieldBlur("truck_no")}
-                    placeholder="MH 12 AB 1234"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 ${fieldErrors.truck_no ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'focus:ring-amber-500/50 focus:border-amber-500'} ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                  {fieldErrors.truck_no && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                      {fieldErrors.truck_no}
-                    </p>
-                  )}
+              {/* Product Info Section */}
+              <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Product Details</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      PO / DO Number
+                    </label>
+                    <input
+                      type="text"
+                      value={form.po_do_number}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, po_do_number: e.target.value }))
+                      }
+                      placeholder="PO-12345"
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Product Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <select
+                        value={form.item_id}
+                        onChange={(e) =>
+                            setForm((f) => ({ ...f, item_id: e.target.value }))
+                        }
+                        className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        required
+                        >
+                        <option value="" className="text-zinc-500">
+                            Select Product
+                        </option>
+                        {items.map((i) => (
+                            <option
+                            key={i.item_id}
+                            value={i.item_id}
+                            className="text-zinc-900"
+                            >
+                            {i.item_name}
+                            </option>
+                        ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Third Row - Invoice Details */}
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Invoice Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.invoice_number}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, invoice_number: e.target.value }))
-                    }
-                    placeholder="INV-2024-001"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Invoice Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={form.invoice_date}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, invoice_date: e.target.value }))
-                    }
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Invoice Quantity <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={form.invoice_quantity}
-                    onChange={(e) => handleFieldChange("invoice_quantity", e.target.value)}
-                    onBlur={() => handleFieldBlur("invoice_quantity")}
-                    placeholder="0.000"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 ${fieldErrors.invoice_quantity ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'focus:ring-amber-500/50 focus:border-amber-500'} ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                  {fieldErrors.invoice_quantity && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                      {fieldErrors.invoice_quantity}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Invoice Rate <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={form.invoice_rate}
-                    onChange={(e) => handleFieldChange("invoice_rate", e.target.value)}
-                    onBlur={() => handleFieldBlur("invoice_rate")}
-                    placeholder="0.00"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 ${fieldErrors.invoice_rate ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'focus:ring-amber-500/50 focus:border-amber-500'} ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                  {fieldErrors.invoice_rate && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                      {fieldErrors.invoice_rate}
-                    </p>
-                  )}
+              {/* Transport Info Section */}
+              <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Transport Details</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Party Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <select
+                        value={form.party_id}
+                        onChange={(e) =>
+                            setForm((f) => ({ ...f, party_id: e.target.value }))
+                        }
+                        className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        required
+                        >
+                        <option value="" className="text-zinc-500">
+                            Select Party
+                        </option>
+                        {parties.map((p) => (
+                            <option
+                            key={p.party_id}
+                            value={p.party_id}
+                            className="text-zinc-900"
+                            >
+                            {p.party_name}
+                            </option>
+                        ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Truck Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.truck_no}
+                      onChange={(e) => handleFieldChange("truck_no", e.target.value)}
+                      onBlur={() => handleFieldBlur("truck_no")}
+                      placeholder="MH 12 AB 1234"
+                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.truck_no 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                      }`}
+                      required
+                    />
+                    {fieldErrors.truck_no && (
+                      <p className="text-xs font-medium text-red-600 mt-1">
+                        {fieldErrors.truck_no}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                        Transporter Name
+                    </label>
+                    <div className="relative">
+                        <select
+                            value={form.transporter_id}
+                            onChange={(e) =>
+                            setForm((f) => ({ ...f, transporter_id: e.target.value }))
+                            }
+                            className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        >
+                            <option value="" className="text-zinc-500">
+                            Select Transporter
+                            </option>
+                            {transporters.map((t) => (
+                            <option
+                                key={t.transporter_id}
+                                value={t.transporter_id}
+                                className="text-zinc-900"
+                            >
+                                {t.name}
+                            </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                        LR Number
+                    </label>
+                    <input
+                        type="text"
+                        value={form.lr_number}
+                        onChange={(e) =>
+                        setForm((f) => ({ ...f, lr_number: e.target.value }))
+                        }
+                        placeholder="LR-12345"
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                    />
+                 </div>
+                 <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                        driver Mobile <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="tel"
+                        value={form.mobile_number}
+                        onChange={(e) => handleFieldChange("mobile_number", e.target.value)}
+                        onBlur={() => handleFieldBlur("mobile_number")}
+                        placeholder="9876543210"
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.mobile_number 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
+                        required
+                    />
+                    {fieldErrors.mobile_number && (
+                        <p className="text-xs font-medium text-red-600 mt-1">
+                        {fieldErrors.mobile_number}
+                        </p>
+                    )}
+                 </div>
                 </div>
               </div>
 
-              {/* Fourth Row - Transporter and LR */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Transporter Name
-                  </label>
-                  <select
-                    value={form.transporter_id}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, transporter_id: e.target.value }))
-                    }
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                  >
-                    <option value="" className="text-zinc-500">
-                      Select Transporter
-                    </option>
-                    {transporters.map((t) => (
-                      <option
-                        key={t.transporter_id}
-                        value={t.transporter_id}
-                        className="text-zinc-900 dark:text-zinc-100"
-                      >
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    LR Number
-                  </label>
-                  <input
-                    type="text"
-                    value={form.lr_number}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, lr_number: e.target.value }))
-                    }
-                    placeholder="LR-12345"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text}`}
-                  />
-                </div>
-              </div>
-
-              {/* Fifth Row - Mobile Number */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={form.mobile_number}
-                    onChange={(e) => handleFieldChange("mobile_number", e.target.value)}
-                    onBlur={() => handleFieldBlur("mobile_number")}
-                    placeholder="9876543210"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 ${fieldErrors.mobile_number ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'focus:ring-amber-500/50 focus:border-amber-500'} ${colors.inputBg} ${colors.text}`}
-                    required
-                  />
-                  {fieldErrors.mobile_number && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                      {fieldErrors.mobile_number}
-                    </p>
-                  )}
+              {/* Invoice Details Section */}
+              <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Invoice Details</h3>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Invoice No <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.invoice_number}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, invoice_number: e.target.value }))
+                      }
+                      placeholder="INV-001"
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Invoice Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={form.invoice_date}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, invoice_date: e.target.value }))
+                      }
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Quantity <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={form.invoice_quantity}
+                      onChange={(e) => handleFieldChange("invoice_quantity", e.target.value)}
+                      onBlur={() => handleFieldBlur("invoice_quantity")}
+                      placeholder="0.000"
+                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.invoice_quantity 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                      }`}
+                      required
+                    />
+                    {fieldErrors.invoice_quantity && (
+                      <p className="text-xs font-medium text-red-600 mt-1">
+                        {fieldErrors.invoice_quantity}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-zinc-700">
+                      Rate <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={form.invoice_rate}
+                      onChange={(e) => handleFieldChange("invoice_rate", e.target.value)}
+                      onBlur={() => handleFieldBlur("invoice_rate")}
+                      placeholder="0.00"
+                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.invoice_rate 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                      }`}
+                      required
+                    />
+                    {fieldErrors.invoice_rate && (
+                      <p className="text-xs font-medium text-red-600 mt-1">
+                        {fieldErrors.invoice_rate}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Remarks Section */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Remarks 1
-                  </label>
-                  <textarea
-                    value={form.remark1}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, remark1: e.target.value }))
-                    }
-                    placeholder="Any additional remarks..."
-                    rows={2}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all duration-300 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 ${colors.inputBg} ${colors.text} resize-none`}
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-semibold text-zinc-700">
+                  Remarks / Notes
+                </label>
+                <textarea
+                  value={form.remark1}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, remark1: e.target.value }))
+                  }
+                  placeholder="Any additional remarks..."
+                  rows={2}
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
+                />
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className={`mt-6 rounded-xl p-4 ${colors.errorBg}`}>
+              <div className="mt-6 rounded-lg p-4 bg-red-50 border border-red-200">
                 <div className="flex items-start gap-3">
                   <svg
                     className="h-5 w-5 text-red-500 mt-0.5"
@@ -634,10 +603,10 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                     />
                   </svg>
                   <div>
-                    <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                    <p className="text-sm font-bold text-red-800">
                       Error
                     </p>
-                    <p className="text-sm text-red-500 dark:text-red-300 mt-1">
+                    <p className="text-sm text-red-600 mt-1">
                       {error}
                     </p>
                   </div>
@@ -646,18 +615,18 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
             )}
 
             {/* Footer Actions */}
-            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3">
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3 border-t border-zinc-100 pt-6">
               <button
                 type="button"
                 onClick={onClose}
-                className={`rounded-xl border px-6 py-3 text-sm font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95 ${colors.buttonSecondary}`}
+                className="rounded-lg border border-zinc-300 bg-white px-6 py-2.5 text-sm font-bold text-zinc-600 transition-all duration-300 hover:bg-zinc-50 hover:text-zinc-800 shadow-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className={`flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${colors.buttonPrimary} shadow-lg shadow-amber-600/20`}
+                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:bg-blue-700 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

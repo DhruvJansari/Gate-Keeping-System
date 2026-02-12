@@ -1,10 +1,10 @@
 'use client';
 
 import { Toaster } from 'react-hot-toast';
-import { useTheme } from '@/context/ThemeContext';
+// import { useTheme } from '@/context/ThemeContext';
 
 export function ToastProvider({ children }) {
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
 
   return (
     <>
@@ -15,9 +15,9 @@ export function ToastProvider({ children }) {
           // Default options
           duration: 3000,
           style: {
-            background: theme === 'dark' ? '#18181b' : '#ffffff',
-            color: theme === 'dark' ? '#fafafa' : '#09090b',
-            border: `1px solid ${theme === 'dark' ? '#27272a' : '#e4e4e7'}`,
+            background: '#ffffff', // Forced light theme
+            color: '#09090b', // Forced light theme
+            border: '1px solid #e4e4e7', // Forced light theme
             borderRadius: '0.75rem',
             padding: '12px 16px',
             fontSize: '14px',
@@ -32,9 +32,9 @@ export function ToastProvider({ children }) {
               secondary: '#ffffff',
             },
             style: {
-              background: theme === 'dark' ? '#18181b' : '#ffffff',
-              color: theme === 'dark' ? '#10b981' : '#047857',
-              border: `1px solid ${theme === 'dark' ? '#065f46' : '#a7f3d0'}`,
+              background: '#ffffff',
+              color: '#047857',
+              border: '1px solid #a7f3d0',
             },
           },
           // Error
@@ -45,9 +45,9 @@ export function ToastProvider({ children }) {
               secondary: '#ffffff',
             },
             style: {
-              background: theme === 'dark' ? '#18181b' : '#ffffff',
-              color: theme === 'dark' ? '#ef4444' : '#b91c1c',
-              border: `1px solid ${theme === 'dark' ? '#991b1b' : '#fecaca'}`,
+              background: '#ffffff',
+              color: '#b91c1c',
+              border: '1px solid #fecaca',
             },
           },
           // Loading
@@ -57,9 +57,9 @@ export function ToastProvider({ children }) {
               secondary: '#ffffff',
             },
             style: {
-              background: theme === 'dark' ? '#18181b' : '#ffffff',
-              color: theme === 'dark' ? '#fbbf24' : '#d97706',
-              border: `1px solid ${theme === 'dark' ? '#92400e' : '#fde68a'}`,
+              background: '#ffffff',
+              color: '#d97706',
+              border: '1px solid #fde68a',
             },
           },
         }}

@@ -15,18 +15,18 @@ function StageItem({ label, timestamp, completed, approver }) {
   return (
     <div className="mb-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</span>
+        <span className="text-sm font-semibold text-zinc-900">{label}</span>
         {completed ? (
-          <CheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <CheckIcon className="h-4 w-4 text-emerald-600" />
         ) : (
           <ClockIcon className="h-4 w-4 text-zinc-400" />
         )}
       </div>
-      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="text-xs text-zinc-500">
         Date&Time: {formatDateTime(timestamp)}
       </div>
       {approver && (
-        <div className="text-xs text-zinc-600 dark:text-zinc-500 italic">
+        <div className="text-xs text-zinc-600 italic">
           By: {approver}
         </div>
       )}
@@ -37,8 +37,8 @@ function StageItem({ label, timestamp, completed, approver }) {
 function DataRow({ label, value }) {
   return (
     <div className="flex justify-between py-1 text-xs">
-      <span className="text-zinc-600 dark:text-zinc-400">{label}:</span>
-      <span className="font-medium text-zinc-900 dark:text-zinc-100">{value}</span>
+      <span className="text-zinc-600">{label}:</span>
+      <span className="font-medium text-zinc-900">{value}</span>
     </div>
   );
 }
@@ -54,9 +54,9 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
           <div>
             <h3 className="text-lg font-semibold">Transaction Details</h3>
             <p className="text-sm text-amber-100">Stage-wise progress view</p>
@@ -71,10 +71,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             
             {/* Step-1 Card */}
-            <div className="rounded-xl border-2 border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 p-4 shadow-lg">
-              <div className="mb-3 border-b border-rose-200 dark:border-rose-800 pb-2">
-                <h4 className="text-sm font-bold text-rose-700 dark:text-rose-300">Step-1</h4>
-                <p className="text-xs text-rose-600 dark:text-rose-400">Parking • Gate In • Gate Out</p>
+            <div className="rounded-xl border-2 border-rose-200 bg-rose-50 p-4 shadow-lg">
+              <div className="mb-3 border-b border-rose-200 pb-2">
+                <h4 className="text-sm font-bold text-rose-700">Step-1</h4>
+                <p className="text-xs text-rose-600">Parking • Gate In • Gate Out</p>
               </div>
               
               <div className="space-y-2 mb-4">
@@ -98,7 +98,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 />
               </div>
 
-              <div className="border-t border-rose-200 dark:border-rose-800 pt-3 space-y-1">
+              <div className="border-t border-rose-200 pt-3 space-y-1">
                 <DataRow label="Number" value={txnNo} />
                 <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
                 <DataRow label="Truck Number" value={transaction.truck_no} />
@@ -115,10 +115,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* Step-2 Card */}
-            <div className="rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-4 shadow-lg">
-              <div className="mb-3 border-b border-purple-200 dark:border-purple-800 pb-2">
-                <h4 className="text-sm font-bold text-purple-700 dark:text-purple-300">Step-2</h4>
-                <p className="text-xs text-purple-600 dark:text-purple-400">WeighBridge • Gate Pass • Campus</p>
+            <div className="rounded-xl border-2 border-purple-200 bg-purple-50 p-4 shadow-lg">
+              <div className="mb-3 border-b border-purple-200 pb-2">
+                <h4 className="text-sm font-bold text-purple-700">Step-2</h4>
+                <p className="text-xs text-purple-600">WeighBridge • Gate Pass • Campus</p>
               </div>
               
               <div className="space-y-2 mb-4">
@@ -154,7 +154,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 />
               </div>
 
-              <div className="border-t border-purple-200 dark:border-purple-800 pt-3 space-y-1">
+              <div className="border-t border-purple-200 pt-3 space-y-1">
                 <DataRow label="ID name" value={`TXN-${transaction.transaction_id}`} />
                 <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
                 <DataRow label="Transaction Number" value={txnNo} />
@@ -169,10 +169,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* Step-3 Card */}
-            <div className="rounded-xl border-2 border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/20 p-4 shadow-lg">
-              <div className="mb-3 border-b border-pink-200 dark:border-pink-800 pb-2">
-                <h4 className="text-sm font-bold text-pink-700 dark:text-pink-300">Step-3</h4>
-                <p className="text-xs text-pink-600 dark:text-pink-400">Campus In • Campus Out</p>
+            <div className="rounded-xl border-2 border-pink-200 bg-pink-50 p-4 shadow-lg">
+              <div className="mb-3 border-b border-pink-200 pb-2">
+                <h4 className="text-sm font-bold text-pink-700">Step-3</h4>
+                <p className="text-xs text-pink-600">Campus In • Campus Out</p>
               </div>
               
               <div className="space-y-2 mb-4">
@@ -190,7 +190,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 />
               </div>
 
-              <div className="border-t border-pink-200 dark:border-pink-800 pt-3 space-y-1">
+              <div className="border-t border-pink-200 pt-3 space-y-1">
                 <DataRow label="Date&Time" value={formatDateTime(transaction.created_at)} />
                 <DataRow label="ID name" value={`TXN-${transaction.transaction_id}`} />
                 <DataRow label="Transaction Number" value={txnNo} />
@@ -203,10 +203,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* View Card */}
-            <div className="rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4 shadow-lg">
-              <div className="mb-3 border-b border-amber-200 dark:border-amber-800 pb-2">
-                <h4 className="text-sm font-bold text-amber-700 dark:text-amber-300">View</h4>
-                <p className="text-xs text-amber-600 dark:text-amber-400">Transaction Summary</p>
+            <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-4 shadow-lg">
+              <div className="mb-3 border-b border-amber-200 pb-2">
+                <h4 className="text-sm font-bold text-amber-700">View</h4>
+                <p className="text-xs text-amber-600">Transaction Summary</p>
               </div>
               
               <div className="space-y-1">
@@ -223,7 +223,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 <DataRow label="Mobile No" value={transaction.mobile_number} />
                 <DataRow label="Remark - 1" value={remark1} />
                 <DataRow label="Remark - 2" value={remark2} />
-                <div className="border-t border-amber-200 dark:border-amber-800 my-2 pt-2">
+                <div className="border-t border-amber-200 my-2 pt-2">
                   <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
                   <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
                   <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
@@ -235,10 +235,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-2 border-t border-zinc-200 dark:border-zinc-800 px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50">
+        <div className="flex justify-end gap-2 border-t border-zinc-200 px-6 py-4 bg-zinc-50">
           <button
             onClick={onClose}
-            className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition"
           >
             Close
           </button>

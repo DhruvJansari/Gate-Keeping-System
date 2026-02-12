@@ -175,13 +175,13 @@ export function ReportsPanel() {
     <PanelLayout title="Reports" roleName={user?.role_name || "User"}>
       <div className="space-y-6">
         {/* Filter Form */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg p-6">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">Transaction Report Filters</h2>
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-lg p-6">
+          <h2 className="text-xl font-bold text-zinc-900 mb-6">Transaction Report Filters</h2>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Transaction Type */}
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 Transaction Type
               </label>
               <div className="space-y-2">
@@ -190,31 +190,31 @@ export function ReportsPanel() {
                     type="checkbox"
                     checked={loadingChecked}
                     onChange={(e) => setLoadingChecked(e.target.checked)}
-                    className="rounded border-zinc-300 dark:border-zinc-700 text-amber-600 focus:ring-amber-500"
+                    className="rounded border-zinc-300 text-amber-600 focus:ring-amber-500"
                   />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Loading Goods (Out Ward)</span>
+                  <span className="text-sm text-zinc-700">Loading Goods (Out Ward)</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={unloadingChecked}
                     onChange={(e) => setUnloadingChecked(e.target.checked)}
-                    className="rounded border-zinc-300 dark:border-zinc-700 text-amber-600 focus:ring-amber-500"
+                    className="rounded border-zinc-300 text-amber-600 focus:ring-amber-500"
                   />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Unloading Goods (In Ward)</span>
+                  <span className="text-sm text-zinc-700">Unloading Goods (In Ward)</span>
                 </label>
               </div>
             </div>
 
             {/* Party Master */}
             <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 Party Master
               </label>
               <select
                 value={selectedParty}
                 onChange={(e) => setSelectedParty(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">All Parties</option>
                 {parties.map((p) => (
@@ -227,13 +227,13 @@ export function ReportsPanel() {
 
             {/* Item Master */}
             <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 Item Master
               </label>
               <select
                 value={selectedItem}
                 onChange={(e) => setSelectedItem(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">All Items</option>
                 {items.map((i) => (
@@ -246,13 +246,13 @@ export function ReportsPanel() {
 
             {/* Transport Master */}
             <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 Transport Master
               </label>
               <select
                 value={selectedTransporter}
                 onChange={(e) => setSelectedTransporter(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">All Transporters</option>
                 {transporters.map((t) => (
@@ -265,7 +265,7 @@ export function ReportsPanel() {
 
             {/* New Compose Date */}
             <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 New Compose Date
               </label>
               <div className="flex items-center gap-2">
@@ -273,21 +273,21 @@ export function ReportsPanel() {
                   type="date"
                   value={composeDateFrom}
                   onChange={(e) => setComposeDateFrom(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
                 <span className="text-zinc-500">To</span>
                 <input
                   type="date"
                   value={composeDateTo}
                   onChange={(e) => setComposeDateTo(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </div>
 
             {/* Second WeighBridge Date */}
             <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
                 Second WeighBridge Date
               </label>
               <div className="flex items-center gap-2">
@@ -295,14 +295,14 @@ export function ReportsPanel() {
                   type="date"
                   value={weighbridgeDateFrom}
                   onChange={(e) => setWeighbridgeDateFrom(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
                 <span className="text-zinc-500">To</span>
                 <input
                   type="date"
                   value={weighbridgeDateTo}
                   onChange={(e) => setWeighbridgeDateTo(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </div>
@@ -332,9 +332,9 @@ export function ReportsPanel() {
 
         {/* Results Table */}
         {hasSearched && (
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden">
-            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-zinc-50 to-zinc-100/50 dark:from-zinc-800 dark:to-zinc-900/50">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-zinc-200 bg-gradient-to-r from-zinc-50 to-zinc-100/50">
+              <h3 className="text-lg font-semibold text-zinc-900">
                 Report Results ({transactions.length} transactions)
               </h3>
             </div>
@@ -342,20 +342,20 @@ export function ReportsPanel() {
             <div className="overflow-x-auto">
               {loading ? (
                 <div className="flex items-center justify-center p-12">
-                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-600 dark:border-t-amber-400" />
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 border-t-amber-600" />
                 </div>
               ) : transactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center">
                   <svg className="h-16 w-16 text-zinc-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">No records found</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-1">Try adjusting your filters</p>
+                  <p className="text-lg font-medium text-zinc-600">No records found</p>
+                  <p className="text-sm text-zinc-500 mt-1">Try adjusting your filters</p>
                 </div>
               ) : (
                 <table className="w-full min-w-[1400px]">
                   <thead>
-                    <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 dark:from-zinc-900 dark:to-black text-left text-sm text-white">
+                    <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 text-left text-sm text-white">
                       <th className="px-4 py-3 font-semibold">S/N</th>
                       <th className="px-4 py-3 font-semibold">Transaction No</th>
                       <th className="px-4 py-3 font-semibold">Type</th>
@@ -375,21 +375,21 @@ export function ReportsPanel() {
                     {transactions.map((t, idx) => (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors"
+                        className="border-b border-zinc-100 hover:bg-amber-50/30 transition-colors"
                       >
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{idx + 1}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{txnNo(t)}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.transaction_type}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.party_name}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.item_name}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.transporter_name}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.truck_no}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.invoice_number || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{formatDate(t.invoice_date)}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.first_weight || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.second_weight || '—'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.net_weight || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{t.current_status || 'In Progress'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{idx + 1}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{txnNo(t)}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.transaction_type}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.party_name}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{t.item_name}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.transporter_name}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.truck_no}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.invoice_number || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{formatDate(t.invoice_date)}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.first_weight || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.second_weight || '—'}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{t.net_weight || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.current_status || 'In Progress'}</td>
                       </tr>
                     ))}
                   </tbody>

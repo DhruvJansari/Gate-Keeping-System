@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { PanelLayout } from "@/components/PanelLayout";
 import { TransporterModal } from "@/components/TransporterModal";
-import { useTheme } from "@/context/ThemeContext";
+// import { useTheme } from "@/context/ThemeContext";
 
 // Icons for consistent dark mode support
 function SearchIcon({ className }) {
@@ -145,7 +145,7 @@ function TrashIcon({ className }) {
 
 export function TransportersManagement() {
   const { user, hasPermission } = useAuth();
-  const { theme } = useTheme(); 
+  // const { theme } = useTheme(); 
   const [transporters, setTransporters] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -256,17 +256,11 @@ export function TransportersManagement() {
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
         <div
-          className={`rounded-t-xl px-6 py-5 ${
-            theme === "dark"
-              ? "bg-amber-700 text-white"
-              : "bg-amber-600 text-white"
-          }`}
+          className="rounded-t-xl px-6 py-5 bg-amber-600 text-white"
         >
           <h2 className="text-xl font-semibold">Transporters Management</h2>
           <p
-            className={`text-sm ${
-              theme === "dark" ? "text-amber-200" : "text-amber-100"
-            }`}
+            className="text-sm text-amber-100"
           >
             Manage all your logistics partners and carriers
           </p>
@@ -277,11 +271,7 @@ export function TransportersManagement() {
           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
-              className={`w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-                theme === "dark"
-                  ? "bg-amber-700 hover:bg-amber-800"
-                  : "bg-amber-600 hover:bg-amber-700"
-              }`}
+              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
             >
               + Add New Transporter
             </button>
@@ -291,30 +281,20 @@ export function TransportersManagement() {
           <div className="flex flex-wrap gap-3">
             <div className="relative">
               <SearchIcon
-                className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-                  theme === "dark" ? "text-zinc-500" : "text-zinc-400"
-                }`}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400"
               />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search transporters..."
-                className={`w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  theme === "dark"
-                    ? "border-zinc-600 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500"
-                    : "border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
-                } sm:w-48`}
+                className="w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 sm:w-48"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className={`rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                theme === "dark"
-                  ? "border-zinc-600 bg-zinc-800 text-zinc-100"
-                  : "border-zinc-300 bg-white text-zinc-900"
-              }`}
+              className="rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900"
             >
               <option value="all">Status: All</option>
               <option value="Active">Active</option>
@@ -325,21 +305,13 @@ export function TransportersManagement() {
 
         {/* Table */}
         <div
-          className={`overflow-hidden rounded-xl border shadow-sm ${
-            theme === "dark"
-              ? "border-zinc-700 bg-zinc-800"
-              : "border-zinc-200 bg-white"
-          }`}
+          className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white"
         >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[750px]">
               <thead>
                 <tr
-                  className={`text-left text-sm ${
-                    theme === "dark"
-                      ? "bg-zinc-900 text-white"
-                      : "bg-zinc-800 text-white"
-                  }`}
+                  className="text-left text-sm bg-zinc-800 text-white"
                 >
                   <th className="px-4 py-3">#</th>
                   <th className="px-4 py-3">TRANSPORTER DETAILS</th>
@@ -354,11 +326,7 @@ export function TransportersManagement() {
                   <tr>
                     <td colSpan={6} className="px-4 py-12 text-center">
                       <div
-                        className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 ${
-                          theme === "dark"
-                            ? "border-zinc-600 border-t-zinc-400"
-                            : "border-zinc-300 border-t-zinc-700"
-                        }`}
+                        className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700"
                       />
                     </td>
                   </tr>
@@ -367,47 +335,29 @@ export function TransportersManagement() {
                   transporters.map((t, idx) => (
                     <tr
                       key={t.transporter_id}
-                      className={`border-b hover:transition-colors ${
-                        theme === "dark"
-                          ? "border-zinc-700 hover:bg-zinc-700/50"
-                          : "border-zinc-100 hover:bg-zinc-50"
-                      }`}
+                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
                     >
                       <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
+                        className="px-4 py-3 text-sm text-zinc-600"
                       >
                         {idx + 1}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                              theme === "dark"
-                                ? "bg-amber-900/50 text-amber-300"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold bg-amber-100 text-amber-800"
                           >
                             {getInitials(t.name)}
                           </div>
                           <div>
                             <p
-                              className={`font-medium ${
-                                theme === "dark"
-                                  ? "text-zinc-100"
-                                  : "text-zinc-900"
-                              }`}
+                              className="font-medium text-zinc-900"
                             >
                               {t.name}
                             </p>
                             {t.service_type && (
                               <p
-                                className={`flex items-center gap-1 text-xs ${
-                                  theme === "dark"
-                                    ? "text-zinc-400"
-                                    : "text-zinc-500"
-                                }`}
+                                className="flex items-center gap-1 text-xs text-zinc-500"
                               >
                                 <TruckIcon className="h-3 w-3" />{" "}
                                 {t.service_type}
@@ -420,47 +370,27 @@ export function TransportersManagement() {
                         <div className="space-y-1 text-sm">
                           {t.contact_person && (
                             <p
-                              className={
-                                theme === "dark"
-                                  ? "text-zinc-300"
-                                  : "text-zinc-700"
-                              }
+                              className="text-zinc-700"
                             >
                               {t.contact_person}
                             </p>
                           )}
                           {t.contact_phone && (
                             <p
-                              className={`flex items-center gap-2 ${
-                                theme === "dark"
-                                  ? "text-zinc-300"
-                                  : "text-zinc-700"
-                              }`}
+                              className="flex items-center gap-2 text-zinc-700"
                             >
                               <PhoneIcon
-                                className={`h-3 w-3 ${
-                                  theme === "dark"
-                                    ? "text-zinc-500"
-                                    : "text-zinc-400"
-                                }`}
+                                className="h-3 w-3 text-zinc-400"
                               />
                               {t.contact_phone}
                             </p>
                           )}
                           {t.email && (
                             <p
-                              className={`flex items-center gap-2 ${
-                                theme === "dark"
-                                  ? "text-zinc-300"
-                                  : "text-zinc-700"
-                              }`}
+                              className="flex items-center gap-2 text-zinc-700"
                             >
                               <MailIcon
-                                className={`h-3 w-3 ${
-                                  theme === "dark"
-                                    ? "text-zinc-500"
-                                    : "text-zinc-400"
-                                }`}
+                                className="h-3 w-3 text-zinc-400"
                               />
                               {t.email}
                             </p>
@@ -469,11 +399,7 @@ export function TransportersManagement() {
                             !t.contact_phone &&
                             !t.email && (
                               <span
-                                className={
-                                  theme === "dark"
-                                    ? "text-zinc-500"
-                                    : "text-zinc-400"
-                                }
+                                className="text-zinc-400"
                               >
                                 —
                               </span>
@@ -484,22 +410,14 @@ export function TransportersManagement() {
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                             t.status === "Active"
-                              ? theme === "dark"
-                                ? "bg-emerald-900/50 text-emerald-400"
-                                : "bg-emerald-100 text-emerald-700"
-                              : theme === "dark"
-                              ? "bg-zinc-700 text-zinc-400"
+                              ? "bg-emerald-100 text-emerald-700"
                               : "bg-zinc-100 text-zinc-600"
                           }`}
                         >
                           {t.status === "Active" ? (
                             <>
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  theme === "dark"
-                                    ? "bg-emerald-400"
-                                    : "bg-emerald-500"
-                                }`}
+                                className="h-1.5 w-1.5 rounded-full bg-emerald-500"
                               />
                               Active
                             </>
@@ -509,9 +427,7 @@ export function TransportersManagement() {
                         </span>
                       </td>
                       <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
+                        className="px-4 py-3 text-sm text-zinc-600"
                       >
                         {formatDate(t.created_at)}
                       </td>
@@ -519,11 +435,7 @@ export function TransportersManagement() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(t)}
-                            className={`rounded p-1.5 transition-colors ${
-                              theme === "dark"
-                                ? "bg-zinc-700 text-zinc-400 hover:bg-zinc-600"
-                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                            }`}
+                            className="rounded p-1.5 transition-colors bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                             title="View details"
                           >
                             <EyeIcon className="h-4 w-4" />
@@ -531,11 +443,7 @@ export function TransportersManagement() {
                           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
                           <button
                             onClick={() => handleEdit(t)}
-                            className={`rounded p-1.5 transition-colors ${
-                              theme === "dark"
-                                ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
-                                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                            }`}
+                            className="rounded p-1.5 transition-colors bg-blue-100 text-blue-600 hover:bg-blue-200"
                             title="Edit"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -545,11 +453,7 @@ export function TransportersManagement() {
                           <button
                             onClick={() => handleDelete(t)}
                             disabled={deletingId === t.transporter_id}
-                            className={`rounded p-1.5 transition-colors disabled:opacity-50 ${
-                              theme === "dark"
-                                ? "bg-red-900/50 text-red-400 hover:bg-red-900"
-                                : "bg-red-100 text-red-600 hover:bg-red-200"
-                            }`}
+                            className="rounded p-1.5 transition-colors disabled:opacity-50 bg-red-100 text-red-600 hover:bg-red-200"
                             title="Delete"
                           >
                             <TrashIcon className="h-4 w-4" />
@@ -564,29 +468,21 @@ export function TransportersManagement() {
           </div>
           {!loading && transporters.length > 0 && (
             <div
-              className={`border-t px-4 py-2 text-sm ${
-                theme === "dark"
-                  ? "border-zinc-700 text-zinc-400"
-                  : "border-zinc-200 text-zinc-500"
-              }`}
+              className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500"
             >
               Showing {transporters.length} transporters
             </div>
           )}
           {!loading && transporters.length === 0 && !error && (
             <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-              }`}
+              className="py-12 text-center text-sm text-zinc-500"
             >
               No transporters found
             </p>
           )}
           {error && (
             <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-red-400" : "text-red-600"
-              }`}
+              className="py-12 text-center text-sm text-red-600"
             >
               {error}
             </p>
@@ -611,60 +507,40 @@ export function TransportersManagement() {
           onClick={() => setViewingTransporter(null)}
         >
           <div
-            className={`w-full max-w-lg rounded-xl border p-6 shadow-xl ${
-              theme === "dark"
-                ? "border-zinc-700 bg-zinc-800"
-                : "border-zinc-200 bg-white"
-            }`}
+            className="w-full max-w-lg rounded-xl border p-6 shadow-xl border-zinc-200 bg-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
               <h3
-                className={`text-lg font-semibold ${
-                  theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                }`}
+                className="text-lg font-semibold text-zinc-900"
               >
                 Transporter Details
               </h3>
               <button
                 onClick={() => setViewingTransporter(null)}
-                className={`rounded p-2 transition-colors ${
-                  theme === "dark"
-                    ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-                }`}
+                className="rounded p-2 transition-colors text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
             <div
-              className={`flex items-center gap-4 border-b pb-4 ${
-                theme === "dark" ? "border-zinc-700" : "border-zinc-200"
-              }`}
+              className="flex items-center gap-4 border-b pb-4 border-zinc-200"
             >
               <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold ${
-                  theme === "dark"
-                    ? "bg-amber-900/50 text-amber-300"
-                    : "bg-amber-100 text-amber-800"
-                }`}
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold bg-amber-100 text-amber-800"
               >
                 {getInitials(viewingTransporter.name)}
               </div>
               <div>
                 <p
-                  className={`font-semibold ${
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }`}
+                  className="font-semibold text-zinc-900"
                 >
                   {viewingTransporter.name}
                 </p>
                 {viewingTransporter.service_type && (
                   <p
-                    className={`flex items-center gap-1 text-sm ${
-                      theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                    }`}
+                    className="flex items-center gap-1 text-sm text-zinc-500"
                   >
                     <TruckIcon className="h-3 w-3" />{" "}
                     {viewingTransporter.service_type}
@@ -675,9 +551,7 @@ export function TransportersManagement() {
             <dl className="mt-4 space-y-3 text-sm">
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Status
                 </dt>
@@ -685,11 +559,7 @@ export function TransportersManagement() {
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                       viewingTransporter.status === "Active"
-                        ? theme === "dark"
-                          ? "bg-emerald-900/50 text-emerald-400"
-                          : "bg-emerald-100 text-emerald-700"
-                        : theme === "dark"
-                        ? "bg-zinc-700 text-zinc-400"
+                        ? "bg-emerald-100 text-emerald-700"
                         : "bg-zinc-100 text-zinc-600"
                     }`}
                   >
@@ -699,80 +569,60 @@ export function TransportersManagement() {
               </div>
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Contact Person
                 </dt>
                 <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
+                  className="text-zinc-900"
                 >
                   {viewingTransporter.contact_person || "—"}
                 </dd>
               </div>
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Phone
                 </dt>
                 <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
+                  className="text-zinc-900"
                 >
                   {viewingTransporter.contact_phone || "—"}
                 </dd>
               </div>
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Email
                 </dt>
                 <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
+                  className="text-zinc-900"
                 >
                   {viewingTransporter.email || "—"}
                 </dd>
               </div>
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Notes
                 </dt>
                 <dd
-                  className={`whitespace-pre-wrap ${
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }`}
+                  className="whitespace-pre-wrap text-zinc-900"
                 >
                   {viewingTransporter.notes || "—"}
                 </dd>
               </div>
               <div>
                 <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
+                  className="text-zinc-500"
                 >
                   Created
                 </dt>
                 <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
+                  className="text-zinc-900"
                 >
                   {formatDate(viewingTransporter.created_at)}
                 </dd>
@@ -781,11 +631,7 @@ export function TransportersManagement() {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setViewingTransporter(null)}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  theme === "dark"
-                    ? "border-zinc-700 text-zinc-300 hover:bg-zinc-700"
-                    : "border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-                }`}
+                className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors border-zinc-300 text-zinc-700 hover:bg-zinc-50"
               >
                 Close
               </button>
@@ -795,11 +641,7 @@ export function TransportersManagement() {
                     setViewingTransporter(null);
                     handleEdit(viewingTransporter);
                   }}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-                    theme === "dark"
-                      ? "bg-amber-700 hover:bg-amber-800"
-                      : "bg-amber-600 hover:bg-amber-700"
-                  }`}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
                 >
                   Edit Transporter
                 </button>

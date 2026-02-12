@@ -21,7 +21,7 @@ import {
   TruckIcon,
   CloseIcon,
 } from "@/components/Icons";
-import { useTheme } from "@/context/ThemeContext";
+// import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/useToast";
 import { useFormValidation } from "@/hooks/useFormValidation";
 
@@ -93,11 +93,11 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-zinc-900 shadow-xl"
+        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-200 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
           <div>
             <h3 className="text-lg font-semibold">Edit Transaction</h3>
             <p className="text-sm text-amber-100">
@@ -112,17 +112,17 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
         <form onSubmit={handleSubmit} className="p-6">
           {/* Read-only Transaction Info */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-blue-200 dark:border-blue-800 p-3 bg-blue-50 dark:bg-blue-900/20">
-              <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Truck Number</p>
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">{transaction.truck_no}</p>
+            <div className="rounded-lg border border-blue-200 p-3 bg-blue-50">
+              <p className="text-xs text-blue-600 mb-1">Truck Number</p>
+              <p className="text-sm font-semibold text-blue-900">{transaction.truck_no}</p>
             </div>
-            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 p-3 bg-emerald-50 dark:bg-emerald-900/20">
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Party Name</p>
-              <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">{transaction.party_name}</p>
+            <div className="rounded-lg border border-emerald-200 p-3 bg-emerald-50">
+              <p className="text-xs text-emerald-600 mb-1">Party Name</p>
+              <p className="text-sm font-semibold text-emerald-900">{transaction.party_name}</p>
             </div>
-            <div className="rounded-lg border border-purple-200 dark:border-purple-800 p-3 bg-purple-50 dark:bg-purple-900/20">
-              <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Item Name</p>
-              <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">{transaction.item_name}</p>
+            <div className="rounded-lg border border-purple-200 p-3 bg-purple-50">
+              <p className="text-xs text-purple-600 mb-1">Item Name</p>
+              <p className="text-sm font-semibold text-purple-900">{transaction.item_name}</p>
             </div>
           </div>
 
@@ -130,7 +130,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           <div className="space-y-6">
             {/* Invoice Section */}
             <div>
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -138,7 +138,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-sm font-medium text-zinc-700 mb-1">
                     Invoice Number *
                   </label>
                   <input
@@ -149,11 +149,11 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     className={`w-full rounded-lg border ${
                       errors.invoice_number && touched.invoice_number
                         ? 'border-red-500 focus:ring-red-500'
-                        : 'border-zinc-300 dark:border-zinc-700 focus:ring-amber-500'
-                    } bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2`}
+                        : 'border-zinc-300 focus:ring-amber-500'
+                    } bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2`}
                   />
                   {errors.invoice_number && touched.invoice_number && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.invoice_number}</p>
+                    <p className="text-xs text-red-600 mt-1">{errors.invoice_number}</p>
                   )}
                 </div>
                 <div>
@@ -202,7 +202,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     type="text"
                     value={values.po_do_number}
                     onChange={(e) => handleChange('po_do_number', e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               </div>
@@ -274,11 +274,11 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 justify-end border-t border-zinc-200 dark:border-zinc-700 pt-6 mt-6">
+          <div className="flex gap-3 justify-end border-t border-zinc-200 pt-6 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg border border-zinc-300 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
             >
               Cancel
             </button>
@@ -307,10 +307,10 @@ function StageStatusIcon({ stageKey, status, transaction }) {
     <span
       className={`inline-flex h-7 w-7 items-center justify-center rounded transition-all ${
         isCompleted
-          ? "bg-emerald-500 dark:bg-emerald-600 text-white shadow-md"
+          ? "bg-emerald-500 text-white shadow-md"
           : isActive
-          ? "bg-amber-500 dark:bg-amber-600 text-white shadow-md animate-pulse"
-          : "bg-zinc-200 dark:bg-zinc-700/50 text-zinc-400 dark:text-zinc-500"
+          ? "bg-amber-500 text-white shadow-md animate-pulse"
+          : "bg-zinc-200 text-zinc-400"
       } ${isPending ? "opacity-40" : "opacity-100"}`}
     >
       <TruckIcon className="h-4 w-4" />
@@ -320,7 +320,7 @@ function StageStatusIcon({ stageKey, status, transaction }) {
 
 function AdminDashboard() {
   const { user, hasPermission } = useAuth();
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
   const { printGatePass, downloadGatePass } = useGatePassPrint();
   const [transactions, setTransactions] = useState([]);
   const [counts, setCounts] = useState({
@@ -376,10 +376,10 @@ function AdminDashboard() {
     setCounts(countData);
     setItemCounts(itemCountData);
     setLoading(false);
-  }, [dateFrom, dateTo, filterType, filterItem]);
+  }, [dateFrom, dateTo, filterType, filterItem, token]);
 
   useEffect(() => {
-    fetchData();
+    setTimeout(() => fetchData(), 0);
   }, [fetchData]);
 
   function handleExport() {
@@ -463,43 +463,42 @@ function AdminDashboard() {
   return (
     <PanelLayout title="Admin Dashboard" roleName="Admin">
       {/* Background decorative elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-amber-200/20 via-transparent to-transparent dark:from-amber-900/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-200/20 via-transparent to-transparent dark:from-blue-900/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-amber-100/10 via-transparent to-blue-100/10 dark:from-amber-900/5 dark:to-blue-900/5 rounded-full blur-3xl"></div>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-slate-50">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100/40 rounded-full blur-3xl opacity-50"></div>
       </div>
 
       <div className="space-y-6 relative z-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-800 dark:from-amber-400 dark:to-amber-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
               Dashboard
             </h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Monitor and manage all transactions</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">Monitor and manage all transactions</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
             />
-            <span className="text-zinc-600 dark:text-zinc-400">to</span>
+            <span className="text-slate-400 font-medium">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
             />
             <button
               onClick={() => window.location.href = '/admin'}
-              className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
             >
               GO
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
+              className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
               <DownloadIcon className="h-4 w-4" />
               Export To Excel
@@ -510,20 +509,20 @@ function AdminDashboard() {
         {/* Stats Cards - Top Row */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {[
-            { label: "Total Employee", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-amber-500 to-amber-600" },
-            { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-orange-500 to-orange-600" },
-            { label: "Total Transporter", value: counts.parties, icon: UsersIcon, gradient: "from-yellow-500 to-yellow-600" },
-            { label: "Total Items", value: counts.transporters, icon: ClipboardIcon, gradient: "from-amber-600 to-amber-700" },
-            { label: "Total Gate Pass", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-yellow-600 to-yellow-700" },
+            { label: "Total Employee", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
+            { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
+            { label: "Total Transporter", value: counts.parties, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
+            { label: "Total Items", value: counts.transporters, icon: ClipboardIcon, gradient: "from-fuchsia-500 to-fuchsia-600" },
+            { label: "Total Gate Pass", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
           ].map((stat, idx) => (
-            <div key={idx} className={`rounded-xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-lg hover:shadow-xl transition-shadow`}>
-              <div className="flex items-center justify-between">
+            <div key={idx} className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-lg ring-1 ring-white/20 hover:shadow-xl transition-all hover:-translate-y-1`}>
+              <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
-                  <p className="text-3xl font-bold">{stat.value}</p>
-                  <p className="text-sm opacity-90 mt-1">{stat.label}</p>
+                  <p className="text-3xl font-bold leading-none tracking-tight">{stat.value}</p>
+                  <p className="text-xs font-semibold opacity-90 mt-1 uppercase tracking-wide">{stat.label}</p>
                 </div>
-                <stat.icon className="h-10 w-10 opacity-80" />
               </div>
+              <stat.icon className="absolute right-2 bottom-2 h-16 w-16 opacity-10" />
             </div>
           ))}
         </div>
@@ -531,72 +530,80 @@ function AdminDashboard() {
         {/* Category Filter Sections */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Unloading Section */}
-          <div className="rounded-xl border-2 border-rose-300 dark:border-rose-800/50 bg-gradient-to-br from-rose-100/90 to-rose-200/70 dark:from-rose-900/20 dark:to-rose-900/10 shadow-md backdrop-blur-sm">
+          {/* Unloading Section */}
+          <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
             <button
               onClick={() => handleFilterClick("Unloading", "")}
-              className={`w-full flex items-center justify-between p-4 border-b-2 border-rose-300 dark:border-rose-800/50 transition-all ${
+              className={`w-full flex items-center justify-between p-4 border-b border-rose-100 transition-all ${
                 filterType === "Unloading" && !filterItem
-                  ? "bg-rose-300 dark:bg-rose-800/50 shadow-inner"
-                  : "hover:bg-rose-200/60 dark:hover:bg-rose-900/30"
+                  ? "bg-rose-100/50 shadow-inner"
+                  : "hover:bg-rose-100/30"
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-rose-600 dark:bg-rose-700 p-2 shadow-md">
-                  <UnloadingGoodsIcon className="h-6 w-6 text-white" />
+                <div className="rounded-lg bg-rose-500 p-2 shadow-sm text-white">
+                  <UnloadingGoodsIcon className="h-5 w-5" />
                 </div>
-                <span className="font-semibold text-rose-900 dark:text-rose-100">
+                <span className="font-semibold text-rose-900">
                   Unloading Goods [Inward] - {totalUnloading}
                 </span>
               </div>
             </button>
-            <div className="p-3 space-y-1">
+            <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
               {itemCounts.unloading.map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleFilterClick("Unloading", item.item_name)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                     filterType === "Unloading" && filterItem === item.item_name
-                      ? "bg-rose-300 dark:bg-rose-700 text-rose-900 dark:text-rose-100 font-medium shadow-md"
-                      : "text-rose-800 dark:text-rose-300 hover:bg-rose-200/50 dark:hover:bg-rose-900/20"
+                      ? "bg-rose-100 text-rose-900 font-medium shadow-sm"
+                      : "text-rose-700 hover:bg-rose-100/50"
                   }`}
                 >
-                  {item.item_name} - {String(item.count).padStart(2, "0")}
+                   <div className="flex justify-between items-center">
+                     <span>{item.item_name}</span>
+                     <span className="bg-rose-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
+                   </div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Loading Section */}
-          <div className="rounded-xl border-2 border-blue-300 dark:border-blue-800/50 bg-gradient-to-br from-blue-100/90 to-blue-200/70 dark:from-blue-900/20 dark:to-blue-900/10 shadow-md backdrop-blur-sm">
+          {/* Loading Section */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
             <button
               onClick={() => handleFilterClick("Loading", "")}
-              className={`w-full flex items-center justify-between p-4 border-b-2 border-blue-300 dark:border-blue-800/50 transition-all ${
+              className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
                 filterType === "Loading" && !filterItem
-                  ? "bg-blue-300 dark:bg-blue-800/50 shadow-inner"
-                  : "hover:bg-blue-200/60 dark:hover:bg-blue-900/30"
+                  ? "bg-blue-100/50 shadow-inner"
+                  : "hover:bg-blue-100/30"
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-600 dark:bg-blue-700 p-2 shadow-md">
-                  <LoadingGoodsIcon className="h-6 w-6 text-white" />
+                <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
+                  <LoadingGoodsIcon className="h-5 w-5" />
                 </div>
-                <span className="font-semibold text-blue-900 dark:text-blue-100">
+                <span className="font-semibold text-blue-900">
                   Loading Goods [Outward] - {totalLoading}
                 </span>
               </div>
             </button>
-            <div className="p-3 space-y-1">
+            <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
               {itemCounts.loading.map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleFilterClick("Loading", item.item_name)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                     filterType === "Loading" && filterItem === item.item_name
-                      ? "bg-blue-400 dark:bg-blue-700 text-blue-900 dark:text-blue-100 font-medium shadow-md"
-                      : "text-blue-800 dark:text-blue-300 hover:bg-blue-200/50 dark:hover:bg-blue-900/20"
+                      ? "bg-blue-100 text-blue-900 font-medium shadow-sm"
+                      : "text-blue-700 hover:bg-blue-100/50"
                   }`}
                 >
-                  {item.item_name} - {String(item.count).padStart(2, "0")}
+                  <div className="flex justify-between items-center">
+                    <span>{item.item_name}</span>
+                    <span className="bg-blue-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -604,17 +611,17 @@ function AdminDashboard() {
         </div>
 
         {/* Stage Filter Buttons */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800/50 bg-white/90 dark:bg-zinc-900/90 shadow-md backdrop-blur-sm p-4">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">Filter by Current Stage</h3>
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm p-4">
+          <h3 className="text-sm font-semibold text-zinc-700 mb-3">Filter by Current Stage</h3>
           <div className="overflow-x-auto -mx-2 px-2">
             <div className="flex gap-2 min-w-max pb-2">
               <button
                 onClick={() => setSelectedStage(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  selectedStage === null
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    selectedStage === null
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                  }`}
               >
                 All Stages
               </button>
@@ -622,10 +629,10 @@ function AdminDashboard() {
                 <button
                   key={stage.key}
                   onClick={() => setSelectedStage(stage.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     selectedStage === stage.key
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
                   }`}
                 >
                   {stage.label}
@@ -636,9 +643,9 @@ function AdminDashboard() {
         </div>
 
         {/* Transaction Table */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-900/80 shadow-lg backdrop-blur-sm overflow-hidden">
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden">
           {/* Table Header with Search and Create Button */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-zinc-200 dark:border-zinc-800/50 bg-gradient-to-r from-zinc-50 to-zinc-100/50 dark:from-zinc-800 dark:to-zinc-900/50">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-zinc-200 bg-zinc-50/50">
             <div className="flex-1 w-full sm:w-auto">
               <div className="relative">
                 <input
@@ -646,7 +653,7 @@ function AdminDashboard() {
                   placeholder="Search transactions (truck no, item, party, invoice...)"  
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-10 pr-10 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-10 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -654,7 +661,7 @@ function AdminDashboard() {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -664,13 +671,13 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="text-sm text-zinc-600">
                 {filteredTransactions.length} of {transactions.length} transactions
               </div>
               {hasPermission("create_transactions") && (
                 <button
                   onClick={() => setModalOpen(true)}
-                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:shadow-lg"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:shadow-lg"
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -684,12 +691,12 @@ function AdminDashboard() {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="flex items-center justify-center p-12">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-600 dark:border-t-amber-400" />
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
               </div>
             ) : (
               <table className="w-full min-w-[1200px]">
                 <thead>
-                  <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 dark:from-zinc-900 dark:to-black text-left text-sm text-white">
+                  <tr className="bg-zinc-100/80 text-left text-sm text-zinc-600 border-b border-zinc-200">
                     <th className="px-4 py-3 font-semibold">S/N</th>
                     <th className="px-4 py-3 font-semibold">Product Name</th>
                     <th className="px-4 py-3 font-semibold">Vehicle Number</th>
@@ -714,26 +721,26 @@ function AdminDashboard() {
                     return (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors"
+                        className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
                       >
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-700">
                           {idx + 1}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
                           {t.item_name || "N/A"}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="inline-block rounded-md px-3 py-1 text-sm font-medium bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-800 dark:text-emerald-200 shadow-sm">
+                          <span className="inline-block rounded-md px-3 py-1 text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
                             {t.truck_no}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
+                        <td className="px-4 py-3 text-sm text-zinc-700">
                           {t.party_name}
                         </td>
                         {STAGES.map((s) => (
                           <td
                             key={s.key}
-                            className="cursor-pointer px-2 py-3 text-center hover:bg-amber-100/30 dark:hover:bg-amber-900/20 transition-colors"
+                            className="cursor-pointer px-2 py-3 text-center hover:bg-zinc-100 transition-colors"
                             onClick={() =>
                               setStageModal({
                                 transaction: t,
@@ -753,7 +760,7 @@ function AdminDashboard() {
                                 viewMode: "full",
                               })
                             }
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md transition-all hover:shadow-lg"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 shadow-sm transition-all"
                             title="View Full Transaction"
                           >
                             <ViewIcon className="h-4 w-4" />
@@ -762,7 +769,7 @@ function AdminDashboard() {
                         <td className="px-3 py-3 text-center">
                           <button
                             onClick={() => printGatePass(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-800 hover:to-zinc-900 text-white shadow-md transition-all hover:shadow-lg"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 shadow-sm transition-all"
                             title="Print"
                           >
                             <PrinterIcon className="h-4 w-4" />
@@ -771,7 +778,7 @@ function AdminDashboard() {
                         <td className="px-3 py-3 text-center">
                           <button
                             onClick={() => setEditModal(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md transition-all hover:shadow-lg"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-orange-600 shadow-sm transition-all"
                             title="Edit"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -780,7 +787,7 @@ function AdminDashboard() {
                         <td className="px-3 py-3 text-center">
                           <button
                             onClick={() => setDeleteConfirm(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md transition-all hover:shadow-lg"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-red-600 shadow-sm transition-all"
                             title="Delete"
                           >
                             <DeleteIcon className="h-4 w-4" />
@@ -793,7 +800,7 @@ function AdminDashboard() {
               </table>
             )}
             {!loading && filteredTransactions.length === 0 && (
-              <p className="py-12 text-center text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="py-12 text-center text-sm text-zinc-600">
                 {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No transactions found'}
               </p>
             )}

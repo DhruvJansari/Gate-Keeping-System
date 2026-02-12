@@ -43,7 +43,7 @@ export function AdminStageDetailModal({
       .then((r) => r.json())
       .then((data) => setTxn(data))
       .catch(() => setTxn(transaction));
-  }, [transaction?.transaction_id]);
+  }, [transaction, transaction?.transaction_id]);
 
   async function handleConfirm() {
     setError('');
@@ -124,116 +124,317 @@ export function AdminStageDetailModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 transition-all">
       <div
-        className={`max-h-[90vh] w-full ${isFullView ? 'max-w-6xl' : 'max-w-2xl'} overflow-y-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl`}
+        className={`w-full ${isFullView ? 'sm:max-w-5xl' : 'sm:max-w-lg'} h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden ring-1 ring-black/5`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-amber-600 px-6 py-4 text-white">
+        {/* Sticky Header */}
+        <div className="flex-none flex items-center justify-between border-b border-zinc-200 bg-zinc-50/50 px-4 py-3 sm:px-6 sm:py-4 z-20">
           <div>
-            <h3 className="text-lg font-semibold">
-              {isFullView ? 'Full Transaction Details' : `Stage: ${currentStageLabel}`}
+            <h3 className="text-base sm:text-lg font-bold text-zinc-900 flex items-center gap-2">
+              {isFullView ? (
+                <>
+                  <span className="p-1 rounded bg-blue-100 text-blue-600">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                  </span>
+                  Full Details
+                </>
+              ) : (
+                <>
+                  <span className="p-1 rounded bg-amber-100 text-amber-600">
+                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  </span>
+                  {currentStageLabel}
+                </>
+              )}
             </h3>
-            <p className="text-sm text-amber-100">
-              Txn: {txnNo(txn)} • {txn.transaction_type}
+            <p className="text-xs text-zinc-500 mt-0.5 font-mono font-medium">
+              {txnNo(txn)} • {txn.transaction_type}
             </p>
           </div>
-          <button onClick={onClose} className="rounded p-2 hover:bg-amber-500" aria-label="Close">
+          <button 
+            onClick={onClose} 
+            className="rounded-full p-2 bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 transition-colors"
+            aria-label="Close"
+          >
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-thumb-zinc-300">
+          
+          {/* 1. COMPACT CONFIRMATION VIEW (Default/Action Mode) */}
+          {!isFullView && (
+            <div className="space-y-4">
+               {/* Context Card: Key Details - HIGH CONTRAST */}
+               <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm">
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Row 1: Vehicle & Item */}
+                    <div className="space-y-1">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Vehicle No</p>
+                       <p className="text-sm font-bold text-zinc-900 bg-zinc-100 px-2 py-1 rounded w-fit border border-zinc-200 shadow-sm font-mono">
+                         {txn.truck_no}
+                       </p>
+                    </div>
+                    <div className="space-y-1 text-right">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Item</p>
+                       <p className="text-sm font-bold text-zinc-800 truncate max-w-[120px] ml-auto" title={txn.item_name}>{txn.item_name}</p>
+                    </div>
 
-        <div className="p-6 space-y-4">
-          {/* Full Transaction View Layout */}
-          {isFullView ? (
-            <>
+                    {/* Row 2: Party Name (Full Width) */}
+                    <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Party Name</p>
+                       <p className="text-sm font-semibold text-zinc-800 truncate" title={txn.party_name}>{txn.party_name}</p>
+                    </div>
+
+                    {/* Row 3: Transporter Name (Full Width) */}
+                    <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Transporter</p>
+                       <p className="text-sm font-medium text-zinc-700 truncate" title={txn.transporter_name}>{txn.transporter_name || '—'}</p>
+                    </div>
+
+                    {/* Row 4: Invoice No & Quantity */}
+                    <div className="space-y-1 pt-3 border-t border-zinc-100">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Invoice No</p>
+                       <p className="text-xs font-bold text-zinc-700 truncate font-mono">{txn.invoice_number || '—'}</p>
+                    </div>
+                    <div className="space-y-1 pt-3 border-t border-zinc-100 text-right">
+                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Quantity</p>
+                       <p className="text-xs font-bold text-zinc-700 font-mono">{txn.invoice_quantity || '—'}</p>
+                    </div>
+                  </div>
+               </div>
+
+               {/* Current Status Block - INCREASED CONTRAST */}
+               <div className={`rounded-xl border p-4 shadow-sm ${
+                  status[clickedStageKey] 
+                    ? 'bg-emerald-50 border-emerald-200' // Completed
+                    : 'bg-amber-50 border-amber-200' // Pending
+               }`}>
+                  <div className="flex items-center justify-between mb-2">
+                     <span className={`text-xs font-bold uppercase tracking-wider ${
+                        status[clickedStageKey] ? 'text-emerald-700' : 'text-amber-700'
+                     }`}>Status</span>
+                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border shadow-sm ${
+                        status[clickedStageKey] 
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200' 
+                          : 'bg-amber-100 text-amber-800 border-amber-200'
+                     }`}>
+                        {status[clickedStageKey] ? 'Completed' : 'Pending Action'}
+                     </span>
+                  </div>
+                  
+                  {/* Detailed Timestamps if available */}
+                  {(stageTimestamp || stageConfirmerName) && (
+                     <div className={`text-xs space-y-1 pt-2 border-t mt-2 ${
+                        status[clickedStageKey] ? 'border-emerald-200' : 'border-amber-200'
+                     }`}>
+                        {stageTimestamp && (
+                           <div className="flex justify-between">
+                              <span className="opacity-70 font-medium text-zinc-600">Time:</span>
+                              <span className="font-mono font-bold text-zinc-800">{formatDateTime(stageTimestamp)}</span>
+                           </div>
+                        )}
+                        {stageConfirmerName && (
+                           <div className="flex justify-between">
+                              <span className="opacity-70 font-medium text-zinc-600">By:</span>
+                              <span className="font-bold text-zinc-800">{stageConfirmerName}</span>
+                           </div>
+                        )}
+                     </div>
+                  )}
+               </div>
+              
+              {/* Weights Display (if relevant) */}
+              {(clickedStageKey.includes('weighbridge') || isGateOut || isFinalStage) && (
+                 <div className="bg-zinc-900 rounded-xl p-4 text-zinc-100 shadow-md border border-zinc-800">
+                    <div className="grid grid-cols-3 gap-2 text-center divide-x divide-zinc-700">
+                       <div>
+                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Gross</p>
+                          <p className="text-base font-mono font-bold text-white">{txn.first_weight || '—'}</p>
+                       </div>
+                       <div>
+                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Tare</p>
+                          <p className="text-base font-mono font-bold text-white">{txn.second_weight || '—'}</p>
+                       </div>
+                       <div>
+                          <p className="text-[9px] uppercase tracking-wider text-emerald-400 mb-0.5 font-bold">Net</p>
+                          <p className="text-base font-mono font-bold text-emerald-400">{txn.net_weight || '—'}</p>
+                       </div>
+                    </div>
+                 </div>
+              )}
+
+              {/* ACTION FORM - INCREASED INPUT CONTRAST */}
+              {canConfirm && (
+                <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300 ring-1 ring-black/5">
+                  <h4 className="text-sm font-bold text-zinc-900 mb-4 flex items-center gap-2">
+                     <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse ring-4 ring-blue-500/20" />
+                     Action Required
+                  </h4>
+
+                  <div className="space-y-4">
+                     {/* Inputs based on stage */}
+                     {clickedStageKey === 'first_weighbridge' && (
+                        <div>
+                           <label className="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Enter First Weight (KG)</label>
+                           <input
+                              type="number"
+                              step="any"
+                              value={firstWeight}
+                              onChange={(e) => setFirstWeight(e.target.value)}
+                              placeholder="e.g. 45000"
+                              className="w-full text-lg font-mono font-bold p-3 rounded-xl border-2 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"
+                              autoFocus
+                           />
+                        </div>
+                     )}
+                     
+                     {clickedStageKey === 'second_weighbridge' && (
+                        <div>
+                           <label className="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Enter Second Weight (KG)</label>
+                           <input
+                              type="number"
+                              step="any"
+                              value={secondWeight}
+                              onChange={(e) => setSecondWeight(e.target.value)}
+                              placeholder="e.g. 15000"
+                              className="w-full text-lg font-mono font-bold p-3 rounded-xl border-2 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"
+                              autoFocus
+                           />
+                        </div>
+                     )}
+
+                     {clickedStageKey === 'campus_out' && (
+                        <div>
+                           <label className="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Remarks (Optional)</label>
+                           <textarea
+                              value={remark2}
+                              onChange={(e) => setRemark2(e.target.value)}
+                              rows={3}
+                              className="w-full p-3 rounded-xl border-2 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm shadow-inner font-medium"
+                              placeholder="Any comments..."
+                           />
+                        </div>
+                     )}
+
+                     {error && (
+                        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-bold shadow-sm">
+                           {error}
+                        </div>
+                     )}
+
+                     <button
+                        onClick={handleConfirm}
+                        disabled={confirming}
+                        className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                     >
+                        {confirming ? (
+                           <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Processing...
+                           </>
+                        ) : (
+                           `Confirm ${currentStageLabel}`
+                        )}
+                     </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 2. FULL DETAILS VIEW - RESTORED ORIGINAL RICH LAYOUT */}
+          {isFullView && (
+            <div className="space-y-4">
               {/* Transaction Overview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Basic Info Card */}
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10">
-                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-blue-50/50 shadow-sm">
+                  <h4 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Transaction Info
                   </h4>
                   <dl className="space-y-2 text-sm">
-                    <div>
-                      <dt className="text-blue-700 dark:text-blue-400 font-medium">Transaction No</dt>
-                      <dd className="text-blue-900 dark:text-blue-100 font-semibold">{txnNo(txn)}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-blue-700 font-medium">Transaction No</dt>
+                      <dd className="text-blue-900 font-bold font-mono">{txnNo(txn)}</dd>
                     </div>
-                    <div>
-                      <dt className="text-blue-700 dark:text-blue-400 font-medium">Type</dt>
-                      <dd className="text-blue-900 dark:text-blue-100">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                    <div className="flex justify-between">
+                      <dt className="text-blue-700 font-medium">Type</dt>
+                      <dd>
+                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase ${
                           txn.transaction_type === 'Loading'
-                            ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
-                            : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-purple-100 text-purple-700'
                         }`}>
                           {txn.transaction_type}
                         </span>
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-blue-700 dark:text-blue-400 font-medium">Status</dt>
-                      <dd className="text-blue-900 dark:text-blue-100 font-semibold">{txn.current_status || 'In Progress'}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-blue-700 font-medium">Status</dt>
+                      <dd className="text-blue-900 font-semibold">{txn.current_status || 'In Progress'}</dd>
                     </div>
                   </dl>
                 </div>
 
                 {/* Party & Truck Info Card */}
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10">
-                  <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-emerald-50/50 shadow-sm">
+                  <h4 className="text-sm font-bold text-emerald-900 mb-3 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     Party & Vehicle
                   </h4>
                   <dl className="space-y-2 text-sm">
-                    <div>
-                      <dt className="text-emerald-700 dark:text-emerald-400 font-medium">Truck Number</dt>
-                      <dd className="text-emerald-900 dark:text-emerald-100 font-semibold">{txn.truck_no}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-emerald-700 font-medium">Truck Number</dt>
+                      <dd className="text-emerald-900 font-bold bg-white px-1.5 rounded shadow-sm">{txn.truck_no}</dd>
                     </div>
-                    <div>
-                      <dt className="text-emerald-700 dark:text-emerald-400 font-medium">Party Name</dt>
-                      <dd className="text-emerald-900 dark:text-emerald-100">{txn.party_name}</dd>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-emerald-700 font-medium whitespace-nowrap">Party Name</dt>
+                      <dd className="text-emerald-900 text-right truncate">{txn.party_name}</dd>
                     </div>
-                    <div>
-                      <dt className="text-emerald-700 dark:text-emerald-400 font-medium">Item Name</dt>
-                      <dd className="text-emerald-900 dark:text-emerald-100">{txn.item_name}</dd>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-emerald-700 font-medium whitespace-nowrap">Item Name</dt>
+                      <dd className="text-emerald-900 text-right truncate">{txn.item_name}</dd>
                     </div>
-                    <div>
-                      <dt className="text-emerald-700 dark:text-emerald-400 font-medium">Transporter</dt>
-                      <dd className="text-emerald-900 dark:text-emerald-100">{txn.transporter_name}</dd>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-emerald-700 font-medium whitespace-nowrap">Transporter</dt>
+                      <dd className="text-emerald-900 text-right truncate">{txn.transporter_name}</dd>
                     </div>
                   </dl>
                 </div>
 
                 {/* Invoice Info Card */}
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10">
-                  <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-3 flex items-center gap-2">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-amber-50/50 shadow-sm">
+                  <h4 className="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Invoice Details
                   </h4>
                   <dl className="space-y-2 text-sm">
-                    <div>
-                      <dt className="text-amber-700 dark:text-amber-400 font-medium">Invoice No</dt>
-                      <dd className="text-amber-900 dark:text-amber-100 font-semibold">{txn.invoice_number}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-amber-700 font-medium">Invoice No</dt>
+                      <dd className="text-amber-900 font-semibold">{txn.invoice_number}</dd>
                     </div>
-                    <div>
-                      <dt className="text-amber-700 dark:text-amber-400 font-medium">Invoice Date</dt>
-                      <dd className="text-amber-900 dark:text-amber-100">{formatDate(txn.invoice_date)}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-amber-700 font-medium">Invoice Date</dt>
+                      <dd className="text-amber-900">{formatDate(txn.invoice_date)}</dd>
                     </div>
-                    <div>
-                      <dt className="text-amber-700 dark:text-amber-400 font-medium">Quantity</dt>
-                      <dd className="text-amber-900 dark:text-amber-100 font-semibold">{txn.invoice_quantity}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-amber-700 font-medium">Quantity</dt>
+                      <dd className="text-amber-900 font-semibold">{txn.invoice_quantity}</dd>
                     </div>
-                    <div>
-                      <dt className="text-amber-700 dark:text-amber-400 font-medium">PO/DO Number</dt>
-                      <dd className="text-amber-900 dark:text-amber-100">{txn.po_do_number || '—'}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-amber-700 font-medium">PO/DO No</dt>
+                      <dd className="text-amber-900">{txn.po_do_number || '—'}</dd>
                     </div>
                   </dl>
                 </div>
@@ -242,53 +443,53 @@ export function AdminStageDetailModal({
               {/* Weight & Gate Pass Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Weight Information */}
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10">
-                  <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-300 mb-3 flex items-center gap-2">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-purple-50/50 shadow-sm">
+                  <h4 className="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                     </svg>
                     Weight Information
                   </h4>
                   <div className="grid grid-cols-3 gap-3 text-center">
-                    <div>
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">First Weight</p>
-                      <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{txn.first_weight ?? '—'}</p>
+                    <div className="bg-white p-2 rounded-lg border border-purple-100 shadow-sm">
+                      <p className="text-xs text-purple-600 mb-1 uppercase tracking-wider font-bold">First</p>
+                      <p className="text-lg font-bold text-purple-900 font-mono">{txn.first_weight ?? '—'}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Second Weight</p>
-                      <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{txn.second_weight ?? '—'}</p>
+                    <div className="bg-white p-2 rounded-lg border border-purple-100 shadow-sm">
+                      <p className="text-xs text-purple-600 mb-1 uppercase tracking-wider font-bold">Second</p>
+                      <p className="text-lg font-bold text-purple-900 font-mono">{txn.second_weight ?? '—'}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Net Weight</p>
-                      <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{txn.net_weight ?? '—'}</p>
+                    <div className="bg-emerald-100 p-2 rounded-lg border border-emerald-200 shadow-sm">
+                      <p className="text-xs text-emerald-700 mb-1 uppercase tracking-wider font-bold">Net</p>
+                      <p className="text-lg font-bold text-emerald-800 font-mono">{txn.net_weight ?? '—'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Additional Details */}
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-gradient-to-br from-rose-50 to-rose-100/50 dark:from-rose-900/20 dark:to-rose-800/10">
-                  <h4 className="text-sm font-semibold text-rose-900 dark:text-rose-300 mb-3 flex items-center gap-2">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-rose-50/50 shadow-sm">
+                  <h4 className="text-sm font-bold text-rose-900 mb-3 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                     Additional Info
                   </h4>
                   <dl className="space-y-2 text-sm">
-                    <div>
-                      <dt className="text-rose-700 dark:text-rose-400 font-medium">Gate Pass No</dt>
-                      <dd className="text-rose-900 dark:text-rose-100 font-semibold">{txn.gate_pass_no || '—'}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-rose-700 font-medium">Gate Pass No</dt>
+                      <dd className="text-rose-900 font-semibold">{txn.gate_pass_no || '—'}</dd>
                     </div>
-                    <div>
-                      <dt className="text-rose-700 dark:text-rose-400 font-medium">LR Number</dt>
-                      <dd className="text-rose-900 dark:text-rose-100">{txn.lr_number || '—'}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-rose-700 font-medium">LR Number</dt>
+                      <dd className="text-rose-900">{txn.lr_number || '—'}</dd>
                     </div>
-                    <div>
-                      <dt className="text-rose-700 dark:text-rose-400 font-medium">Mobile</dt>
-                      <dd className="text-rose-900 dark:text-rose-100">{txn.mobile_number}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-rose-700 font-medium">Mobile</dt>
+                      <dd className="text-rose-900 font-mono bg-white px-1.5 rounded border border-rose-100">{txn.mobile_number}</dd>
                     </div>
-                    <div>
-                      <dt className="text-rose-700 dark:text-rose-400 font-medium">Created</dt>
-                      <dd className="text-rose-900 dark:text-rose-100 text-xs">{formatDateTime(txn.created_at)}</dd>
+                    <div className="flex justify-between">
+                      <dt className="text-rose-700 font-medium">Created</dt>
+                      <dd className="text-rose-900 text-xs">{formatDateTime(txn.created_at)}</dd>
                     </div>
                   </dl>
                 </div>
@@ -296,308 +497,125 @@ export function AdminStageDetailModal({
 
               {/* Remarks Section */}
               {(txn.remark1 || txn.remark2) && (
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-                  <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">Remarks</h4>
-                  <div className="space-y-2 text-sm">
+                <div className="rounded-xl border border-zinc-200 p-4 bg-white shadow-sm">
+                  <h4 className="text-sm font-bold text-zinc-700 mb-3">Remarks</h4>
+                  <div className="space-y-3 text-sm">
                     {txn.remark1 && (
-                      <div>
-                        <span className="font-medium text-zinc-600 dark:text-zinc-400">Entry Remarks: </span>
-                        <span className="text-zinc-900 dark:text-zinc-100">{txn.remark1}</span>
+                      <div className="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <span className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Entry Remarks</span>
+                        <span className="text-zinc-900 font-medium">{txn.remark1}</span>
                       </div>
                     )}
                     {txn.remark2 && (
-                      <div>
-                        <span className="font-medium text-zinc-600 dark:text-zinc-400">Exit Remarks: </span>
-                        <span className="text-zinc-900 dark:text-zinc-100">{txn.remark2}</span>
+                      <div className="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                         <span className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Exit Remarks</span>
+                         <span className="text-zinc-900 font-medium">{txn.remark2}</span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
-            </>
-          ) : (
-            /* Regular Stage-Specific Transaction Details */
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-            <h4 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">Transaction Details</h4>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Truck Number</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.truck_no}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Party Name</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.party_name}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Item Name</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.item_name || 'N/A'}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Transporter</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.transporter_name}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Invoice Number</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.invoice_number}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Invoice Date</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{formatDate(txn.invoice_date)}</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Quantity</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.invoice_quantity} units</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500 dark:text-zinc-400">Mobile</dt>
-                <dd className="font-medium text-zinc-900 dark:text-zinc-100">{txn.mobile_number}</dd>
-              </div>
-            </dl>
-          </div>
-          )}
 
-
-          {/* Stage Filter Buttons (Full View Only) */}
-          {isFullView && txn.stages && (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-              <h4 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">Filter by Stage</h4>
-              <div className="overflow-x-auto -mx-2 px-2">
-                <div className="flex gap-2 min-w-max pb-2">
-                  <button
-                    onClick={() => setSelectedStageFilter(null)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                      selectedStageFilter === null
-                        ? 'bg-amber-500 text-white shadow-md'
-                        : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600'
-                    }`}
-                  >
-                    All Stages
-                  </button>
-                  {STAGES.map((stage) => (
-                    <button
-                      key={stage.key}
-                      onClick={() => setSelectedStageFilter(stage.key)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                        selectedStageFilter === stage.key
-                          ? 'bg-amber-500 text-white shadow-md'
-                          : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600'
-                      }`}
-                    >
-                      {stage.label}
-                    </button>
-                  ))}
+              {/* Stage Filter Buttons (Full View Only) */}
+              {txn.stages && (
+                <div className="rounded-xl border border-zinc-200 p-4 bg-white shadow-sm">
+                  <h4 className="mb-3 text-sm font-bold text-zinc-700">Filter by Stage</h4>
+                  <div className="overflow-x-auto -mx-2 px-2 pb-2">
+                    <div className="flex gap-2 min-w-max">
+                      <button
+                        onClick={() => setSelectedStageFilter(null)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                          selectedStageFilter === null
+                            ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-500/30'
+                            : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                        }`}
+                      >
+                        All Stages
+                      </button>
+                      {STAGES.map((stage) => (
+                        <button
+                          key={stage.key}
+                          onClick={() => setSelectedStageFilter(stage.key)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                            selectedStageFilter === stage.key
+                              ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-500/30'
+                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                          }`}
+                        >
+                          {stage.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Full Transaction View - All Stages */}
-          {isFullView && txn.stages && (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-              <h4 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300">Complete Stage History</h4>
-              <div className="space-y-3">
-                {STAGES.filter(stage => selectedStageFilter === null || stage.key === selectedStageFilter).map((stage) => {
-                  const stageData = txn.stages[stage.key];
-                  const isCompleted = stageData?.confirmed;
-                  return (
-                    <div
-                      key={stage.key}
-                      className={`rounded-lg border p-3 transition-all ${
-                        isCompleted
-                          ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20'
-                          : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-semibold ${
-                            isCompleted ? 'text-emerald-700 dark:text-emerald-300' : 'text-zinc-600 dark:text-zinc-400'
-                          }`}>
-                            {stage.label}
-                          </span>
-                          <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
+              {/* Stage History */}
+              {txn.stages && (
+                <div className="rounded-xl border border-zinc-200 p-4 bg-white shadow-sm">
+                  <h4 className="mb-4 text-sm font-bold text-zinc-700">Complete Stage History</h4>
+                  <div className="space-y-3">
+                    {STAGES.filter(stage => selectedStageFilter === null || stage.key === selectedStageFilter).map((stage) => {
+                      const stageData = txn.stages[stage.key];
+                      const isCompleted = stageData?.confirmed;
+                      return (
+                        <div
+                          key={stage.key}
+                          className={`rounded-lg border p-3 transition-all ${
                             isCompleted
-                              ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400'
-                          }`}>
-                            {isCompleted ? '✓ Completed' : '⏳ Pending'}
-                          </span>
-                        </div>
-                      </div>
-                      {isCompleted && (
-                        <div className="space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Timestamp:</span>
-                            <span>{formatDateTime(stageData.confirmed_at)}</span>
-                          </div>
-                          {stageData.confirmed_by_name && (
+                              ? 'border-emerald-200 bg-emerald-50'
+                              : 'border-zinc-200 bg-zinc-50'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">Approved by:</span>
-                              <span className="text-zinc-700 dark:text-zinc-300">{stageData.confirmed_by_name}</span>
+                              <span className={`text-sm font-bold ${
+                                isCompleted ? 'text-emerald-700' : 'text-zinc-600'
+                              }`}>
+                                {stage.label}
+                              </span>
+                              <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                isCompleted
+                                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                  : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                              }`}>
+                                {isCompleted ? '✓ Completed' : '⏳ Pending'}
+                              </span>
+                            </div>
+                          </div>
+                          {isCompleted && (
+                            <div className="space-y-1 text-xs text-zinc-600">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold opacity-70">Timestamp:</span>
+                                <span className="font-mono">{formatDateTime(stageData.confirmed_at)}</span>
+                              </div>
+                              {stageData.confirmed_by_name && (
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold opacity-70">Approved by:</span>
+                                  <span className="text-zinc-800 font-medium">{stageData.confirmed_by_name}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Stage Status */}
-          {!isFullView && clickedStageKey && (
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-            <h4 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">Current Stage Status</h4>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">Stage</span>
-                <span className={`text-sm font-medium ${status[clickedStageKey] ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500'}`}>
-                  {currentStageLabel}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">Status</span>
-                <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${
-                  status[clickedStageKey]
-                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                    : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400'
-                }`}>
-                  {status[clickedStageKey] ? 'Completed' : 'Pending'}
-                </span>
-              </div>
-              {stageTimestamp && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Timestamp</span>
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDateTime(stageTimestamp)}
-                  </span>
-                </div>
-              )}
-              {stageConfirmerName && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Confirmed By</span>
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {stageConfirmerName}
-                  </span>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
           )}
 
-
-          {/* Weighbridge Info - only show for weighbridge stages or final stages */}
-          {!isFullView && clickedStageKey && (clickedStageKey.includes('weighbridge') || isGateOut || isFinalStage) && (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800">
-              <h4 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">Weight Information</h4>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">First Weight</p>
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{txn.first_weight ?? '—'}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Second Weight</p>
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{txn.second_weight ?? '—'}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Net Weight</p>
-                  <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{txn.net_weight ?? '—'}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Confirmation Section */}
-          {canConfirm && (
-            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 p-4">
-              <h4 className="mb-3 text-sm font-semibold text-amber-800 dark:text-amber-300">Confirm This Stage</h4>
-              {previousStageEntry && previousStageConfirmerName && (
-                 <div className="mb-3 p-2 rounded bg-amber-100 dark:bg-amber-900/50 text-xs text-amber-900 dark:text-amber-100">
-                   <strong>{previousStageEntry.label}</strong> was confirmed by <strong>{previousStageConfirmerName}</strong>
-                 </div>
-              )}
-              {clickedStageKey === 'first_weighbridge' && (
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    First weight (optional)
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={firstWeight}
-                    onChange={(e) => setFirstWeight(e.target.value)}
-                    placeholder="Enter first weight"
-                    className="w-full max-w-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
-                  />
-                </div>
-              )}
-              {clickedStageKey === 'second_weighbridge' && (
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Second weight (optional)
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={secondWeight}
-                    onChange={(e) => setSecondWeight(e.target.value)}
-                    placeholder="Enter second weight"
-                    className="w-full max-w-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
-                  />
-                </div>
-              )}
-              {clickedStageKey === 'campus_out' && (
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Campus out remarks (optional)
-                  </label>
-                  <textarea
-                    value={remark2}
-                    onChange={(e) => setRemark2(e.target.value)}
-                    placeholder="Enter remarks for campus out stage"
-                    rows={3}
-                    className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
-                  />
-                </div>
-              )}
-              {error && <p className="mb-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={confirming}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
-              >
-                {confirming ? 'Confirming...' : `Confirm ${currentStageLabel}`}
-              </button>
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Transaction will move to the next stage after confirmation.
-              </p>
-            </div>
-          )}
-
-          {/* Final Stage Message */}
-          {isFinalStage && (
-            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 p-4">
-              <h4 className="mb-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                Transaction Closed
-              </h4>
-              <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                All stages completed successfully.
-              </p>
-            </div>
-          )}
-
-          {/* Footer Buttons */}
-          <div className="flex justify-end gap-2 border-t border-zinc-200 dark:border-zinc-700 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-            >
-              Close
-            </button>
-          </div>
+        </div>
+        
+        {/* Footer (Action buttons if needed, or close) */}
+        <div className="flex-none p-4 border-t border-zinc-200 bg-zinc-50 sm:rounded-b-xl z-20 md:hidden">
+             <button
+               onClick={onClose}
+               className="w-full py-3 rounded-xl border border-zinc-300 text-zinc-600 font-medium active:bg-zinc-100"
+             >
+               Close
+             </button>
         </div>
       </div>
     </div>

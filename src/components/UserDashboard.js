@@ -21,11 +21,12 @@ import {
   TruckIcon,
   CloseIcon,
 } from "@/components/Icons";
-import { useTheme } from "@/context/ThemeContext";
+// import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/useToast";
 import { useFormValidation } from "@/hooks/useFormValidation";
 
 // Edit Transaction Modal Component
+// Edit Transaction Modal Component - Premium Light Theme
 function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const toast = useToast();
   const { values, errors, touched, handleChange, handleBlur, validateAll } = useFormValidation(
@@ -91,20 +92,20 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-zinc-900 shadow-xl"
+        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold">Edit Transaction</h3>
-            <p className="text-sm text-amber-100">
-              {txnNo} • {transaction.transaction_type}
+            <h3 className="text-lg font-bold text-zinc-900">Edit Transaction</h3>
+            <p className="text-sm text-zinc-500 font-medium">
+              {txnNo} • <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs ml-2 border border-blue-200 font-semibold">{transaction.transaction_type}</span>
             </p>
           </div>
-          <button onClick={onClose} className="rounded p-2 hover:bg-amber-500/50" aria-label="Close">
+          <button onClick={onClose} className="rounded-lg p-2 hover:bg-zinc-200 text-zinc-500 transition-colors" aria-label="Close">
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
@@ -112,17 +113,17 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
         <form onSubmit={handleSubmit} className="p-6">
           {/* Read-only Transaction Info */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-blue-200 dark:border-blue-800 p-3 bg-blue-50 dark:bg-blue-900/20">
-              <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Truck Number</p>
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">{transaction.truck_no}</p>
+            <div className="rounded-lg border border-blue-100 p-3 bg-blue-50/50">
+              <p className="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wider">Truck Number</p>
+              <p className="text-sm font-bold text-blue-900">{transaction.truck_no}</p>
             </div>
-            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 p-3 bg-emerald-50 dark:bg-emerald-900/20">
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Party Name</p>
-              <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">{transaction.party_name}</p>
+            <div className="rounded-lg border border-emerald-100 p-3 bg-emerald-50/50">
+              <p className="text-xs font-bold text-emerald-600 mb-1 uppercase tracking-wider">Party Name</p>
+              <p className="text-sm font-bold text-emerald-900">{transaction.party_name}</p>
             </div>
-            <div className="rounded-lg border border-purple-200 dark:border-purple-800 p-3 bg-purple-50 dark:bg-purple-900/20">
-              <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">Item Name</p>
-              <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">{transaction.item_name}</p>
+            <div className="rounded-lg border border-purple-100 p-3 bg-purple-50/50">
+              <p className="text-xs font-bold text-purple-600 mb-1 uppercase tracking-wider">Item Name</p>
+              <p className="text-sm font-bold text-purple-900">{transaction.item_name}</p>
             </div>
           </div>
 
@@ -130,16 +131,18 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           <div className="space-y-6">
             {/* Invoice Section */}
             <div>
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
+                <div className="p-1 rounded bg-blue-100 text-blue-600">
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                </div>
                 Invoice Details
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Invoice Number *
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                    Invoice Number <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -148,17 +151,17 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     onBlur={() => handleBlur('invoice_number')}
                     className={`w-full rounded-lg border ${
                       errors.invoice_number && touched.invoice_number
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-zinc-300 dark:border-zinc-700 focus:ring-amber-500'
-                    } bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2`}
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
+                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
                   />
                   {errors.invoice_number && touched.invoice_number && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.invoice_number}</p>
+                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_number}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Invoice Date *
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                    Invoice Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -167,17 +170,17 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     onBlur={() => handleBlur('invoice_date')}
                     className={`w-full rounded-lg border ${
                       errors.invoice_date && touched.invoice_date
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-zinc-300 dark:border-zinc-700 focus:ring-amber-500'
-                    } bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2`}
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
+                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
                   />
                   {errors.invoice_date && touched.invoice_date && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.invoice_date}</p>
+                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_date}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Quantity *
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                    Quantity <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -186,23 +189,23 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     onBlur={() => handleBlur('invoice_quantity')}
                     className={`w-full rounded-lg border ${
                       errors.invoice_quantity && touched.invoice_quantity
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-zinc-300 dark:border-zinc-700 focus:ring-amber-500'
-                    } bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2`}
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
+                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
                   />
                   {errors.invoice_quantity && touched.invoice_quantity && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.invoice_quantity}</p>
+                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_quantity}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
                     PO/DO Number
                   </label>
                   <input
                     type="text"
                     value={values.po_do_number}
                     onChange={(e) => handleChange('po_do_number', e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -210,27 +213,29 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
 
             {/* Additional Info Section */}
             <div>
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
+                <div className="p-1 rounded bg-blue-100 text-blue-600">
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                   </svg>
+                </div>
                 Additional Information
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
                     LR Number
                   </label>
                   <input
                     type="text"
                     value={values.lr_number}
                     onChange={(e) => handleChange('lr_number', e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Mobile Number *
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                    Mobile Number <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -239,12 +244,12 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                     onBlur={() => handleBlur('mobile_number')}
                     className={`w-full rounded-lg border ${
                       errors.mobile_number && touched.mobile_number
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-zinc-300 dark:border-zinc-700 focus:ring-amber-500'
-                    } bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2`}
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
+                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
                   />
                   {errors.mobile_number && touched.mobile_number && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.mobile_number}</p>
+                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.mobile_number}</p>
                   )}
                 </div>
               </div>
@@ -252,21 +257,23 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
 
             {/* Remarks Section */}
             <div>
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
+              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
+                <div className="p-1 rounded bg-blue-100 text-blue-600">
+                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                   </svg>
+                </div>
                 Remarks
               </h4>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">
                   Entry Remarks
                 </label>
                 <textarea
                   value={values.remark1}
                   onChange={(e) => handleChange('remark1', e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
                   placeholder="Enter any remarks for this transaction..."
                 />
               </div>
@@ -274,18 +281,18 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 justify-end border-t border-zinc-200 dark:border-zinc-700 pt-6 mt-6">
+          <div className="flex gap-3 justify-end border-t border-zinc-200 pt-6 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg border border-zinc-300 bg-white text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-sm font-medium text-white disabled:opacity-60 transition-all shadow-md hover:shadow-lg"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white disabled:opacity-70 transition-all shadow-md hover:shadow-lg shadow-blue-500/20"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -307,10 +314,10 @@ function StageStatusIcon({ stageKey, status, transaction }) {
     <span
       className={`inline-flex h-7 w-7 items-center justify-center rounded transition-all ${
         isCompleted
-          ? "bg-emerald-500 dark:bg-emerald-600 text-white shadow-md"
+          ? "bg-emerald-500 text-white shadow-md"
           : isActive
-          ? "bg-amber-500 dark:bg-amber-600 text-white shadow-md animate-pulse"
-          : "bg-zinc-200 dark:bg-zinc-700/50 text-zinc-400 dark:text-zinc-500"
+          ? "bg-amber-500 text-white shadow-md animate-pulse"
+          : "bg-zinc-200 text-zinc-400"
       } ${isPending ? "opacity-40" : "opacity-100"}`}
     >
       <TruckIcon className="h-4 w-4" />
@@ -320,7 +327,7 @@ function StageStatusIcon({ stageKey, status, transaction }) {
 
 export default function UserDashboard({ roleName = "Dashboard" }) {
   const { user, loading: authLoading, permissions, hasPermission } = useAuth();
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
   const { printGatePass, downloadGatePass } = useGatePassPrint();
   const [transactions, setTransactions] = useState([]);
   const [counts, setCounts] = useState({
@@ -514,164 +521,247 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
 
   return (
     <PanelLayout title="Dashboard" roleName={roleName}>
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-amber-200/20 via-transparent to-transparent dark:from-amber-900/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-200/20 via-transparent to-transparent dark:from-blue-900/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-amber-100/10 via-transparent to-blue-100/10 dark:from-amber-900/5 dark:to-blue-900/5 rounded-full blur-3xl"></div>
+      {/* Background decorative elements - Subtle Light */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-slate-50">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100/40 rounded-full blur-3xl opacity-50"></div>
       </div>
 
       <div className="space-y-6 relative z-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-800 dark:from-amber-400 dark:to-amber-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
               {roleName}
             </h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Manage your daily tasks and transactions</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">Manage your daily tasks and transactions</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
             />
-            <span className="text-zinc-600 dark:text-zinc-400">to</span>
+            <span className="text-slate-400 font-medium">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
             />
             <button
               onClick={() => fetchData()}
-              className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
             >
               GO
             </button>
             {hasPermission(PERMISSIONS.EXPORT_DATA) && (
               <button
                 onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
+                className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
               >
                 <DownloadIcon className="h-4 w-4" />
-                Export To Excel
+                Export
               </button>
             )}
           </div>
         </div>
 
         {/* Stats Cards - Top Row - Only for Gatekeeper */}
+        {/* Stats Section - Responsive */}
         {user?.role_name === 'Gatekeeper' && (
-          <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="space-y-4">
+            {/* Stats Items */}
+            <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-5 md:gap-4 md:pb-0 scrollbar-hide px-1">
               {[
-                { label: "Total Employee", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-amber-500 to-amber-600" },
-                { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-orange-500 to-orange-600" },
-                { label: "Total Transporter", value: counts.parties, icon: UsersIcon, gradient: "from-yellow-500 to-yellow-600" },
-                { label: "Total Items", value: counts.transporters, icon: ClipboardIcon, gradient: "from-amber-600 to-amber-700" },
-                { label: "Total Gate Pass", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-yellow-600 to-yellow-700" },
+                { label: "Total Emp", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
+                { label: "Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
+                { label: "Transporters", value: counts.parties, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
+                { label: "Vehicles", value: counts.transporters, icon: TruckIcon, gradient: "from-fuchsia-500 to-fuchsia-600" }, 
+                { label: "Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
               ].map((stat, idx) => (
-                <div key={idx} className={`rounded-xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-lg hover:shadow-xl transition-shadow`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-3xl font-bold">{stat.value}</p>
-                      <p className="text-sm opacity-90 mt-1">{stat.label}</p>
-                    </div>
-                    <stat.icon className="h-10 w-10 opacity-80" />
-                  </div>
+                <div key={idx} className={`relative flex-shrink-0 min-w-[130px] md:min-w-0 rounded-xl bg-gradient-to-br ${stat.gradient} p-4 text-white shadow-lg ring-1 ring-white/20`}>
+                   <div className="flex flex-col h-full justify-between">
+                     <div className="z-10">
+                       <p className="text-3xl font-bold leading-none tracking-tight">{stat.value}</p>
+                       <p className="text-xs font-semibold opacity-90 mt-1 uppercase tracking-wide">{stat.label}</p>
+                     </div>
+                     <stat.icon className="absolute right-2 bottom-2 h-12 w-12 opacity-10" />
+                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Category Filter Sections */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Unloading Section */}
-              <div className="rounded-xl border-2 border-rose-300 dark:border-rose-800/50 bg-gradient-to-br from-rose-100/90 to-rose-200/70 dark:from-rose-900/20 dark:to-rose-900/10 shadow-md backdrop-blur-sm">
-                <button
-                  onClick={() => handleFilterClick("Unloading", "")}
-                  className={`w-full flex items-center justify-between p-4 border-b-2 border-rose-300 dark:border-rose-800/50 transition-all ${
-                    filterType === "Unloading" && !filterItem
-                      ? "bg-rose-300 dark:bg-rose-800/50 shadow-inner"
-                      : "hover:bg-rose-200/60 dark:hover:bg-rose-900/30"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-rose-600 dark:bg-rose-700 p-2 shadow-md">
-                      <UnloadingGoodsIcon className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="font-semibold text-rose-900 dark:text-rose-100">
-                      Unloading Goods [Inward] - {totalUnloading}
-                    </span>
-                  </div>
-                </button>
-                <div className="p-3 space-y-1">
-                  {itemCounts.unloading.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleFilterClick("Unloading", item.item_name)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                        filterType === "Unloading" && filterItem === item.item_name
-                          ? "bg-rose-300 dark:bg-rose-700 text-rose-900 dark:text-rose-100 font-medium shadow-md"
-                          : "text-rose-800 dark:text-rose-300 hover:bg-rose-200/50 dark:hover:bg-rose-900/20"
-                      }`}
+            {/* Category Filters - Responsive Wrapper */}
+            <>
+              {/* Mobile View (Compact) */}
+              <div className="md:hidden grid grid-cols-2 gap-3">
+                 {/* Unloading - Light Theme */}
+                 <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
+                    <button 
+                       onClick={() => handleFilterClick("Unloading", "")}
+                       className={`w-full p-3 text-left transition-colors ${filterType === "Unloading" && !filterItem ? "bg-rose-100" : "hover:bg-rose-100/50"}`}
                     >
-                      {item.item_name} - {String(item.count).padStart(2, "0")}
+                       <p className="text-xs text-rose-600 font-bold uppercase tracking-wider">Inward</p>
+                       <div className="flex items-center justify-between mt-0.5">
+                         <span className="text-sm font-bold text-rose-900">Unloading</span>
+                         <span className="bg-rose-200 text-rose-800 text-xs px-2 py-0.5 rounded-full font-bold">{totalUnloading}</span>
+                       </div>
                     </button>
-                  ))}
-                </div>
+                    {filterType === "Unloading" && (
+                       <div className="border-t border-rose-200 max-h-48 overflow-y-auto">
+                          {itemCounts.unloading.map((item, idx) => (
+                             <button
+                                key={idx}
+                                onClick={() => handleFilterClick("Unloading", item.item_name)}
+                                className={`w-full flex justify-between px-3 py-2 text-xs border-b border-rose-100 last:border-0 ${
+                                   filterItem === item.item_name ? "bg-rose-200 font-bold text-rose-900" : "hover:bg-rose-100/50 text-rose-800"
+                                }`}
+                             >
+                                <span className="truncate mr-2">{item.item_name}</span>
+                                <span>{item.count}</span>
+                             </button>
+                          ))}
+                       </div>
+                    )}
+                 </div>
+
+                 {/* Loading - Light Theme */}
+                 <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
+                    <button 
+                       onClick={() => handleFilterClick("Loading", "")}
+                       className={`w-full p-3 text-left transition-colors ${filterType === "Loading" && !filterItem ? "bg-blue-100" : "hover:bg-blue-100/50"}`}
+                    >
+                       <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Outward</p>
+                       <div className="flex items-center justify-between mt-0.5">
+                         <span className="text-sm font-bold text-blue-900">Loading</span>
+                         <span className="bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded-full font-bold">{totalLoading}</span>
+                       </div>
+                    </button>
+                    {filterType === "Loading" && (
+                       <div className="border-t border-blue-200 max-h-48 overflow-y-auto">
+                          {itemCounts.loading.map((item, idx) => (
+                             <button
+                                key={idx}
+                                onClick={() => handleFilterClick("Loading", item.item_name)}
+                                className={`w-full flex justify-between px-3 py-2 text-xs border-b border-blue-100 last:border-0 ${
+                                   filterItem === item.item_name ? "bg-blue-200 font-bold text-blue-900" : "hover:bg-blue-100/50 text-blue-800"
+                                }`}
+                             >
+                                <span className="truncate mr-2">{item.item_name}</span>
+                                <span>{item.count}</span>
+                             </button>
+                          ))}
+                       </div>
+                    )}
+                 </div>
               </div>
 
-              {/* Loading Section */}
-              <div className="rounded-xl border-2 border-blue-300 dark:border-blue-800/50 bg-gradient-to-br from-blue-100/90 to-blue-200/70 dark:from-blue-900/20 dark:to-blue-900/10 shadow-md backdrop-blur-sm">
-                <button
-                  onClick={() => handleFilterClick("Loading", "")}
-                  className={`w-full flex items-center justify-between p-4 border-b-2 border-blue-300 dark:border-blue-800/50 transition-all ${
-                    filterType === "Loading" && !filterItem
-                      ? "bg-blue-300 dark:bg-blue-800/50 shadow-inner"
-                      : "hover:bg-blue-200/60 dark:hover:bg-blue-900/30"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-blue-600 dark:bg-blue-700 p-2 shadow-md">
-                      <LoadingGoodsIcon className="h-6 w-6 text-white" />
+              {/* Desktop View (Expanded) */}
+              <div className="hidden md:grid gap-4 sm:grid-cols-2">
+                {/* Unloading Section - Light Premium */}
+                <div className="rounded-xl border-2 border-rose-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all">
+                  <button
+                    onClick={() => handleFilterClick("Unloading", "")}
+                    className={`w-full flex items-center justify-between p-4 border-b border-rose-100 transition-all ${
+                      filterType === "Unloading" && !filterItem
+                        ? "bg-rose-50"
+                        : "hover:bg-rose-50/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-rose-100 p-2 text-rose-600 shadow-sm">
+                        <UnloadingGoodsIcon className="h-6 w-6" />
+                      </div>
+                      <span className="font-bold text-rose-900">
+                        Unloading Goods [Inward]
+                      </span>
                     </div>
-                    <span className="font-semibold text-blue-900 dark:text-blue-100">
-                      Loading Goods [Outward] - {totalLoading}
-                    </span>
+                    <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-md text-sm font-bold shadow-sm">{totalUnloading}</span>
+                  </button>
+                  <div className="p-3 space-y-1 bg-white max-h-[300px] overflow-y-auto custom-scrollbar">
+                    {itemCounts.unloading.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleFilterClick("Unloading", item.item_name)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                          filterType === "Unloading" && filterItem === item.item_name
+                            ? "bg-rose-100 text-rose-900 font-bold border border-rose-200 shadow-sm"
+                            : "text-zinc-600 hover:bg-zinc-50 hover:text-rose-700 hover:pl-4"
+                        }`}
+                      >
+                         <div className="flex justify-between items-center">
+                            <span className="truncate pr-2">{item.item_name}</span>
+                            <span className="font-medium bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-xs border border-rose-100">{String(item.count).padStart(2, "0")}</span>
+                         </div>
+                      </button>
+                    ))}
                   </div>
-                </button>
-                <div className="p-3 space-y-1">
-                  {itemCounts.loading.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleFilterClick("Loading", item.item_name)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                        filterType === "Loading" && filterItem === item.item_name
-                          ? "bg-blue-400 dark:bg-blue-700 text-blue-900 dark:text-blue-100 font-medium shadow-md"
-                          : "text-blue-800 dark:text-blue-300 hover:bg-blue-200/50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      {item.item_name} - {String(item.count).padStart(2, "0")}
-                    </button>
-                  ))}
+                </div>
+
+                {/* Loading Section - Light Premium */}
+                <div className="rounded-xl border-2 border-blue-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-all">
+                  <button
+                    onClick={() => handleFilterClick("Loading", "")}
+                    className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
+                      filterType === "Loading" && !filterItem
+                        ? "bg-blue-50"
+                        : "hover:bg-blue-50/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-blue-100 p-2 text-blue-600 shadow-sm">
+                        <LoadingGoodsIcon className="h-6 w-6" />
+                      </div>
+                      <span className="font-bold text-blue-900">
+                        Loading Goods [Outward]
+                      </span>
+                    </div>
+                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-sm font-bold shadow-sm">{totalLoading}</span>
+                  </button>
+                  <div className="p-3 space-y-1 bg-white max-h-[300px] overflow-y-auto custom-scrollbar">
+                    {itemCounts.loading.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleFilterClick("Loading", item.item_name)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                          filterType === "Loading" && filterItem === item.item_name
+                            ? "bg-blue-100 text-blue-900 font-bold border border-blue-200 shadow-sm"
+                            : "text-zinc-600 hover:bg-zinc-50 hover:text-blue-700 hover:pl-4"
+                        }`}
+                      >
+                         <div className="flex justify-between items-center">
+                            <span className="truncate pr-2">{item.item_name}</span>
+                            <span className="font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs border border-blue-100">{String(item.count).padStart(2, "0")}</span>
+                         </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </>
+            </>
+          </div>
         )}
 
-        {/* Stage Filter Buttons */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800/50 bg-white/90 dark:bg-zinc-900/90 shadow-md backdrop-blur-sm p-4">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">Filter by Current Stage</h3>
-          <div className="overflow-x-auto -mx-2 px-2">
-            <div className="flex gap-2 min-w-max pb-2">
+        {/* Stage Filter Buttons - Light Theme */}
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+             <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wide opacity-80 flex items-center gap-2">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                Filter by Stage
+             </h3>
+             {selectedStage && (
+                <button onClick={() => setSelectedStage(null)} className="text-xs text-blue-600 hover:underline font-medium">Clear Filter</button>
+             )}
+          </div>
+          <div className="overflow-x-auto -mx-2 px-2 pb-2 scrollbar-thin scrollbar-thumb-zinc-200 scrollbar-track-transparent">
+            <div className="flex gap-2 min-w-max">
               <button
                 onClick={() => setSelectedStage(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
                   selectedStage === null
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                    ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md ring-2 ring-blue-100'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                 }`}
               >
                 All Stages
@@ -680,10 +770,10 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 <button
                   key={stage.key}
                   onClick={() => setSelectedStage(stage.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
                     selectedStage === stage.key
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                      ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md ring-2 ring-blue-100'
+                      : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 >
                   {stage.label}
@@ -693,195 +783,183 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
           </div>
         </div>
 
-        {/* Transaction Content - Cards (Mobile) / Table (Desktop) */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-900/80 shadow-lg backdrop-blur-sm overflow-hidden">
+        {/* Transaction Content - Cards (Mobile) / Table (Desktop) - Premium Light */}
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden flex flex-col h-full min-h-[500px]">
           {/* Header with Search */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-zinc-200 dark:border-zinc-800/50 bg-gradient-to-r from-zinc-50 to-zinc-100/50 dark:from-zinc-800 dark:to-zinc-900/50">
-            <div className="flex-1 w-full sm:w-auto">
-              <div className="relative">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-zinc-200 bg-zinc-50/50">
+            <div className="flex-1 w-full sm:w-auto max-w-md">
+              <div className="relative group">
                 <input
                   type="text"
                   placeholder="Search transactions..."  
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-10 pr-10 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-10 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm group-hover:border-blue-300"
                 />
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 hover:bg-zinc-100 rounded-full transition-colors"
                   >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-sm text-zinc-600 dark:text-zinc-400 hidden sm:block">
-                {filteredTransactions.length} of {transactions.length} transactions
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="text-sm font-medium text-zinc-500 whitespace-nowrap hidden sm:block bg-white px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
+                <span className="text-zinc-900 font-bold">{filteredTransactions.length}</span> results found
               </div>
               {hasPermission(PERMISSIONS.CREATE_TRANSACTIONS) && (
                 <button
                   onClick={() => setModalOpen(true)}
-                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:shadow-lg w-full sm:w-auto justify-center"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto justify-center"
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                   </svg>
-                  New
+                  New Entry
                 </button>
               )}
             </div>
-            <div className="sm:hidden text-xs text-zinc-500 w-full text-center">
-              {filteredTransactions.length} transactions found
-            </div>
           </div>
 
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
+          {/* Desktop Table View - Tally Prime Style */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar">
             {loading ? (
-              <div className="flex items-center justify-center p-12">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-600 dark:border-t-amber-400" />
+              <div className="flex flex-col items-center justify-center p-20 gap-3">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+                <p className="text-sm text-zinc-500 animate-pulse">Loading transactions...</p>
               </div>
             ) : (
-              <table className="w-full min-w-[1200px]">
+              <table className="w-full min-w-[1200px] border-collapse">
                 <thead>
-                  <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 dark:from-zinc-900 dark:to-black text-left text-sm text-white">
-                    <th className="px-4 py-3 font-semibold">S/N</th>
-                    <th className="px-4 py-3 font-semibold">Product Name</th>
-                    <th className="px-4 py-3 font-semibold">Vehicle Number</th>
-                    <th className="px-4 py-3 font-semibold">Vendor Name</th>
+                  <tr className="bg-zinc-100 border-b border-zinc-200 text-left text-xs uppercase tracking-wider text-zinc-600 font-bold">
+                    <th className="px-4 py-3 w-16 text-center">S/N</th>
+                    <th className="px-4 py-3 w-48">Product Name</th>
+                    <th className="px-4 py-3 w-32 text-center">Vehicle No.</th>
+                    <th className="px-4 py-3 w-48">Vendor Name</th>
                     {visibleStages.map((s) => (
                       <th
                         key={s.key}
-                        className="px-2 py-3 text-center text-xs font-semibold"
+                        className="px-2 py-3 text-center min-w-[100px]"
                       >
                         {s.shortLabel || s.label}
                       </th>
                     ))}
-                    <th className="px-3 py-3 text-center font-semibold">View</th>
-                    <th className="px-3 py-3 text-center font-semibold">Print</th>
-                    {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && (
-                      <th className="px-3 py-3 text-center font-semibold">Edit</th>
-                    )}
-                    {(user?.role === 'Admin' || hasPermission(PERMISSIONS.EDIT_TRANSACTIONS)) && (
-                      <th className="px-3 py-3 text-center font-semibold">Delete</th>
-                    )}
+                    <th className="px-4 py-3 text-center min-w-[120px]">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-zinc-100">
                   {filteredTransactions.map((t, idx) => {
                     const status = getStageStatus(t);
+                    const isEven = idx % 2 === 0;
                     return (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors"
+                        className={`transition-colors group hover:bg-blue-50/40 ${isEven ? 'bg-white' : 'bg-slate-50/30'}`}
                       >
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-400 text-center">
                           {idx + 1}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                          {t.item_name || "N/A"}
+                        <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
+                          {t.item_name || <span className="text-zinc-400 italic">N/A</span>}
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-block rounded-md px-3 py-1 text-sm font-medium bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-800 dark:text-emerald-200 shadow-sm">
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-block rounded px-2.5 py-1 text-xs font-bold bg-white text-zinc-700 border border-zinc-200 shadow-sm font-mono tracking-tight">
                             {t.truck_no}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
+                        <td className="px-4 py-3 text-sm text-zinc-600 font-medium">
                           {t.party_name}
                         </td>
                         {visibleStages.map((s) => {
                           const isNext = getNextStageToConfirm(t) === s.key;
                           const canConfirm = canUserConfirmStage(s.key);
-                          // Weighbridge sees Gate In but cannot confirm it (View Only)
                           const isWeighbridgeGateIn = (user?.role_name === 'Weighbridge' || user?.role === 'Weighbridge') && s.key === 'gate_in';
+                          const isCompleted = status[s.key];
 
                           return (
                             <td
                               key={s.key}
-                              className="cursor-pointer px-2 py-3 text-center hover:bg-amber-100/30 dark:hover:bg-amber-900/20 transition-colors"
-                              onClick={() =>
-                                setStageModal({
-                                  transaction: t,
-                                  clickedStageKey: s.key,
-                                })
-                              }
-                              title={`View ${s.label} stage`}
-                            >
-                              {canConfirm && isNext && !status[s.key] && !isWeighbridgeGateIn ? (
+                              className="px-2 py-3 text-center align-middle"
+                            > 
+                              <div className="flex justify-center items-center h-full">
+                              {canConfirm && isNext && !isCompleted && !isWeighbridgeGateIn ? (
                                 <button
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent parent td onClick
-                                    // handleStageClick(t, s.key); 
-                                    // NOTE: handleStageClick was not defined in the original file I viewed, 
-                                    // but setStageModal is used in onClick above.
-                                    // I'll stick to setStageModal which seems to be the intended way to open the modal.
-                                    setStageModal({
+                                  onClick={() => setStageModal({
                                       transaction: t,
                                       clickedStageKey: s.key,
-                                    });
-                                  }}
-                                  className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                                    })
+                                  }
+                                  className="rounded bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm uppercase tracking-wide flex items-center gap-1"
+                                  title="Confirm Stage"
                                 >
-                                  Confirm
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                  Action
                                 </button>
                               ) : (
-                                <StageStatusIcon stageKey={s.key} status={status} transaction={t} />
+                                <div 
+                                  className="cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                                  onClick={() => setStageModal({
+                                      transaction: t,
+                                      clickedStageKey: s.key,
+                                    })
+                                  }
+                                >
+                                   <StageStatusIcon stageKey={s.key} status={status} transaction={t} />
+                                </div>
                               )}
+                              </div>
                             </td>
                           );
                         })}
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() =>
-                              setStageModal({
-                                transaction: t,
-                                viewMode: "full",
-                              })
-                            }
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md transition-all hover:shadow-lg"
-                            title="View Full Transaction"
-                          >
-                            <ViewIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() => printGatePass(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-800 hover:to-zinc-900 text-white shadow-md transition-all hover:shadow-lg"
-                            title="Print"
-                          >
-                            <PrinterIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                        {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && (
-                          <td className="px-3 py-3 text-center">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={() => setEditModal(t)}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md transition-all hover:shadow-lg"
-                              title="Edit"
+                              onClick={() =>
+                                setStageModal({
+                                  transaction: t,
+                                  viewMode: "full",
+                                })
+                              }
+                              className="p-1.5 rounded-md text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="View Details"
                             >
-                              <EditIcon className="h-4 w-4" />
+                              <ViewIcon className="h-4 w-4" />
                             </button>
-                          </td>
-                        )}
-                        {(user?.role === 'Admin' || hasPermission(PERMISSIONS.EDIT_TRANSACTIONS)) && (
-                          <td className="px-3 py-3 text-center">
                             <button
-                              onClick={() => setDeleteConfirm(t)}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md transition-all hover:shadow-lg"
-                              title="Delete"
+                              onClick={() => printGatePass(t)}
+                              className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                              title="Print"
                             >
-                              <DeleteIcon className="h-4 w-4" />
+                              <PrinterIcon className="h-4 w-4" />
                             </button>
-                          </td>
-                        )}
+                            {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && (
+                              <button
+                                onClick={() => setEditModal(t)}
+                                className="p-1.5 rounded-md text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                title="Edit"
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </button>
+                            )}
+                            {(user?.role === 'Admin' || hasPermission(PERMISSIONS.EDIT_TRANSACTIONS)) && (
+                              <button
+                                onClick={() => setDeleteConfirm(t)}
+                                className="p-1.5 rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Delete"
+                              >
+                                <DeleteIcon className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -889,22 +967,41 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               </table>
             )}
             {!loading && filteredTransactions.length === 0 && (
-              <p className="py-12 text-center text-sm text-zinc-600 dark:text-zinc-400">
-                {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No transactions found'}
-              </p>
+              <div className="py-20 text-center bg-zinc-50/50">
+                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white mb-4 border border-zinc-200 shadow-sm">
+                    <ClipboardIcon className="h-10 w-10 text-zinc-300" />
+                 </div>
+                 <h3 className="text-xl font-bold text-zinc-900 mb-2">No transactions found</h3>
+                 <p className="text-zinc-500 max-w-sm mx-auto text-sm leading-relaxed">
+                   {searchQuery ? `We couldn't find any transactions matching "${searchQuery}". Try a different search term.` : 'Get started by creating a new gate entry using the button above.'}
+                 </p>
+                 {searchQuery && (
+                    <button 
+                       onClick={() => setSearchQuery("")}
+                       className="mt-6 px-4 py-2 bg-white border border-zinc-300 rounded-lg text-sm font-medium text-zinc-600 shadow-sm hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                    >
+                       Clear search filters
+                    </button>
+                 )}
+              </div>
             )}
           </div>
 
-          {/* Mobile Card View */}
-          <div className="md:hidden space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 min-h-[50vh]">
+          {/* Mobile Card View - Premium Light */}
+          <div className="md:hidden space-y-3 pb-20 bg-slate-50 p-3"> 
             {loading ? (
-              <div className="flex items-center justify-center p-12">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-600 dark:border-t-amber-400" />
+              <div className="flex flex-col items-center justify-center p-12 gap-3">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+                <p className="text-xs text-zinc-400">Loading...</p>
               </div>
             ) : filteredTransactions.length === 0 ? (
-              <p className="py-12 text-center text-sm text-zinc-600 dark:text-zinc-400">
-                {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No transactions found'}
-              </p>
+               <div className="py-20 text-center">
+                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white border border-zinc-200 mb-4 shadow-sm">
+                    <ClipboardIcon className="h-8 w-8 text-zinc-300" />
+                 </div>
+                 <h3 className="text-lg font-bold text-zinc-900">No transactions</h3>
+                 <p className="text-xs text-zinc-500 mt-1">Try adjusting your filters</p>
+              </div>
             ) : (
               filteredTransactions.map((t) => {
                 const status = getStageStatus(t);
@@ -912,49 +1009,86 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 const nextStageLabel = STAGES.find(s => s.key === nextStageKey)?.label || 'Completed';
                 
                 return (
-                  <div key={t.transaction_id} className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
-                    <div className="p-4 space-y-3">
-                      {/* Top Row: Truck & Status */}
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <span className="inline-block rounded-md px-2 py-1 text-sm font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200">
+                  <div key={t.transaction_id} className="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden active:scale-[0.99] transition-transform duration-100 ring-1 ring-black/5">
+                    <div className="p-4">
+                      {/* Header: Truck & Status */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex flex-col">
+                          <span className="inline-flex items-center self-start rounded px-2 py-1 text-sm font-bold bg-zinc-100 text-zinc-800 border border-zinc-200 shadow-sm font-mono tracking-tight">
                             {t.truck_no}
                           </span>
-                          <p className="text-xs text-zinc-500 mt-1">{t.transaction_type} • {t.item_name}</p>
+                          <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-bold truncate max-w-[150px]">
+                            {t.transaction_type} • {t.item_name || 'N/A'}
+                          </span>
                         </div>
-                        <div className="text-right">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border shadow-sm ${
                             nextStageKey 
-                              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200' 
-                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           }`}>
-                            {nextStageKey ? 'In Progress' : 'Completed'}
+                            {nextStageKey ? 'Pending' : 'Done'}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 font-mono">
+                            #{t.transaction_id}
                           </span>
                         </div>
                       </div>
 
-                      {/* Middle Row: Party Info */}
-                      <div className="grid grid-cols-2 gap-2 text-sm">
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 bg-slate-50/80 rounded-lg p-3 border border-slate-100">
                         <div>
-                           <p className="text-xs text-zinc-500">Party</p>
-                           <p className="font-medium text-zinc-800 dark:text-zinc-200 truncate">{t.party_name}</p>
+                           <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Party</p>
+                           <p className="text-xs font-semibold text-zinc-800 truncate" title={t.party_name}>
+                             {t.party_name}
+                           </p>
                         </div>
                         <div>
-                           <p className="text-xs text-zinc-500">Current Stage</p>
-                           <p className="font-medium text-zinc-800 dark:text-zinc-200 truncate">{nextStageLabel}</p>
+                           <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Current Stage</p>
+                           <p className={`text-xs font-bold truncate ${
+                             nextStageKey ? 'text-blue-600' : 'text-emerald-600'
+                           }`}>
+                             {nextStageLabel}
+                           </p>
                         </div>
+                        {(userSteps.includes(STEPS.WEIGHBRIDGE) || isViewer) && (
+                          <>
+                            <div>
+                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Gross Wt</p>
+                               <p className="text-xs font-mono font-medium text-zinc-700">
+                                 {t.first_weight ? `${t.first_weight} kg` : '—'}
+                               </p>
+                            </div>
+                            <div>
+                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Tare Wt</p>
+                               <p className="text-xs font-mono font-medium text-zinc-700">
+                                 {t.second_weight ? `${t.second_weight} kg` : '—'}
+                               </p>
+                            </div>
+                          </>
+                        )}
                       </div>
 
-                      {/* Action Buttons Row */}
-                      <div className="pt-2 border-t border-zinc-100 dark:border-zinc-700/50 flex items-center gap-2 overflow-x-auto">
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-4 gap-2">
                         <button
                           onClick={() => setStageModal({ transaction: t, viewMode: 'full' })}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-medium"
+                          className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
                         >
-                          <ViewIcon className="h-3.5 w-3.5" /> View
+                          <ViewIcon className="h-4 w-4 mb-0.5" />
+                          <span className="text-[9px] font-bold">View</span>
                         </button>
+
+                         <button
+                           onClick={() => printGatePass(t)}
+                           className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
+                         >
+                           <PrinterIcon className="h-4 w-4 mb-0.5" />
+                           <span className="text-[9px] font-bold">Print</span>
+                         </button>
                         
-                        {/* Dynamic Confirm Action for Next Stage */}
+                        {/* Dynamic Confirm Action */}
+                        <div className="col-span-2">
                         {visibleStages.map(s => {
                            if (s.key !== nextStageKey) return null;
                            const canConfirm = canUserConfirmStage(s.key);
@@ -965,20 +1099,33 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                                <button
                                  key={s.key}
                                  onClick={() => setStageModal({ transaction: t, clickedStageKey: s.key })}
-                                 className="flex-[2] flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm"
+                                 className="w-full h-full flex flex-col items-center justify-center p-2 rounded-lg bg-blue-600 text-white shadow-sm active:bg-blue-700 transition-colors"
                                >
-                                 Confirm {s.shortLabel || s.label}
+                                 <TruckIcon className="h-4 w-4 mb-0.5" />
+                                 <span className="text-[9px] font-bold uppercase tracking-wide">
+                                   Confirm {s.shortLabel || s.label.split(' ')[0]}
+                                 </span>
                                </button>
                              );
+                           } else if (isWeighbridgeGateIn) {
+                              return (
+                                <div key={s.key} className="w-full h-full flex items-center justify-center rounded-lg bg-zinc-100 border border-zinc-200">
+                                   <span className="text-[10px] text-zinc-400 font-medium italic">Pending Gate Check...</span>
+                                </div>
+                              );
                            }
-                           return null;
+                           return null; 
                         })}
-
-                        {hasPermission(PERMISSIONS.ADD_WEIGHT_ENTRIES) && (nextStageKey === 'first_weighbridge' || nextStageKey === 'second_weighbridge') && (
-                           // Fallback if loop above doesn't catch it correctly or if we want specific weight button? 
-                           // actually loop above handles confirmation modal which includes weight input.
-                           null
+                        {/* If no pending action or completed, show Check */}
+                        {!nextStageKey && (
+                          <div className="w-full h-full flex items-center justify-center rounded-lg bg-emerald-50 border border-emerald-100">
+                              <span className="text-[10px] font-bold text-emerald-600 uppercase flex items-center gap-1">
+                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                Completed
+                              </span>
+                          </div>
                         )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1027,31 +1174,36 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
 
       {deleteConfirm && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
           onClick={() => setDeleteConfirm(null)}
         >
           <div
-            className="rounded-xl border-2 border-red-200 dark:border-red-800 bg-white dark:bg-zinc-900 p-6 shadow-2xl max-w-md"
+            className="rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-              Confirm Delete
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-              Are you sure you want to delete transaction {txnNo(deleteConfirm)}? This action cannot be undone.
+            <div className="flex items-center gap-3 mb-4 text-red-600">
+               <div className="p-2 bg-red-100 rounded-full border border-red-200 shadow-sm">
+                  <DeleteIcon className="h-6 w-6" />
+               </div>
+               <h3 className="text-lg font-bold text-zinc-900">
+                  Confirm Delete
+               </h3>
+            </div>
+            <p className="text-sm text-zinc-600 mb-6 leading-relaxed">
+              Are you sure you want to delete transaction <span className="font-mono font-bold text-zinc-800">{txnNo(deleteConfirm)}</span>? This action cannot be undone and will remove all associated data.
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                className="px-4 py-2 rounded-lg border border-zinc-300 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm.transaction_id)}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-sm font-medium text-white shadow-md"
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
               >
-                Delete
+                Delete Transaction
               </button>
             </div>
           </div>

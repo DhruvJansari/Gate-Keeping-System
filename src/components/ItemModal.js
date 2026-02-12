@@ -68,7 +68,7 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white shadow-xl">
         {/* Header */}
         <div className="rounded-t-xl bg-amber-600 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -101,7 +101,7 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Item Name */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="mb-1 block text-sm font-medium text-zinc-700">
               Item Name
             </label>
             <input
@@ -109,14 +109,14 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
               placeholder="Enter item name"
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="mb-1 block text-sm font-medium text-zinc-700">
               Description
             </label>
             <textarea
@@ -124,19 +124,19 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter item description"
               rows={3}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 resize-none"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 resize-none"
             />
           </div>
 
           {/* Status */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="mb-1 block text-sm font-medium text-zinc-700">
               Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -145,7 +145,7 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
 
           {/* Error */}
           {error && (
-            <p className="rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
             </p>
           )}
@@ -155,7 +155,7 @@ export function ItemModal({ open, onClose, onSuccess, item }) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
               Cancel
             </button>

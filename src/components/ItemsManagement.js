@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { PanelLayout } from "@/components/PanelLayout";
 import { ItemModal } from "@/components/ItemModal";
 import { ClipboardIcon } from "@/components/Icons";
-import { useTheme } from "@/context/ThemeContext";
+// import { useTheme } from "@/context/ThemeContext";
 
 function SearchIcon({ className }) {
   return (
@@ -63,7 +63,7 @@ function TrashIcon({ className }) {
 
 export function ItemsManagement() {
   const { user, hasPermission } = useAuth();
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
 
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
@@ -169,17 +169,11 @@ export function ItemsManagement() {
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
         <div
-          className={`rounded-t-xl px-6 py-5 ${
-            theme === "dark"
-              ? "bg-amber-700 text-white"
-              : "bg-amber-600 text-white"
-          }`}
+          className="rounded-t-xl px-6 py-5 bg-amber-600 text-white"
         >
           <h2 className="text-xl font-semibold">Items Management</h2>
           <p
-            className={`text-sm ${
-              theme === "dark" ? "text-amber-200" : "text-amber-100"
-            }`}
+            className="text-sm text-amber-100"
           >
             Manage all items in your system.
           </p>
@@ -190,11 +184,7 @@ export function ItemsManagement() {
           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
-              className={`w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-                theme === "dark"
-                  ? "bg-amber-700 hover:bg-amber-800"
-                  : "bg-amber-600 hover:bg-amber-700"
-              }`}
+              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
             >
               + Add New Item
             </button>
@@ -205,41 +195,27 @@ export function ItemsManagement() {
 
           <div className="relative">
             <SearchIcon
-              className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-                theme === "dark" ? "text-zinc-500" : "text-zinc-400"
-              }`}
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search items..."
-              className={`w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                theme === "dark"
-                  ? "border-zinc-600 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500"
-                  : "border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
-              } sm:w-64`}
+              className="w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 sm:w-64"
             />
           </div>
         </div>
 
         {/* Table */}
         <div
-          className={`overflow-hidden rounded-xl border shadow-sm ${
-            theme === "dark"
-              ? "border-zinc-700 bg-zinc-800"
-              : "border-zinc-200 bg-white"
-          }`}
+          className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white"
         >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr
-                  className={`text-left text-sm ${
-                    theme === "dark"
-                      ? "bg-zinc-900 text-white"
-                      : "bg-zinc-800 text-white"
-                  }`}
+                  className="text-left text-sm bg-zinc-800 text-white"
                 >
                   <th className="px-4 py-3">#</th>
                   <th className="px-4 py-3">NAME</th>
@@ -254,11 +230,7 @@ export function ItemsManagement() {
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center">
                       <div
-                        className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 ${
-                          theme === "dark"
-                            ? "border-zinc-600 border-t-zinc-400"
-                            : "border-zinc-300 border-t-zinc-700"
-                        }`}
+                        className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700"
                       />
                     </td>
                   </tr>
@@ -268,30 +240,20 @@ export function ItemsManagement() {
                   items.map((item, idx) => (
                     <tr
                       key={item.item_id}
-                      className={`border-b hover:transition-colors ${
-                        theme === "dark"
-                          ? "border-zinc-700 hover:bg-zinc-700/50"
-                          : "border-zinc-100 hover:bg-zinc-50"
-                      }`}
+                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
                     >
                       <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
+                        className="px-4 py-3 text-sm text-zinc-600"
                       >
                         {idx + 1}
                       </td>
 
                       <td className="px-4 py-3 flex items-center gap-2">
                         <ClipboardIcon
-                          className={`h-4 w-4 ${
-                            theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                          }`}
+                          className="h-4 w-4 text-zinc-500"
                         />
                         <span
-                          className={
-                            theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                          }
+                          className="text-zinc-900"
                         >
                           {item.item_name}
                         </span>
@@ -301,11 +263,7 @@ export function ItemsManagement() {
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-medium ${
                             item.status === "Active"
-                              ? theme === "dark"
-                                ? "bg-emerald-900/50 text-emerald-400"
-                                : "bg-emerald-100 text-emerald-700"
-                              : theme === "dark"
-                              ? "bg-zinc-700 text-zinc-400"
+                              ? "bg-emerald-100 text-emerald-700"
                               : "bg-zinc-100 text-zinc-600"
                           }`}
                         >
@@ -314,9 +272,7 @@ export function ItemsManagement() {
                       </td>
 
                       <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
+                        className="px-4 py-3 text-sm text-zinc-600"
                       >
                         {formatDate(item.created_at)}
                       </td>
@@ -325,11 +281,7 @@ export function ItemsManagement() {
                         {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
                           <button
                             onClick={() => handleEdit(item)}
-                            className={`rounded p-1.5 transition-colors ${
-                              theme === "dark"
-                                ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
-                                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                            }`}
+                            className="rounded p-1.5 transition-colors bg-blue-100 text-blue-600 hover:bg-blue-200"
                           >
                             <EditIcon className="h-4 w-4" />
                           </button>
@@ -339,11 +291,7 @@ export function ItemsManagement() {
                           <button
                             onClick={() => handleDelete(item)}
                             disabled={deletingId === item.item_id}
-                            className={`rounded p-1.5 transition-colors disabled:opacity-50 ${
-                              theme === "dark"
-                                ? "bg-red-900/50 text-red-400 hover:bg-red-900"
-                                : "bg-red-100 text-red-600 hover:bg-red-200"
-                            }`}
+                            className="rounded p-1.5 transition-colors disabled:opacity-50 bg-red-100 text-red-600 hover:bg-red-200"
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
@@ -357,11 +305,7 @@ export function ItemsManagement() {
 
           {!loading && items.length > 0 && (
             <div
-              className={`border-t px-4 py-2 text-sm ${
-                theme === "dark"
-                  ? "border-zinc-700 text-zinc-400"
-                  : "border-zinc-200 text-zinc-500"
-              }`}
+              className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500"
             >
               Showing {items.length} items
             </div>
@@ -369,9 +313,7 @@ export function ItemsManagement() {
 
           {!loading && items.length === 0 && !error && (
             <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-              }`}
+              className="py-12 text-center text-sm text-zinc-500"
             >
               No items found
             </p>
@@ -379,9 +321,7 @@ export function ItemsManagement() {
 
           {error && (
             <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-red-400" : "text-red-600"
-              }`}
+              className="py-12 text-center text-sm text-red-600"
             >
               {error}
             </p>

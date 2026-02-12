@@ -8,22 +8,27 @@
   --color-card-bg: var(--card-bg);
   
   /* Zinc color palette for consistency */
-  --color-zinc-50: #fafafa;
-  --color-zinc-100: #f4f4f5;
-  --color-zinc-200: #e4e4e7;
-  --color-zinc-300: #d4d4d8;
-  --color-zinc-400: #a1a1aa;
-  --color-zinc-500: #71717a;
-  --color-zinc-600: #52525b;
-  --color-zinc-700: #3f3f46;
-  --color-zinc-800: #27272a;
-  --color-zinc-900: #18181b;
-  --color-zinc-950: #09090b;
+  --color-zinc-50: #f9fafb;
+  --color-zinc-100: #f3f4f6; /* Cool Slate-like Zinc */
+  --color-zinc-200: #e5e7eb;
+  --color-zinc-300: #d1d5db;
+  --color-zinc-400: #9ca3af;
+  --color-zinc-500: #6b7280;
+  --color-zinc-600: #4b5563;
+  --color-zinc-700: #374151;
+  --color-zinc-800: #1f2937;
+  --color-zinc-900: #111827;
+  --color-zinc-950: #030712;
   
   /* Custom theme colors */
+  --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
   --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
   --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
   --color-blue-900: #1e3a8a;
   
   --color-amber-100: #fef3c7;
@@ -31,6 +36,7 @@
   --color-amber-600: #d97706;
   --color-amber-900: #78350f;
   
+  --color-emerald-50: #ecfdf5;
   --color-emerald-100: #d1fae5;
   --color-emerald-400: #34d399;
   --color-emerald-600: #059669;
@@ -47,20 +53,25 @@
 }
 
 :root {
-  /* Light theme - WHITE background */
-  --background: #ffffff;
-  --foreground: #18181b;
+  /* Premium Light Theme - Tally Prime Style */
+  /* Backgrounds */
+  --background: #f8fafc; /* Slate-50 - Main app background */
+  --foreground: #0f172a; /* Slate-900 - Primary text */
+  
+  /* Cards & Panels */
   --card-bg: #ffffff;
-  --card-border: #e4e4e7;
+  --card-border: #e2e8f0; /* Slate-200 */
+  
+  /* Primary Accents - Calm Professional Blue */
+  --primary: #2563eb;    /* Blue-600 */
+  --primary-fg: #ffffff;
+  
+  /* UI Elements */
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1; /* Slate-300 */
 }
 
-.dark {
-  /* Dark theme */
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card-bg: #18181b;
-  --card-border: #27272a;
-}
+/* Removed .dark block - Enforcing light theme */
 
 body {
   background: var(--background);

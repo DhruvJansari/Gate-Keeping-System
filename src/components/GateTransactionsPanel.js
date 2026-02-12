@@ -14,8 +14,8 @@ function StageBadge({ completed }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
         completed
-          ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400'
-          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+          ? 'bg-emerald-100 text-emerald-700'
+          : 'bg-zinc-100 text-zinc-500'
       }`}
     >
       {completed ? (
@@ -112,19 +112,19 @@ export function GateTransactionsPanel() {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
             />
-            <span className="text-zinc-500 dark:text-zinc-400">to</span>
+            <span className="text-zinc-500">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
             />
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
             >
               <option value="all">All Types</option>
               <option value="Loading">Loading</option>
@@ -150,21 +150,21 @@ export function GateTransactionsPanel() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             {loading ? (
               <div className="flex items-center justify-center p-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-700 dark:border-t-zinc-300" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700" />
               </div>
             ) : error ? (
-              <div className="p-12 text-center text-red-600 dark:text-red-400">
+              <div className="p-12 text-center text-red-600">
                 <p className="font-medium">Error loading data</p>
                 <p className="text-sm mt-1">{error}</p>
               </div>
             ) : (
               <table className="w-full min-w-[1000px]">
                 <thead>
-                  <tr className="bg-zinc-800 dark:bg-zinc-950 text-left text-sm text-white">
+                  <tr className="bg-zinc-800 text-left text-sm text-white">
                     <th className="px-4 py-3 font-medium">STAGES</th>
                     <th className="px-4 py-3 font-medium">TXN NO</th>
                     <th className="px-4 py-3 font-medium">TRUCK NO</th>
@@ -181,23 +181,23 @@ export function GateTransactionsPanel() {
                     return (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                        className="border-b border-zinc-100 hover:bg-zinc-50"
                       >
                         <td className="px-4 py-3">
                           <button
                             onClick={() => setDetailTxn(t)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-teal-100 dark:bg-teal-900/50 px-3 py-1.5 text-sm font-medium text-teal-800 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-900"
+                            className="inline-flex items-center gap-2 rounded-lg bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-800 hover:bg-teal-200"
                           >
                             <EyeIcon className="h-4 w-4" /> View
                           </button>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-medium text-amber-800 dark:text-amber-400">
+                          <span className="font-medium text-amber-800">
                             {txnNo(t)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                          <span className="font-medium text-emerald-700">
                             {t.truck_no}
                           </span>
                         </td>
@@ -213,7 +213,7 @@ export function GateTransactionsPanel() {
               </table>
             )}
             {!loading && transactions.length === 0 && (
-              <p className="py-12 text-center text-sm text-zinc-500 dark:text-zinc-400">No transactions found</p>
+              <p className="py-12 text-center text-sm text-zinc-500">No transactions found</p>
             )}
           </div>
         </div>

@@ -9,20 +9,18 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-  /* Force Dark Mode */
-  const [theme] = useState("dark"); // Always dark
+  /* Force Light Mode - Tally Prime Style */
+  const [theme] = useState("light"); // Always light
   
   useEffect(() => {
-    // Always enforce dark mode
-    document.documentElement.classList.add("dark");
-    // Optional: remove if you really want to clean up, but adding is enough
-    document.documentElement.style.colorScheme = "dark";
-    localStorage.setItem("gks-theme", "dark");
+    // Always enforce light mode by removing 'dark' class
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+    localStorage.setItem("gks-theme", "light");
   }, []);
 
   const toggleTheme = () => {
-    // No-op or notification
-    console.log("Theme is locked to dark mode");
+    console.log("Theme is locked to light mode (Tally Prime Style)");
   };
 
   const setTheme = () => {}; // No-op

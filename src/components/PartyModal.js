@@ -174,7 +174,7 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white shadow-xl">
         <div className="rounded-t-xl bg-amber-600 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Party Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -210,27 +210,27 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
                 onChange={(e) => handleFieldChange("party_name", e.target.value, setPartyName)}
                 onBlur={() => handleFieldBlur("party_name", partyName)}
                 placeholder="Enter party name"
-                className={`w-full rounded-lg border ${fieldErrors.party_name ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
+                className={`w-full rounded-lg border ${fieldErrors.party_name ? 'border-red-500' : 'border-zinc-300'} bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
                 required
               />
               {fieldErrors.party_name && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.party_name}
                 </p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Address</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Address</label>
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Enter full address..."
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 rows={3}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">GST No</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">GST No</label>
               <input
                 type="text"
                 value={gstNo}
@@ -238,16 +238,16 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
                 onBlur={() => handleFieldBlur("gst_no", gstNo)}
                 placeholder="22AAAAA0000A1Z5"
                 maxLength={15}
-                className={`w-full rounded-lg border ${fieldErrors.gst_no ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
+                className={`w-full rounded-lg border ${fieldErrors.gst_no ? 'border-red-500' : 'border-zinc-300'} bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
               />
               {fieldErrors.gst_no && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.gst_no}
                 </p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">PAN No</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">PAN No</label>
               <input
                 type="text"
                 value={panNo}
@@ -255,53 +255,53 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
                 onBlur={() => handleFieldBlur("pan_no", panNo)}
                 placeholder="ABCDE1234F"
                 maxLength={10}
-                className={`w-full rounded-lg border ${fieldErrors.pan_no ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
+                className={`w-full rounded-lg border ${fieldErrors.pan_no ? 'border-red-500' : 'border-zinc-300'} bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
               />
               {fieldErrors.pan_no && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.pan_no}
                 </p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Mobile Number</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Mobile Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
                 onBlur={() => handleFieldBlur("phone", phone)}
                 placeholder="9876543210"
-                className={`w-full rounded-lg border ${fieldErrors.phone ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
+                className={`w-full rounded-lg border ${fieldErrors.phone ? 'border-red-500' : 'border-zinc-300'} bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
               />
               {fieldErrors.phone && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.phone}
                 </p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Email Address</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
                 onBlur={() => handleFieldBlur("email", email)}
                 placeholder="email@example.com"
-                className={`w-full rounded-lg border ${fieldErrors.email ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
+                className={`w-full rounded-lg border ${fieldErrors.email ? 'border-red-500' : 'border-zinc-300'} bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500`}
               />
               {fieldErrors.email && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.email}
                 </p>
               )}
             </div>
             {isEdit && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Status</label>
+                <label className="mb-1 block text-sm font-medium text-zinc-700">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -311,14 +311,14 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
           </div>
 
           {error && (
-            <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
           )}
 
           <div className="mt-6 flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
             >
               Cancel
             </button>

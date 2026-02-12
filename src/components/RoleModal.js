@@ -73,7 +73,7 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl">
         <div className="rounded-t-xl bg-amber-600 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -103,24 +103,24 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter role name"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Description</label>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Description</label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Short description"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Permission</label>
-                <label className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <label className="text-sm font-medium text-zinc-700">Permission</label>
+                <label className="flex items-center gap-2 text-xs text-zinc-500">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -129,31 +129,31 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
                   Select all
                 </label>
               </div>
-              <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-3">
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 bg-white p-3">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {permList.map((p) => (
                     <label
                       key={p.permission_id}
-                      className="flex cursor-pointer items-center gap-2 rounded border border-zinc-100 dark:border-zinc-700 px-3 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-700"
+                      className="flex cursor-pointer items-center gap-2 rounded border border-zinc-100 px-3 py-2 hover:bg-zinc-50"
                     >
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(p.permission_id)}
                         onChange={() => togglePermission(p.permission_id)}
                       />
-                      <span className="text-sm text-zinc-900 dark:text-zinc-100">{p.code}</span>
+                      <span className="text-sm text-zinc-900">{p.code}</span>
                     </label>
                   ))}
                 </div>
                 {permList.length === 0 && (
-                  <p className="py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">No permissions defined. Create permissions first.</p>
+                  <p className="py-4 text-center text-sm text-zinc-500">No permissions defined. Create permissions first.</p>
                 )}
               </div>
             </div>
           </div>
-          {error && <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
           <div className="mt-6 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800">
+            <button type="button" onClick={onClose} className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">
               Cancel
             </button>
             <button type="submit" disabled={loading} className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-60">

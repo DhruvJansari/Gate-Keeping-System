@@ -502,8 +502,8 @@ export function StageTruckIcon({ completed, className = "" }) {
     <span
       className={`inline-flex h-8 w-8 items-center justify-center rounded ${
         completed
-          ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400"
-          : "bg-zinc-200 text-zinc-400 dark:bg-zinc-700 dark:text-zinc-500"
+          ? "bg-emerald-100 text-emerald-600"
+          : "bg-zinc-200 text-zinc-400"
       } ${className}`}
       title={completed ? "Completed" : "Pending"}
     >

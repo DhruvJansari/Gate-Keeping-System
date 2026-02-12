@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
+// import { useTheme } from "@/context/ThemeContext";
 import { getPanelPathForRole } from "@/lib/roleConfig";
 import { SunIcon, MoonIcon } from "@/components/Icons";
 
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { login, user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  // const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -41,23 +41,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-100 dark:bg-zinc-950 p-4">
-      {/* Theme toggle in corner */}
-      <button
-        onClick={toggleTheme}
-        className="absolute top-4 right-4 rounded-lg p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-        aria-label={
-          theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-        }
-      >
-        {theme === "dark" ? (
-          <SunIcon className="h-5 w-5" />
-        ) : (
-          <MoonIcon className="h-5 w-5" />
-        )}
-      </button>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
 
-      <div className="w-full max-w-md rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 shadow-xl relative z-10">
         <div className="mb-6 flex justify-center">
           <img 
             src="/logo.png" 
@@ -65,18 +54,18 @@ export default function LoginPage() {
             className="h-20 w-auto object-contain" 
           />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
+        <h1 className="mb-2 text-2xl font-bold text-slate-900 text-center">
           Gate Keeping System
         </h1>
-        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-          Sign in with username or email
+        <p className="mb-8 text-sm text-slate-500 text-center">
+          Sign in to your account
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="identifier"
-              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-1.5 block text-sm font-semibold text-slate-700"
             >
               Username or Email
             </label>
@@ -85,8 +74,8 @@ export default function LoginPage() {
               type="text"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="admin or admin@gatekeeping.local"
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2.5 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              placeholder="Enter your username"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
               required
               autoComplete="username"
             />
@@ -95,7 +84,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-1.5 block text-sm font-semibold text-slate-700"
             >
               Password
             </label>
@@ -104,22 +93,22 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2.5 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
               required
               autoComplete="current-password"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600 border border-red-100">
               {error}
-            </p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-white transition hover:bg-amber-700 disabled:opacity-60"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-bold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg shadow-blue-500/20"
           >
             {submitting ? "Signing in..." : "Sign in"}
           </button>

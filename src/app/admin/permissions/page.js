@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { PanelLayout } from "@/components/PanelLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PermissionModal } from "@/components/PermissionModal";
-import { useTheme } from "@/context/ThemeContext";
 import { EyeIcon, EditIcon, DeleteIcon } from "@/components/Icons";
 
 // Icons for consistent dark mode
@@ -45,7 +44,6 @@ function KeyIcon({ className }) {
 }
 
 function PermissionsManagement() {
-  const { theme } = useTheme(); // Get theme
   const [permissions, setPermissions] = useState([]);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -138,19 +136,9 @@ function PermissionsManagement() {
     <PanelLayout title="Permissions Management" roleName="Admin">
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
-        <div
-          className={`rounded-t-xl px-6 py-5 ${
-            theme === "dark"
-              ? "bg-amber-700 text-white"
-              : "bg-amber-600 text-white"
-          }`}
-        >
+        <div className="rounded-t-xl px-6 py-5 bg-amber-600 text-white">
           <h2 className="text-xl font-semibold">Permissions Management</h2>
-          <p
-            className={`text-sm ${
-              theme === "dark" ? "text-amber-200" : "text-amber-100"
-            }`}
-          >
+          <p className="text-sm text-amber-100">
             Manage system permissions and access controls
           </p>
         </div>
@@ -159,53 +147,29 @@ function PermissionsManagement() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             onClick={handleAdd}
-            className={`flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-              theme === "dark"
-                ? "bg-amber-700 hover:bg-amber-800"
-                : "bg-amber-600 hover:bg-amber-700"
-            }`}
+            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
           >
             <KeyIcon className="h-4 w-4" />
             Create New Permission
           </button>
           <div className="relative">
-            <SearchIcon
-              className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-                theme === "dark" ? "text-zinc-500" : "text-zinc-400"
-              }`}
-            />
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search permissions..."
-              className={`w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                theme === "dark"
-                  ? "border-zinc-600 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500"
-                  : "border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400"
-              } sm:w-56`}
+              className="w-full rounded-lg border py-2 pl-9 pr-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 sm:w-56"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div
-          className={`overflow-hidden rounded-xl border shadow-sm ${
-            theme === "dark"
-              ? "border-zinc-700 bg-zinc-800"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
+        <div className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px]">
               <thead>
-                <tr
-                  className={`text-left text-sm ${
-                    theme === "dark"
-                      ? "bg-zinc-900 text-white"
-                      : "bg-zinc-800 text-white"
-                  }`}
-                >
+                <tr className="text-left text-sm bg-zinc-800 text-white">
                   <th className="px-4 py-3">#</th>
                   <th className="px-4 py-3">PERMISSION DETAILS</th>
                   <th className="px-4 py-3">ACTIONS</th>
@@ -215,13 +179,7 @@ function PermissionsManagement() {
                 {loading && (
                   <tr>
                     <td colSpan={3} className="px-4 py-12 text-center">
-                      <div
-                        className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 ${
-                          theme === "dark"
-                            ? "border-zinc-600 border-t-zinc-400"
-                            : "border-zinc-300 border-t-zinc-700"
-                        }`}
-                      />
+                      <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700" />
                     </td>
                   </tr>
                 )}
@@ -229,56 +187,24 @@ function PermissionsManagement() {
                   permissions.map((p, idx) => (
                     <tr
                       key={p.permission_id}
-                      className={`border-b hover:transition-colors ${
-                        theme === "dark"
-                          ? "border-zinc-700 hover:bg-zinc-700/50"
-                          : "border-zinc-100 hover:bg-zinc-50"
-                      }`}
+                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
                     >
-                      <td
-                        className={`px-4 py-3 text-sm ${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                        }`}
-                      >
+                      <td className="px-4 py-3 text-sm text-zinc-600">
                         {idx + 1}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                              theme === "dark"
-                                ? "bg-amber-900/50 text-amber-400"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
                             <KeyIcon className="h-5 w-5" />
                           </div>
                           <div>
-                            <p
-                              className={`font-medium ${
-                                theme === "dark"
-                                  ? "text-zinc-100"
-                                  : "text-zinc-900"
-                              }`}
-                            >
+                            <p className="font-medium text-zinc-900">
                               {p.code}
                             </p>
-                            <p
-                              className={`text-xs ${
-                                theme === "dark"
-                                  ? "text-zinc-400"
-                                  : "text-zinc-500"
-                              }`}
-                            >
+                            <p className="text-xs text-zinc-500">
                               ID: {p.permission_id}
                             </p>
-                            <p
-                              className={`text-xs ${
-                                theme === "dark"
-                                  ? "text-zinc-400"
-                                  : "text-zinc-500"
-                              }`}
-                            >
+                            <p className="text-xs text-zinc-500">
                               Created {formatDate(p.created_at)}
                             </p>
                           </div>
@@ -288,22 +214,14 @@ function PermissionsManagement() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(p)}
-                            className={`rounded p-2 transition-colors ${
-                              theme === "dark"
-                                ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
-                                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                            }`}
+                            className="rounded p-2 transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
                             title="View Details"
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleEdit(p)}
-                            className={`rounded p-2 transition-colors ${
-                              theme === "dark"
-                                ? "bg-amber-900/50 text-amber-400 hover:bg-amber-900"
-                                : "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                            }`}
+                            className="rounded p-2 transition-colors bg-amber-100 text-amber-700 hover:bg-amber-200"
                             title="Edit Permission"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -311,11 +229,7 @@ function PermissionsManagement() {
                           <button
                             onClick={() => handleDelete(p)}
                             disabled={deletingId === p.permission_id}
-                            className={`rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                              theme === "dark"
-                                ? "bg-red-900/50 text-red-400 hover:bg-red-900"
-                                : "bg-red-100 text-red-700 hover:bg-red-200"
-                            }`}
+                            className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
                             title="Delete Permission"
                           >
                             <DeleteIcon className="h-4 w-4" />
@@ -328,33 +242,17 @@ function PermissionsManagement() {
             </table>
           </div>
           {!loading && permissions.length > 0 && (
-            <div
-              className={`border-t px-4 py-2 text-sm ${
-                theme === "dark"
-                  ? "border-zinc-700 text-zinc-400"
-                  : "border-zinc-200 text-zinc-500"
-              }`}
-            >
+            <div className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500">
               Showing 1 to {permissions.length} of {permissions.length} entries
             </div>
           )}
           {!loading && permissions.length === 0 && !error && (
-            <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-              }`}
-            >
+            <p className="py-12 text-center text-sm text-zinc-500">
               No permissions found
             </p>
           )}
           {error && (
-            <p
-              className={`py-12 text-center text-sm ${
-                theme === "dark" ? "text-red-400" : "text-red-600"
-              }`}
-            >
-              {error}
-            </p>
+            <p className="py-12 text-center text-sm text-red-600">{error}</p>
           )}
         </div>
       </div>
@@ -376,28 +274,16 @@ function PermissionsManagement() {
           onClick={() => setViewingPermission(null)}
         >
           <div
-            className={`w-full max-w-md rounded-xl border p-6 shadow-xl ${
-              theme === "dark"
-                ? "border-zinc-700 bg-zinc-800"
-                : "border-zinc-200 bg-white"
-            }`}
+            className="w-full max-w-md rounded-xl border p-6 shadow-xl border-zinc-200 bg-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3
-                className={`text-lg font-semibold ${
-                  theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                }`}
-              >
+              <h3 className="text-lg font-semibold text-zinc-900">
                 Permission Details
               </h3>
               <button
                 onClick={() => setViewingPermission(null)}
-                className={`rounded p-2 transition-colors ${
-                  theme === "dark"
-                    ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-                }`}
+                className="rounded p-2 transition-colors text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                 aria-label="Close"
               >
                 ✕
@@ -405,66 +291,26 @@ function PermissionsManagement() {
             </div>
             <dl className="space-y-3 text-sm">
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Code
-                </dt>
-                <dd
-                  className={`font-medium ${
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }`}
-                >
+                <dt className="text-zinc-500">Code</dt>
+                <dd className="font-medium text-zinc-900">
                   {viewingPermission.code}
                 </dd>
               </div>
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Name
-                </dt>
-                <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
-                >
+                <dt className="text-zinc-500">Name</dt>
+                <dd className="text-zinc-900">
                   {viewingPermission.name}
                 </dd>
               </div>
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  ID
-                </dt>
-                <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
-                >
+                <dt className="text-zinc-500">ID</dt>
+                <dd className="text-zinc-900">
                   {viewingPermission.permission_id}
                 </dd>
               </div>
               <div>
-                <dt
-                  className={
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                  }
-                >
-                  Created
-                </dt>
-                <dd
-                  className={
-                    theme === "dark" ? "text-zinc-100" : "text-zinc-900"
-                  }
-                >
+                <dt className="text-zinc-500">Created</dt>
+                <dd className="text-zinc-900">
                   {formatDate(viewingPermission.created_at)}
                 </dd>
               </div>
@@ -472,11 +318,7 @@ function PermissionsManagement() {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setViewingPermission(null)}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  theme === "dark"
-                    ? "border-zinc-700 text-zinc-300 hover:bg-zinc-700"
-                    : "border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-                }`}
+                className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors border-zinc-300 text-zinc-700 hover:bg-zinc-50"
               >
                 Close
               </button>
@@ -485,11 +327,7 @@ function PermissionsManagement() {
                   setViewingPermission(null);
                   handleEdit(viewingPermission);
                 }}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-                  theme === "dark"
-                    ? "bg-amber-700 hover:bg-amber-800"
-                    : "bg-amber-600 hover:bg-amber-700"
-                }`}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
               >
                 Edit Permission
               </button>
