@@ -1,0 +1,255 @@
+'use client';
+
+import { STAGES, getStageStatus } from '@/lib/stageUtils';
+import { CloseIcon, CheckIcon, ClockIcon, PrinterIcon } from '@/components/Icons';
+
+function formatDate(d) {
+  return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+}
+
+function formatDateTime(d) {
+  return d ? new Date(d).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+}
+
+function StageItem({ label, timestamp, completed, approver }) {
+  return (
+    <div className="mb-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</span>
+        {completed ? (
+          <CheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+        ) : (
+          <ClockIcon className="h-4 w-4 text-zinc-400" />
+        )}
+      </div>
+      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+        Date&Time: {formatDateTime(timestamp)}
+      </div>
+      {approver && (
+        <div className="text-xs text-zinc-600 dark:text-zinc-500 italic">
+          By: {approver}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DataRow({ label, value }) {
+  return (
+    <div className="flex justify-between py-1 text-xs">
+      <span className="text-zinc-600 dark:text-zinc-400">{label}:</span>
+      <span className="font-medium text-zinc-900 dark:text-zinc-100">{value}</span>
+    </div>
+  );
+}
+
+export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
+  if (!transaction) return null;
+
+  const status = getStageStatus(transaction);
+  const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
+  
+  const remark1 = transaction.remark1 || '—';
+  const remark2 = transaction.remark2 || '—';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
+          <div>
+            <h3 className="text-lg font-semibold">Transaction Details</h3>
+            <p className="text-sm text-amber-100">Stage-wise progress view</p>
+          </div>
+          <button onClick={onClose} className="rounded p-2 hover:bg-amber-700 transition" aria-label="Close">
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Cards Container */}
+        <div className="overflow-y-auto p-4 md:p-6" style={{ maxHeight: 'calc(90vh - 130px)' }}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            
+            {/* Step-1 Card */}
+            <div className="rounded-xl border-2 border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 p-4 shadow-lg">
+              <div className="mb-3 border-b border-rose-200 dark:border-rose-800 pb-2">
+                <h4 className="text-sm font-bold text-rose-700 dark:text-rose-300">Step-1</h4>
+                <p className="text-xs text-rose-600 dark:text-rose-400">Parking • Gate In • Gate Out</p>
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                <StageItem 
+                  label="Parking" 
+                  timestamp={transaction.parking_confirmed_at || transaction.created_at}
+                  completed={status.parking}
+                  approver={transaction.parking_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Gate In" 
+                  timestamp={transaction.gate_in_at}
+                  completed={status.gate_in}
+                  approver={transaction.gate_in_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Gate Out" 
+                  timestamp={transaction.gate_out_at}
+                  completed={status.gate_out}
+                  approver={transaction.gate_out_confirmed_by_name}
+                />
+              </div>
+
+              <div className="border-t border-rose-200 dark:border-rose-800 pt-3 space-y-1">
+                <DataRow label="Number" value={txnNo} />
+                <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
+                <DataRow label="Truck Number" value={transaction.truck_no} />
+                <DataRow label="Party Name" value={transaction.party_name} />
+                <DataRow label="Invoice No" value={transaction.invoice_number} />
+                <DataRow label="Invoice Date" value={formatDate(transaction.invoice_date)} />
+                <DataRow label="Invoice Qty" value={`${transaction.invoice_quantity} units`} />
+                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
+                <DataRow label="Transporter" value={transaction.transporter_name} />
+                <DataRow label="Mobile No" value={transaction.mobile_number} />
+                <DataRow label="Remark - 1" value={remark1} />
+                <DataRow label="Remark - 2" value={remark2} />
+              </div>
+            </div>
+
+            {/* Step-2 Card */}
+            <div className="rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-4 shadow-lg">
+              <div className="mb-3 border-b border-purple-200 dark:border-purple-800 pb-2">
+                <h4 className="text-sm font-bold text-purple-700 dark:text-purple-300">Step-2</h4>
+                <p className="text-xs text-purple-600 dark:text-purple-400">WeighBridge • Gate Pass • Campus</p>
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                <StageItem 
+                  label="First WeighBridge" 
+                  timestamp={transaction.first_weigh_at}
+                  completed={status.first_weighbridge}
+                  approver={transaction.first_weigh_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Second WeighBridge" 
+                  timestamp={transaction.second_weigh_at}
+                  completed={status.second_weighbridge}
+                  approver={transaction.second_weigh_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Gate Pass" 
+                  timestamp={transaction.gate_pass_finalized_at}
+                  completed={status.gate_pass}
+                  approver={transaction.gate_pass_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Campus In" 
+                  timestamp={transaction.campus_in_at}
+                  completed={status.campus_in}
+                  approver={transaction.campus_in_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Campus Out" 
+                  timestamp={transaction.campus_out_at}
+                  completed={status.campus_out}
+                  approver={transaction.campus_out_confirmed_by_name}
+                />
+              </div>
+
+              <div className="border-t border-purple-200 dark:border-purple-800 pt-3 space-y-1">
+                <DataRow label="ID name" value={`TXN-${transaction.transaction_id}`} />
+                <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
+                <DataRow label="Transaction Number" value={txnNo} />
+                <DataRow label="Truck Number" value={transaction.truck_no} />
+                <DataRow label="Party Name" value={transaction.party_name} />
+                <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
+                <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
+                <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
+                <DataRow label="Remark - 1" value={remark1} />
+                <DataRow label="Remark - 2" value={remark2} />
+              </div>
+            </div>
+
+            {/* Step-3 Card */}
+            <div className="rounded-xl border-2 border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/20 p-4 shadow-lg">
+              <div className="mb-3 border-b border-pink-200 dark:border-pink-800 pb-2">
+                <h4 className="text-sm font-bold text-pink-700 dark:text-pink-300">Step-3</h4>
+                <p className="text-xs text-pink-600 dark:text-pink-400">Campus In • Campus Out</p>
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                <StageItem 
+                  label="Campus In" 
+                  timestamp={transaction.campus_in_at}
+                  completed={status.campus_in}
+                  approver={transaction.campus_in_confirmed_by_name}
+                />
+                <StageItem 
+                  label="Campus Out" 
+                  timestamp={transaction.campus_out_at}
+                  completed={status.campus_out}
+                  approver={transaction.campus_out_confirmed_by_name}
+                />
+              </div>
+
+              <div className="border-t border-pink-200 dark:border-pink-800 pt-3 space-y-1">
+                <DataRow label="Date&Time" value={formatDateTime(transaction.created_at)} />
+                <DataRow label="ID name" value={`TXN-${transaction.transaction_id}`} />
+                <DataRow label="Transaction Number" value={txnNo} />
+                <DataRow label="Truck Number" value={transaction.truck_no} />
+                <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
+                <DataRow label="Mobile No" value={transaction.mobile_number} />
+                <DataRow label="Remark - 1" value={remark1} />
+                <DataRow label="Remark - 2" value={remark2} />
+              </div>
+            </div>
+
+            {/* View Card */}
+            <div className="rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4 shadow-lg">
+              <div className="mb-3 border-b border-amber-200 dark:border-amber-800 pb-2">
+                <h4 className="text-sm font-bold text-amber-700 dark:text-amber-300">View</h4>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Transaction Summary</p>
+              </div>
+              
+              <div className="space-y-1">
+                <DataRow label="Number" value={txnNo} />
+                <DataRow label="Transaction" value={transaction.transaction_type} />
+                <DataRow label="Item Name" value={transaction.item_name || 'N/A'} />
+                <DataRow label="Truck Number" value={transaction.truck_no} />
+                <DataRow label="Party Name" value={transaction.party_name} />
+                <DataRow label="Invoice No" value={transaction.invoice_number} />
+                <DataRow label="Invoice Date" value={formatDate(transaction.invoice_date)} />
+                <DataRow label="Invoice Qty" value={`${transaction.invoice_quantity} units`} />
+                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
+                <DataRow label="Transporter" value={transaction.transporter_name} />
+                <DataRow label="Mobile No" value={transaction.mobile_number} />
+                <DataRow label="Remark - 1" value={remark1} />
+                <DataRow label="Remark - 2" value={remark2} />
+                <div className="border-t border-amber-200 dark:border-amber-800 my-2 pt-2">
+                  <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
+                  <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
+                  <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex justify-end gap-2 border-t border-zinc-200 dark:border-zinc-800 px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => onPrint?.(transaction)}
+            className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition"
+          >
+            <PrinterIcon className="h-4 w-4" /> Print
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
