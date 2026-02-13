@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { STAGES, getStageStatus, getNextStageToConfirm } from '@/lib/stageUtils';
+import { formatWeight } from '@/utils/formatters';
 import { CloseIcon } from '@/components/Icons';
 
 function formatDateTime(d) {
@@ -124,7 +125,7 @@ export function AdminStageDetailModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 transition-all">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-transparent/50 backdrop-blur-sm p-0 sm:p-4 transition-all">
       <div
         className={`w-full ${isFullView ? 'sm:max-w-5xl' : 'sm:max-w-lg'} h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden ring-1 ring-black/5`}
         onClick={(e) => e.stopPropagation()}
@@ -253,15 +254,15 @@ export function AdminStageDetailModal({
                     <div className="grid grid-cols-3 gap-2 text-center divide-x divide-zinc-700">
                        <div>
                           <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Gross</p>
-                          <p className="text-base font-mono font-bold text-white">{txn.first_weight || '—'}</p>
+                          <p className="text-base font-mono font-bold text-white">{formatWeight(txn.first_weight)} kg</p>
                        </div>
                        <div>
                           <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Tare</p>
-                          <p className="text-base font-mono font-bold text-white">{txn.second_weight || '—'}</p>
+                          <p className="text-base font-mono font-bold text-white">{formatWeight(txn.second_weight)} kg</p>
                        </div>
                        <div>
                           <p className="text-[9px] uppercase tracking-wider text-emerald-400 mb-0.5 font-bold">Net</p>
-                          <p className="text-base font-mono font-bold text-emerald-400">{txn.net_weight || '—'}</p>
+                          <p className="text-base font-mono font-bold text-emerald-400">{formatWeight(txn.net_weight)} kg</p>
                        </div>
                     </div>
                  </div>
@@ -453,15 +454,15 @@ export function AdminStageDetailModal({
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div className="bg-white p-2 rounded-lg border border-purple-100 shadow-sm">
                       <p className="text-xs text-purple-600 mb-1 uppercase tracking-wider font-bold">First</p>
-                      <p className="text-lg font-bold text-purple-900 font-mono">{txn.first_weight ?? '—'}</p>
+                      <p className="text-lg font-bold text-purple-900 font-mono">{formatWeight(txn.first_weight)}</p>
                     </div>
                     <div className="bg-white p-2 rounded-lg border border-purple-100 shadow-sm">
                       <p className="text-xs text-purple-600 mb-1 uppercase tracking-wider font-bold">Second</p>
-                      <p className="text-lg font-bold text-purple-900 font-mono">{txn.second_weight ?? '—'}</p>
+                      <p className="text-lg font-bold text-purple-900 font-mono">{formatWeight(txn.second_weight)}</p>
                     </div>
                     <div className="bg-emerald-100 p-2 rounded-lg border border-emerald-200 shadow-sm">
                       <p className="text-xs text-emerald-700 mb-1 uppercase tracking-wider font-bold">Net</p>
-                      <p className="text-lg font-bold text-emerald-800 font-mono">{txn.net_weight ?? '—'}</p>
+                      <p className="text-lg font-bold text-emerald-800 font-mono">{formatWeight(txn.net_weight)}</p>
                     </div>
                   </div>
                 </div>

@@ -21,10 +21,20 @@ export async function GET(request) {
 
     const db = await getDb();
     const { searchParams } = new URL(request.url);
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
+    let from = searchParams.get('from');
+    let to = searchParams.get('to');
     const type = searchParams.get('type');
     const item = searchParams.get('item');
+
+    // Role-based filtering logic
+    // Use roleName directly from token to avoid extra DB calls and potential errors if roleId is missing
+    const { roleId, userId, roleName } = user;
+    
+    // 2. Determine if restricted
+    const isWeighbridge = roleName === 'Weighbridge';
+    const isYard = roleName === 'Yard'; 
+    
+    const isRestricted = isWeighbridge || isYard;
 
     let sql = `SELECT t.transaction_id, t.transaction_type, t.invoice_number, t.invoice_date, t.invoice_quantity,
       t.po_do_number, t.lr_number, t.mobile_number, t.remark1, t.remark2, t.first_weight, t.second_weight, t.net_weight,
@@ -55,8 +65,16 @@ export async function GET(request) {
       WHERE 1=1`;
     const params = [];
 
-    if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
-    if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    if (isRestricted) {
+      // FORCE TODAY AND ACTIVE ONLY
+      sql += ' AND DATE(t.created_at) = CURDATE() AND t.closed_at IS NULL';
+    } else {
+      // Normal filtering for others
+      if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
+      if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    }
+
+    // Common filters
     if (type && type !== 'all') { sql += ' AND t.transaction_type = ?'; params.push(type); }
     if (item) { sql += ' AND i.item_name = ?'; params.push(item); }
 
@@ -66,7 +84,7 @@ export async function GET(request) {
     return NextResponse.json(rows);
   } catch (err) {
     console.error('Transactions fetch error:', err);
-    return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch transactions', details: err.message }, { status: 500 });
   }
 }
 

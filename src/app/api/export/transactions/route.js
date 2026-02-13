@@ -42,9 +42,9 @@ export async function GET(request) {
       'Status': r.current_status,
       'Remark 1': r.remark1 || '',
       'Remark 2': r.remark2 || '',
-      'First Weight': r.first_weight,
-      'Second Weight': r.second_weight,
-      'Net Weight': r.net_weight,
+      'First Weight': r.first_weight ? parseFloat(r.first_weight) : '',
+      'Second Weight': r.second_weight ? parseFloat(r.second_weight) : '',
+      'Net Weight': r.net_weight ? parseFloat(r.net_weight) : '',
       'Created': r.created_at,
     }));
 

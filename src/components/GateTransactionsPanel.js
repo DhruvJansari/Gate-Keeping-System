@@ -33,7 +33,7 @@ function StageBadge({ completed }) {
 
 export function GateTransactionsPanel() {
   const { user, hasPermission } = useAuth();
-  const { printGatePass } = useGatePassPrint();
+  const { printGatePass, printEntryPass } = useGatePassPrint();
   const [transactions, setTransactions] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -235,8 +235,12 @@ export function GateTransactionsPanel() {
             <GateTransactionDetailModal
               transaction={detailTxn}
               onClose={() => setDetailTxn(null)}
-              onPrint={(txn) => {
-                printGatePass(txn);
+              onPrint={(txn, type) => {
+                if (type === 'entry') {
+                  printEntryPass(txn);
+                } else {
+                  printGatePass(txn);
+                }
               }}
             />
           </div>

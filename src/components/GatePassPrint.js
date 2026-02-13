@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { STAGES, getStageStatus } from '@/lib/stageUtils';
+import { formatWeight } from '@/utils/formatters';
 
 export function getGatePassHtml(transaction, options = {}) {
   const { forPrint = false } = options;
@@ -141,9 +142,9 @@ export function getGatePassHtml(transaction, options = {}) {
     <div class="red-box">
       <div class="section-title">WEIGHBRIDGE INFORMATION</div>
       <div class="weights-row">
-        <div class="weight-box"><div>First Weight</div><div class="val">${transaction.first_weight ?? '—'}</div></div>
-        <div class="weight-box"><div>Second Weight</div><div class="val">${transaction.second_weight ?? '—'}</div></div>
-        <div class="weight-box"><div>Net Weight</div><div class="val">${transaction.net_weight ?? '—'}</div></div>
+        <div class="weight-box"><div>First Weight</div><div class="val">${formatWeight(transaction.first_weight)} kg</div></div>
+        <div class="weight-box"><div>Tare Weight</div><div class="val">${formatWeight(transaction.second_weight)} kg</div></div>
+        <div class="weight-box"><div>Net Weight</div><div class="val">${formatWeight(transaction.net_weight)} kg</div></div>
       </div>
     </div>
 
@@ -204,12 +205,100 @@ export function getGatePassHtml(transaction, options = {}) {
 </html>`;
 }
 
+export function getEntryPassHtml(transaction, options = {}) {
+  const { forPrint = false } = options;
+  const txnNo = transaction.gate_pass_no || `TRN-${transaction.transaction_id}`;
+  // Padding logic to match "00001" style if needed, or just use the ID
+  const displayId = String(transaction.gate_pass_no).padStart(5, '0');
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENTRY PASS - ${displayId}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Courier New', monospace; background: white; padding: 5px; }
+    .ticket {
+      width: 80mm; /* Standard thermal receipt width */
+      margin: 0 auto;
+      padding: 10px;
+      border: 2px dashed #000;
+      text-align: center;
+    }
+    .logo {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .divider {
+      border-bottom: 1px solid #000;
+      margin: 10px 0;
+    }
+    .txn-id {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .item-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px 0;
+      text-transform: uppercase;
+    }
+    .truck-no {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0;
+      text-transform: uppercase;
+    }
+    @media print {
+      body { padding: 0; }
+      .ticket { border: none; width: 100%; border: 2px dashed #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <img src="/logo.png" alt="VARPL" class="logo">
+    <div class="divider"></div>
+    
+    <div class="txn-id">${displayId}</div>
+    <div class="divider"></div>
+    
+    <div class="item-name">${transaction.item_name || 'N/A'}</div>
+    <div class="divider"></div>
+    
+    <div class="truck-no">${transaction.truck_no}</div>
+  </div>
+  ${forPrint ? `<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };</script>` : ''}
+</body>
+</html>`;
+}
+
 export function useGatePassPrint() {
   const printGatePass = useCallback((transaction) => {
     const html = getGatePassHtml(transaction, { forPrint: true });
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(html);
-    printWindow.document.close();
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+    }
+  }, []);
+
+  const printEntryPass = useCallback((transaction) => {
+    const html = getEntryPassHtml(transaction, { forPrint: true });
+    // Open a smaller window for the thermal print preview
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+    }
   }, []);
 
   const downloadGatePass = useCallback((transaction) => {
@@ -223,5 +312,5 @@ export function useGatePassPrint() {
     URL.revokeObjectURL(url);
   }, []);
 
-  return { printGatePass, downloadGatePass };
+  return { printGatePass, printEntryPass, downloadGatePass };
 }

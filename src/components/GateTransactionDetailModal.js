@@ -1,7 +1,8 @@
 'use client';
 
 import { STAGES, getStageStatus } from '@/lib/stageUtils';
-import { CloseIcon, CheckIcon, ClockIcon, PrinterIcon } from '@/components/Icons';
+import { formatWeight } from '@/utils/formatters';
+import { CloseIcon, PrinterIcon } from '@/components/Icons';
 
 function formatDate(d) {
   return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
@@ -243,10 +244,16 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             Close
           </button>
           <button
-            onClick={() => onPrint?.(transaction)}
+            onClick={() => onPrint?.(transaction, 'entry')}
+            className="flex items-center gap-2 rounded-lg bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition"
+          >
+            <PrinterIcon className="h-4 w-4" /> Entry Pass
+          </button>
+          <button
+            onClick={() => onPrint?.(transaction, 'gatepass')}
             className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition"
           >
-            <PrinterIcon className="h-4 w-4" /> Print
+            <PrinterIcon className="h-4 w-4" /> Gate Pass
           </button>
         </div>
       </div>

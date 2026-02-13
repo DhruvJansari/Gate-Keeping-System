@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PanelLayout } from '@/components/PanelLayout';
 import { useAuth } from '@/context/AuthContext';
+import { formatWeight } from '@/utils/formatters';
 
 export function ReportsPanel() {
   const { user } = useAuth();
@@ -139,9 +140,9 @@ export function ReportsPanel() {
         'PO/DO Number': t.po_do_number || '—',
         'LR Number': t.lr_number || '—',
         'Mobile': t.mobile_number || '—',
-        'First Weight': t.first_weight || '—',
-        'Second Weight': t.second_weight || '—',
-        'Net Weight': t.net_weight || '—',
+        'First Weight': t.first_weight ? parseFloat(t.first_weight) : '—',
+        'Second Weight': t.second_weight ? parseFloat(t.second_weight) : '—',
+        'Net Weight': t.net_weight ? parseFloat(t.net_weight) : '—',
         'Status': t.current_status || 'In Progress',
         'Remark 1': t.remark1 || '',
         'Remark 2': t.remark2 || '',
@@ -386,9 +387,9 @@ export function ReportsPanel() {
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.truck_no}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.invoice_number || '—'}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{formatDate(t.invoice_date)}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700">{t.first_weight || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-700">{t.second_weight || '—'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{t.net_weight || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{formatWeight(t.first_weight)}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{formatWeight(t.second_weight)}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{formatWeight(t.net_weight)}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.current_status || 'In Progress'}</td>
                       </tr>
                     ))}

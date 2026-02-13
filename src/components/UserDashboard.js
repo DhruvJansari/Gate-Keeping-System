@@ -27,6 +27,7 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 
 // Edit Transaction Modal Component
 // Edit Transaction Modal Component - Premium Light Theme
+// Edit Transaction Modal Component - Premium styling
 function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const toast = useToast();
   const { values, errors, touched, handleChange, handleBlur, validateAll } = useFormValidation(
@@ -92,212 +93,216 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/50 backdrop-blur-sm p-4 transition-all" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl"
+        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl ring-1 ring-black/5 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-100 bg-white/80 backdrop-blur-md px-6 py-4">
           <div>
-            <h3 className="text-lg font-bold text-zinc-900">Edit Transaction</h3>
-            <p className="text-sm text-zinc-500 font-medium">
-              {txnNo} • <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs ml-2 border border-blue-200 font-semibold">{transaction.transaction_type}</span>
+            <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-blue-100 text-blue-600">
+                <EditIcon className="h-5 w-5" />
+              </span>
+              Edit Transaction
+            </h3>
+            <p className="text-sm text-zinc-500 font-medium ml-10 mt-1">
+              {txnNo} • <span className="bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded text-xs border border-zinc-200 font-semibold">{transaction.transaction_type}</span>
             </p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 hover:bg-zinc-200 text-zinc-500 transition-colors" aria-label="Close">
-            <CloseIcon className="h-5 w-5" />
+          <button 
+            onClick={onClose} 
+            className="rounded-full p-2 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors" 
+            aria-label="Close"
+          >
+            <CloseIcon className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          {/* Read-only Transaction Info */}
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-blue-100 p-3 bg-blue-50/50">
-              <p className="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wider">Truck Number</p>
-              <p className="text-sm font-bold text-blue-900">{transaction.truck_no}</p>
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Read-only Context */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Truck Number</p>
+              <p className="text-sm font-bold text-zinc-900 font-mono">{transaction.truck_no}</p>
             </div>
-            <div className="rounded-lg border border-emerald-100 p-3 bg-emerald-50/50">
-              <p className="text-xs font-bold text-emerald-600 mb-1 uppercase tracking-wider">Party Name</p>
-              <p className="text-sm font-bold text-emerald-900">{transaction.party_name}</p>
+            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Party Name</p>
+              <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.party_name}>{transaction.party_name}</p>
             </div>
-            <div className="rounded-lg border border-purple-100 p-3 bg-purple-50/50">
-              <p className="text-xs font-bold text-purple-600 mb-1 uppercase tracking-wider">Item Name</p>
-              <p className="text-sm font-bold text-purple-900">{transaction.item_name}</p>
+            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Item Name</p>
+              <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.item_name}>{transaction.item_name}</p>
             </div>
           </div>
 
-          {/* Editable Fields */}
-          <div className="space-y-6">
-            {/* Invoice Section */}
-            <div>
-              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
-                <div className="p-1 rounded bg-blue-100 text-blue-600">
-                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                   </svg>
-                </div>
-                Invoice Details
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    Invoice Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={values.invoice_number}
-                    onChange={(e) => handleChange('invoice_number', e.target.value)}
-                    onBlur={() => handleBlur('invoice_number')}
-                    className={`w-full rounded-lg border ${
-                      errors.invoice_number && touched.invoice_number
-                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
-                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
-                  />
-                  {errors.invoice_number && touched.invoice_number && (
-                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_number}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    Invoice Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={values.invoice_date}
-                    onChange={(e) => handleChange('invoice_date', e.target.value)}
-                    onBlur={() => handleBlur('invoice_date')}
-                    className={`w-full rounded-lg border ${
-                      errors.invoice_date && touched.invoice_date
-                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
-                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
-                  />
-                  {errors.invoice_date && touched.invoice_date && (
-                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_date}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    Quantity <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={values.invoice_quantity}
-                    onChange={(e) => handleChange('invoice_quantity', e.target.value)}
-                    onBlur={() => handleBlur('invoice_quantity')}
-                    className={`w-full rounded-lg border ${
-                      errors.invoice_quantity && touched.invoice_quantity
-                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
-                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
-                  />
-                  {errors.invoice_quantity && touched.invoice_quantity && (
-                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.invoice_quantity}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    PO/DO Number
-                  </label>
-                  <input
-                    type="text"
-                    value={values.po_do_number}
-                    onChange={(e) => handleChange('po_do_number', e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Info Section */}
-            <div>
-              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
-                <div className="p-1 rounded bg-blue-100 text-blue-600">
-                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                   </svg>
-                </div>
-                Additional Information
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    LR Number
-                  </label>
-                  <input
-                    type="text"
-                    value={values.lr_number}
-                    onChange={(e) => handleChange('lr_number', e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={values.mobile_number}
-                    onChange={(e) => handleChange('mobile_number', e.target.value)}
-                    onBlur={() => handleBlur('mobile_number')}
-                    className={`w-full rounded-lg border ${
-                      errors.mobile_number && touched.mobile_number
-                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                        : 'border-zinc-300 bg-white focus:border-blue-500 focus:ring-blue-100'
-                    } px-3 py-2 text-sm text-zinc-900 outline-none transition-all shadow-sm focus:ring-4`}
-                  />
-                  {errors.mobile_number && touched.mobile_number && (
-                    <p className="text-xs text-red-600 mt-1 font-medium">{errors.mobile_number}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Remarks Section */}
-            <div>
-              <h4 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
-                <div className="p-1 rounded bg-blue-100 text-blue-600">
-                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                   </svg>
-                </div>
-                Remarks
-              </h4>
-              <div>
-                <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                  Entry Remarks
+          {/* Invoice Details Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Invoice Details
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Invoice Number <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  value={values.remark1}
-                  onChange={(e) => handleChange('remark1', e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
-                  placeholder="Enter any remarks for this transaction..."
+                <input
+                  type="text"
+                  value={values.invoice_number}
+                  onChange={(e) => handleChange('invoice_number', e.target.value)}
+                  onBlur={() => handleBlur('invoice_number')}
+                  className={`w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all ${
+                    errors.invoice_number && touched.invoice_number
+                      ? 'border-red-100 bg-red-50 text-red-900 focus:border-red-500'
+                      : 'border-zinc-100 bg-zinc-50 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
+                  }`}
+                  placeholder="Enter invoice number"
+                />
+                {errors.invoice_number && touched.invoice_number && (
+                  <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_number}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Invoice Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={values.invoice_date}
+                  onChange={(e) => handleChange('invoice_date', e.target.value)}
+                  onBlur={() => handleBlur('invoice_date')}
+                  className={`w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all ${
+                    errors.invoice_date && touched.invoice_date
+                       ? 'border-red-100 bg-red-50 text-red-900 focus:border-red-500'
+                       : 'border-zinc-100 bg-zinc-50 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
+                  }`}
+                />
+                {errors.invoice_date && touched.invoice_date && (
+                  <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_date}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Quantity <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={values.invoice_quantity}
+                  onChange={(e) => handleChange('invoice_quantity', e.target.value)}
+                  onBlur={() => handleBlur('invoice_quantity')}
+                  className={`w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all ${
+                    errors.invoice_quantity && touched.invoice_quantity
+                       ? 'border-red-100 bg-red-50 text-red-900 focus:border-red-500'
+                       : 'border-zinc-100 bg-zinc-50 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
+                  }`}
+                  placeholder="0.00"
+                />
+                {errors.invoice_quantity && touched.invoice_quantity && (
+                  <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_quantity}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  PO/DO Number
+                </label>
+                <input
+                  type="text"
+                  value={values.po_do_number}
+                  onChange={(e) => handleChange('po_do_number', e.target.value)}
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
+                  placeholder="Optional"
                 />
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 justify-end border-t border-zinc-200 pt-6 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-zinc-300 bg-white text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white disabled:opacity-70 transition-all shadow-md hover:shadow-lg shadow-blue-500/20"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
+          {/* Transport Details Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Transport Details
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Driver Mobile <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={values.mobile_number}
+                  onChange={(e) => handleChange('mobile_number', e.target.value.replace(/\D/g, ''))}
+                  onBlur={() => handleBlur('mobile_number')}
+                  className={`w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all font-mono ${
+                    errors.mobile_number && touched.mobile_number
+                       ? 'border-red-100 bg-red-50 text-red-900 focus:border-red-500'
+                       : 'border-zinc-100 bg-zinc-50 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
+                  }`}
+                  placeholder="10-digit number"
+                />
+                {errors.mobile_number && touched.mobile_number && (
+                  <p className="text-xs text-red-600 font-medium ml-1">{errors.mobile_number}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  LR Number
+                </label>
+                <input
+                  type="text"
+                  value={values.lr_number}
+                  onChange={(e) => handleChange('lr_number', e.target.value)}
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
+                  placeholder="Optional"
+                />
+              </div>
+
+              <div className="col-span-1 md:col-span-2 space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Remarks / Notes
+                </label>
+                <textarea
+                  value={values.remark1}
+                  onChange={(e) => handleChange('remark1', e.target.value)}
+                  rows={2}
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400 resize-none"
+                  placeholder="Any additional information..."
+                />
+              </div>
+            </div>
           </div>
         </form>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 z-10 border-t border-zinc-100 bg-zinc-50/80 backdrop-blur px-6 py-4 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl px-5 py-2.5 text-sm font-semibold text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {saving ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Saving...
+              </>
+            ) : (
+              <>Save Changes</>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -314,13 +319,13 @@ function StageStatusIcon({ stageKey, status, transaction }) {
     <span
       className={`inline-flex h-7 w-7 items-center justify-center rounded transition-all ${
         isCompleted
-          ? "bg-emerald-500 text-white shadow-md"
+          ? "text-emerald-500 shadow-md"
           : isActive
           ? "bg-amber-500 text-white shadow-md animate-pulse"
           : "bg-zinc-200 text-zinc-400"
       } ${isPending ? "opacity-40" : "opacity-100"}`}
     >
-      <TruckIcon className="h-4 w-4" />
+      <TruckIcon className="h-6 w-6" />
     </span>
   );
 }
@@ -328,7 +333,7 @@ function StageStatusIcon({ stageKey, status, transaction }) {
 export default function UserDashboard({ roleName = "Dashboard" }) {
   const { user, loading: authLoading, permissions, hasPermission } = useAuth();
   // const { theme } = useTheme();
-  const { printGatePass, downloadGatePass } = useGatePassPrint();
+  const { printGatePass, printEntryPass, downloadGatePass } = useGatePassPrint();
   const [transactions, setTransactions] = useState([]);
   const [counts, setCounts] = useState({
     loading: 0,
@@ -339,8 +344,31 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     users: 0,
   });
   const [itemCounts, setItemCounts] = useState({ loading: [], unloading: [] });
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  // Determine if user has restricted view (Weighbridge/Yard)
+  // This matches logic in API to keep UI consistent with API behavior
+  const isRestrictedRole = user?.role_name === 'Weighbridge' || user?.role_name === 'Yard';
+  
+  const [dateFrom, setDateFrom] = useState(() => {
+    if (typeof window === 'undefined') return "";
+    // If restricted, default to today. Else empty (all time) or whatever default you want.
+    // Actually, previously it defaulted to empty (all). 
+    // But for Restricted, API enforces today anyway. Better to show it in UI.
+    return isRestrictedRole ? new Date().toISOString().split('T')[0] : "";
+  });
+  const [dateTo, setDateTo] = useState(() => {
+    if (typeof window === 'undefined') return "";
+    return isRestrictedRole ? new Date().toISOString().split('T')[0] : "";
+  });
+
+  // Re-sync dates if user object loads late
+  useEffect(() => {
+    if (isRestrictedRole) {
+        const today = new Date().toISOString().split('T')[0];
+        setDateFrom(today);
+        setDateTo(today);
+    }
+  }, [isRestrictedRole]);
+
   const [filterType, setFilterType] = useState("all");
   const [filterItem, setFilterItem] = useState("");
   const [selectedStage, setSelectedStage] = useState(null);
@@ -349,7 +377,9 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
   const [stageModal, setStageModal] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [editModal, setEditModal] = useState(null);
+  const [printModal, setPrintModal] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -405,11 +435,17 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     const type = filterType !== "all" ? filterType : undefined;
     const item = filterItem || undefined;
 
-    const params = new URLSearchParams();
-    if (from) params.set("from", from);
-    if (to) params.set("to", to);
-    if (type) params.set("type", type);
-    if (item) params.set("item", item);
+    // Params for Transaction List (Includes all filters)
+    const listParams = new URLSearchParams();
+    if (from) listParams.set("from", from);
+    if (to) listParams.set("to", to);
+    if (type) listParams.set("type", type);
+    if (item) listParams.set("item", item);
+
+    // Params for Stats/Counts (Only filters by Date, so tabs show global counts)
+    const statsParams = new URLSearchParams();
+    if (from) statsParams.set("from", from);
+    if (to) statsParams.set("to", to);
 
     try {
       const headers = {
@@ -417,9 +453,9 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
       };
 
       const [txnRes, countRes, itemCountRes] = await Promise.all([
-        fetch(`/api/transactions?${params}`, { headers }),
-        fetch(`/api/transactions/counts?${params}`, { headers }),
-        fetch(`/api/transactions/item-counts?${params}`, { headers }),
+        fetch(`/api/transactions?${listParams}`, { headers }),
+        fetch(`/api/transactions/counts?${statsParams}`, { headers }),
+        fetch(`/api/transactions/item-counts?${statsParams}`, { headers }),
       ]);
       const txnData = await txnRes.json();
       const countData = await countRes.json();
@@ -517,6 +553,11 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     }
     
     return true;
+  }).sort((a, b) => {
+    // console.log('Sorting:', sortOrder, a.transaction_id, b.transaction_id);
+    return sortOrder === 'asc' 
+      ? Number(a.transaction_id) - Number(b.transaction_id) 
+      : Number(b.transaction_id) - Number(a.transaction_id);
   });
 
   return (
@@ -540,15 +581,22 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
+              disabled={isRestrictedRole}
+              className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
             />
             <span className="text-slate-400 font-medium">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
+              disabled={isRestrictedRole}
+              className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
             />
+            {isRestrictedRole && (
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                Viewing Today's Active
+              </span>
+            )}
             <button
               onClick={() => fetchData()}
               className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
@@ -840,7 +888,19 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               <table className="w-full min-w-[1200px] border-collapse">
                 <thead>
                   <tr className="bg-zinc-100 border-b border-zinc-200 text-left text-xs uppercase tracking-wider text-zinc-600 font-bold">
-                    <th className="px-4 py-3 w-16 text-center">S/N</th>
+                    <th 
+                      className="px-4 py-3 w-16 text-center cursor-pointer hover:bg-zinc-200 transition-colors group select-none"
+                      onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                      title="Click to toggle sort order (Newest/Oldest)"
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        S/N
+                        <div className="flex flex-col">
+                          <svg className={`w-2 h-2 ${sortOrder === 'asc' ? 'text-zinc-800' : 'text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-8 8h16l-8-8z"/></svg>
+                          <svg className={`w-2 h-2 ${sortOrder === 'desc' ? 'text-zinc-800' : 'text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 20l-8-8h16l-8 8z"/></svg>
+                        </div>
+                      </div>
+                    </th>
                     <th className="px-4 py-3 w-48">Product Name</th>
                     <th className="px-4 py-3 w-32 text-center">Vehicle No.</th>
                     <th className="px-4 py-3 w-48">Vendor Name</th>
@@ -870,11 +930,11 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
                           {t.item_name || <span className="text-zinc-400 italic">N/A</span>}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-block rounded px-2.5 py-1 text-xs font-bold bg-white text-zinc-700 border border-zinc-200 shadow-sm font-mono tracking-tight">
-                            {t.truck_no}
-                          </span>
-                        </td>
+ <td className="px-4 py-3 text-center">
+  <span className="inline-block whitespace-nowrap rounded px-2.5 py-1 text-xs font-bold bg-white text-zinc-700 border border-zinc-200 shadow-sm font-mono tracking-tight">
+    {t.truck_no}
+  </span>
+</td>
                         <td className="px-4 py-3 text-sm text-zinc-600 font-medium">
                           {t.party_name}
                         </td>
@@ -934,7 +994,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                               <ViewIcon className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => printGatePass(t)}
+                              onClick={() => setPrintModal(t)}
                               className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
                               title="Print"
                             >
@@ -1079,13 +1139,13 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                           <span className="text-[9px] font-bold">View</span>
                         </button>
 
-                         <button
-                           onClick={() => printGatePass(t)}
-                           className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
-                         >
-                           <PrinterIcon className="h-4 w-4 mb-0.5" />
-                           <span className="text-[9px] font-bold">Print</span>
-                         </button>
+                          <button
+                            onClick={() => setPrintModal(t)}
+                            className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
+                          >
+                            <PrinterIcon className="h-4 w-4 mb-0.5" />
+                            <span className="text-[9px] font-bold">Print</span>
+                          </button>
                         
                         {/* Dynamic Confirm Action */}
                         <div className="col-span-2">
@@ -1155,8 +1215,6 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               viewMode={stageModal.viewMode}
               onClose={() => setStageModal(null)}
               onConfirmSuccess={() => fetchData()}
-              onPrint={(txn) => printGatePass(txn)}
-              onDownload={(txn) => downloadGatePass(txn)}
               canConfirmStage={canUserConfirmStage(stageModal.clickedStageKey)}
             />
           </div>
@@ -1206,6 +1264,64 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 Delete Transaction
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {printModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setPrintModal(null)}
+        >
+          <div 
+            className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-zinc-900 mb-4">Select Print Format</h3>
+            <p className="text-sm text-zinc-500 mb-6">
+              Choose the format you want to print for transaction #{printModal.transaction_id}.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+               <button
+                onClick={() => {
+                  printEntryPass(printModal);
+                  setPrintModal(null);
+                }}
+                className="flex items-center justify-center gap-3 rounded-lg border-2 border-zinc-200 p-4 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+              >
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-zinc-100 group-hover:bg-blue-200">
+                  <PrinterIcon className="h-5 w-5 text-zinc-600 group-hover:text-blue-700" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="block font-bold text-zinc-900 group-hover:text-blue-900">Entry Pass</span>
+                  <span className="block text-xs text-zinc-500">Small thermal receipt format</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                   printGatePass(printModal);
+                   setPrintModal(null);
+                }}
+                className="flex items-center justify-center gap-3 rounded-lg border-2 border-zinc-200 p-4 hover:border-amber-500 hover:bg-amber-50 transition-all group"
+              >
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-zinc-100 group-hover:bg-amber-200">
+                  <PrinterIcon className="h-5 w-5 text-zinc-600 group-hover:text-amber-700" />
+                </div>
+                <div className="text-left flex-1">
+                   <span className="block font-bold text-zinc-900 group-hover:text-amber-900">Gate Pass</span>
+                   <span className="block text-xs text-zinc-500">Full A4 page format</span>
+                </div>
+              </button>
+            </div>
+
+            <button
+               onClick={() => setPrintModal(null)}
+               className="mt-6 w-full rounded-lg py-2 text-sm font-medium text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
