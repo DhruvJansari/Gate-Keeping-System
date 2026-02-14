@@ -37,7 +37,8 @@ export async function GET(request) {
       'Party': r.party_name,
       'Type': r.transaction_type,
       'Invoice No': r.invoice_number,
-      'Invoice Date': r.invoice_date,
+      'Invoice No': r.invoice_number,
+      'Invoice Date': r.invoice_date ? new Date(r.invoice_date).toLocaleDateString('en-GB') : '',
       'Qty': r.invoice_quantity,
       'Status': r.current_status,
       'Remark 1': r.remark1 || '',
@@ -45,7 +46,7 @@ export async function GET(request) {
       'First Weight': r.first_weight ? parseFloat(r.first_weight) : '',
       'Second Weight': r.second_weight ? parseFloat(r.second_weight) : '',
       'Net Weight': r.net_weight ? parseFloat(r.net_weight) : '',
-      'Created': r.created_at,
+      'Created': r.created_at ? new Date(r.created_at).toLocaleString('en-GB') : '',
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);

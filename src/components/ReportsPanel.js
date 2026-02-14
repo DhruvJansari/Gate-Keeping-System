@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PanelLayout } from '@/components/PanelLayout';
 import { useAuth } from '@/context/AuthContext';
 import { formatWeight } from '@/utils/formatters';
+import { STAGES, getNextStageToConfirm } from '@/lib/stageUtils';
 
 export function ReportsPanel() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export function ReportsPanel() {
   const [composeDateTo, setComposeDateTo] = useState('');
   const [weighbridgeDateFrom, setWeighbridgeDateFrom] = useState('');
   const [weighbridgeDateTo, setWeighbridgeDateTo] = useState('');
+  const [selectedStage, setSelectedStage] = useState('');
   
   // Master data
   const [parties, setParties] = useState([]);
@@ -102,6 +104,17 @@ export function ReportsPanel() {
           return true;
         });
       }
+
+      // Stage filter (client-side) - Logic: Show trucks currently AT this stage
+      if (selectedStage) {
+        filtered = filtered.filter(t => {
+          const nextStage = getNextStageToConfirm(t);
+          if (selectedStage === 'completed') {
+            return nextStage === null; // All stages done
+          }
+          return nextStage === selectedStage;
+        });
+      }
       
       setTransactions(filtered);
     } catch (err) {
@@ -111,7 +124,7 @@ export function ReportsPanel() {
       setLoading(false);
     }
   }, [loadingChecked, unloadingChecked, selectedParty, selectedItem, selectedTransporter, 
-      composeDateFrom, composeDateTo, weighbridgeDateFrom, weighbridgeDateTo, token]);
+      composeDateFrom, composeDateTo, weighbridgeDateFrom, weighbridgeDateTo, selectedStage, token]);
 
   // Helper functions for formatting
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN') : '—';
@@ -306,6 +319,26 @@ export function ReportsPanel() {
                   className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
+            </div>
+
+            {/* Stage Filter */}
+            <div>
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
+                Filter by Stage
+              </label>
+              <select
+                value={selectedStage}
+                onChange={(e) => setSelectedStage(e.target.value)}
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="">All Stages</option>
+                {STAGES.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.shortLabel || s.label}
+                  </option>
+                ))}
+                <option value="completed">All Completed / Closed</option>
+              </select>
             </div>
           </div>
 

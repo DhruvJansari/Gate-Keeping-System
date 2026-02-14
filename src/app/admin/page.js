@@ -9,17 +9,19 @@ import { AdminStageDetailModal } from "@/components/AdminStageDetailModal";
 import { useGatePassPrint } from "@/components/GatePassPrint";
 import { STAGES, getStageStatus, getNextStageToConfirm } from "@/lib/stageUtils";
 import {
-  DownloadIcon,
-  LoadingGoodsIcon,
-  UnloadingGoodsIcon,
-  ClipboardIcon,
-  UsersIcon,
-  ViewIcon,
-  EditIcon,
-  DeleteIcon,
   PrinterIcon,
   TruckIcon,
   CloseIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DownloadIcon,
+  UsersIcon,
+  ClipboardIcon,
+  UnloadingGoodsIcon,
+  LoadingGoodsIcon,
+  ViewIcon,
+  EditIcon,
+  DeleteIcon,
 } from "@/components/Icons";
 // import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/useToast";
@@ -356,6 +358,8 @@ function AdminDashboard() {
   const [printModal, setPrintModal] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -395,6 +399,7 @@ function AdminDashboard() {
     setCounts(countData);
     setItemCounts(itemCountData);
     setLoading(false);
+    setCurrentPage(1);
   }, [dateFrom, dateTo, filterType, filterItem, token]);
 
   useEffect(() => {
@@ -482,6 +487,12 @@ function AdminDashboard() {
       ? Number(a.transaction_id) - Number(b.transaction_id) 
       : Number(b.transaction_id) - Number(a.transaction_id);
   });
+
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <PanelLayout title="Admin Dashboard" roleName="Admin">
@@ -692,8 +703,29 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-sm text-zinc-600">
-                {filteredTransactions.length} of {transactions.length} transactions
+              {totalPages > 1 && (
+                <div className="flex items-center bg-white rounded-lg border border-zinc-200 p-1 shadow-sm">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-md text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </button>
+                  <span className="text-xs font-bold text-zinc-700 px-2 min-w-[70px] text-center border-x border-zinc-100">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-md text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              <div className="text-sm text-zinc-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-zinc-200">
+                {filteredTransactions.length} results
               </div>
               {hasPermission("create_transactions") && (
                 <button
@@ -749,15 +781,16 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((t, idx) => {
+                  {paginatedTransactions.map((t, idx) => {
                     const status = getStageStatus(t);
+                    const serialNumber = (currentPage - 1) * itemsPerPage + idx + 1;
                     return (
                       <tr
                         key={t.transaction_id}
                         className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
                       >
                         <td className="px-4 py-3 text-sm font-medium text-zinc-700">
-                          {idx + 1}
+                          {serialNumber}
                         </td>
                         <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
                           {t.item_name || "N/A"}
@@ -833,6 +866,81 @@ function AdminDashboard() {
                 </tbody>
               </table>
             )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 bg-zinc-50 border-t border-zinc-200">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-zinc-300 text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-zinc-300 text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-zinc-700">
+                      Showing <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, filteredTransactions.length)}</span> of{' '}
+                      <span className="font-bold text-zinc-900">{filteredTransactions.length}</span> results
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-zinc-300 bg-white text-sm font-medium text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <ChevronLeftIcon className="h-5 w-5" />
+                      </button>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => {
+                          if (totalPages <= 7) return true;
+                          return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
+                        })
+                        .map((page, index, array) => (
+                          <div key={page} className="flex">
+                            {index > 0 && array[index - 1] !== page - 1 && (
+                              <span className="relative inline-flex items-center px-4 py-2 border border-zinc-300 bg-white text-sm font-medium text-zinc-700">...</span>
+                            )}
+                            <button
+                              onClick={() => setCurrentPage(page)}
+                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-bold transition-all ${
+                                currentPage === page
+                                  ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
+                                  : 'bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          </div>
+                        ))}
+
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-zinc-300 bg-white text-sm font-medium text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      >
+                        <span className="sr-only">Next</span>
+                        <ChevronRightIcon className="h-5 w-5" />
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {!loading && filteredTransactions.length === 0 && (
               <p className="py-12 text-center text-sm text-zinc-600">
                 {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No transactions found'}
