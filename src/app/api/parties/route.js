@@ -40,6 +40,10 @@ export async function POST(request) {
     if (!party_name?.trim()) {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
+    
+    if (contact_phone && !/^[6-9]\d{9}$/.test(contact_phone.trim())) {
+        return NextResponse.json({ error: 'Invalid mobile number' }, { status: 400 });
+    }
 
     const db = await getDb();
     const s = status === 'Inactive' ? 'Inactive' : 'Active';

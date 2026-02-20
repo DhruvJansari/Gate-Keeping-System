@@ -176,14 +176,14 @@ function RolesManagement() {
     <PanelLayout title="Roles Management" roleName="Admin">
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-t-xl px-6 py-5 bg-amber-600 text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-t-xl px-6 py-5 bg-white border border-zinc-200">
           <div>
             <h2 className="text-xl font-semibold">Roles Management</h2>
-            <p className="text-sm text-amber-100">
+            <p className="text-sm text-zinc-500">
               Manage user roles and permissions
             </p>
           </div>
-          <span className="rounded-lg px-3 py-1 text-sm font-medium bg-amber-500/30">
+          <span className="rounded-lg px-3 py-1 text-sm font-medium bg-zinc-500/30">
             {roles.length} Roles
           </span>
         </div>
@@ -191,8 +191,8 @@ function RolesManagement() {
         {/* Toolbar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <button
-            onClick={handleAdd}
-            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+            onClick={handleAdd}             
+            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
           >
             + Create New Role
           </button>
@@ -238,14 +238,14 @@ function RolesManagement() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
                             <ShieldIcon className="h-5 w-5" />
                           </div>
                           <div>
                             <p className="font-medium text-zinc-900">
                               {r.name}
                             </p>
-                            <span className="inline-block rounded px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800">
+                            <span className="inline-block rounded px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-800">
                               {r.permission_count ?? 0} Permissions
                             </span>
                             <p className="mt-1 text-xs text-zinc-500">
@@ -265,7 +265,7 @@ function RolesManagement() {
                           </button>
                           <button
                             onClick={() => handleEdit(r)}
-                            className="rounded p-2 transition-colors bg-amber-100 text-amber-700 hover:bg-amber-200"
+                            className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                             title="Edit Role"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -372,7 +372,7 @@ function RolesManagement() {
                   setViewingRole(null);
                   handleEdit(viewingRole);
                 }}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
               >
                 Edit Role
               </button>

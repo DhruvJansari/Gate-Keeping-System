@@ -204,7 +204,7 @@ export function ReportsPanel() {
                     type="checkbox"
                     checked={loadingChecked}
                     onChange={(e) => setLoadingChecked(e.target.checked)}
-                    className="rounded border-zinc-300 text-amber-600 focus:ring-amber-500"
+                    className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-zinc-700">Loading Goods (Out Ward)</span>
                 </label>
@@ -213,7 +213,7 @@ export function ReportsPanel() {
                     type="checkbox"
                     checked={unloadingChecked}
                     onChange={(e) => setUnloadingChecked(e.target.checked)}
-                    className="rounded border-zinc-300 text-amber-600 focus:ring-amber-500"
+                    className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-zinc-700">Unloading Goods (In Ward)</span>
                 </label>
@@ -228,7 +228,7 @@ export function ReportsPanel() {
               <select
                 value={selectedParty}
                 onChange={(e) => setSelectedParty(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Parties</option>
                 {parties.map((p) => (
@@ -247,7 +247,7 @@ export function ReportsPanel() {
               <select
                 value={selectedItem}
                 onChange={(e) => setSelectedItem(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Items</option>
                 {items.map((i) => (
@@ -266,7 +266,7 @@ export function ReportsPanel() {
               <select
                 value={selectedTransporter}
                 onChange={(e) => setSelectedTransporter(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Transporters</option>
                 {transporters.map((t) => (
@@ -287,14 +287,14 @@ export function ReportsPanel() {
                   type="date"
                   value={composeDateFrom}
                   onChange={(e) => setComposeDateFrom(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-zinc-500">To</span>
                 <input
                   type="date"
                   value={composeDateTo}
                   onChange={(e) => setComposeDateTo(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -309,14 +309,14 @@ export function ReportsPanel() {
                   type="date"
                   value={weighbridgeDateFrom}
                   onChange={(e) => setWeighbridgeDateFrom(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-zinc-500">To</span>
                 <input
                   type="date"
                   value={weighbridgeDateTo}
                   onChange={(e) => setWeighbridgeDateTo(e.target.value)}
-                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -329,7 +329,7 @@ export function ReportsPanel() {
               <select
                 value={selectedStage}
                 onChange={(e) => setSelectedStage(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Stages</option>
                 {STAGES.map((s) => (
@@ -376,7 +376,7 @@ export function ReportsPanel() {
             <div className="overflow-x-auto">
               {loading ? (
                 <div className="flex items-center justify-center p-12">
-                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 border-t-amber-600" />
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-600" />
                 </div>
               ) : transactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -409,7 +409,7 @@ export function ReportsPanel() {
                     {transactions.map((t, idx) => (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 hover:bg-amber-50/30 transition-colors"
+                        className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
                       >
                         <td className="px-4 py-3 text-sm text-zinc-700">{idx + 1}</td>
                         <td className="px-4 py-3 text-sm font-medium text-zinc-900">{txnNo(t)}</td>

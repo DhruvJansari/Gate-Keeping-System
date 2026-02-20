@@ -101,9 +101,9 @@ export function GateTransactionsPanel() {
   return (
     <PanelLayout title="Gate Transactions" roleName={user?.role_name || "User"}>
       <div className="space-y-6">
-        <div className="rounded-t-xl bg-amber-600 px-6 py-5 text-white">
-          <h2 className="text-xl font-semibold">Gate Transactions</h2>
-          <p className="text-sm text-amber-100">Manage all gate entries and track their progress</p>
+        <div className="rounded-t-xl bg-white border border-zinc-200 px-6 py-5">
+          <h2 className="text-xl font-semibold text-zinc-900">Gate Transactions</h2>
+          <p className="text-sm text-zinc-500">Manage all gate entries and track their progress</p>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -142,7 +142,7 @@ export function GateTransactionsPanel() {
             {hasPermission('create_transactions') && (
               <button
                 onClick={() => setModalOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
                 + New Gate Entry
               </button>
@@ -192,7 +192,7 @@ export function GateTransactionsPanel() {
                           </button>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-medium text-amber-800">
+                          <span className="font-medium text-zinc-900">
                             {txnNo(t)}
                           </span>
                         </td>

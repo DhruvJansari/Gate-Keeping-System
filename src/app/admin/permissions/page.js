@@ -136,9 +136,9 @@ function PermissionsManagement() {
     <PanelLayout title="Permissions Management" roleName="Admin">
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
-        <div className="rounded-t-xl px-6 py-5 bg-amber-600 text-white">
+        <div className="rounded-t-xl px-6 py-5 bg-white border border-zinc-200">
           <h2 className="text-xl font-semibold">Permissions Management</h2>
-          <p className="text-sm text-amber-100">
+          <p className="text-sm text-zinc-500">
             Manage system permissions and access controls
           </p>
         </div>
@@ -147,7 +147,7 @@ function PermissionsManagement() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             onClick={handleAdd}
-            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
           >
             <KeyIcon className="h-4 w-4" />
             Create New Permission
@@ -194,7 +194,7 @@ function PermissionsManagement() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
                             <KeyIcon className="h-5 w-5" />
                           </div>
                           <div>
@@ -221,7 +221,7 @@ function PermissionsManagement() {
                           </button>
                           <button
                             onClick={() => handleEdit(p)}
-                            className="rounded p-2 transition-colors bg-amber-100 text-amber-700 hover:bg-amber-200"
+                            className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                             title="Edit Permission"
                           >
                             <EditIcon className="h-4 w-4" />
@@ -327,7 +327,7 @@ function PermissionsManagement() {
                   setViewingPermission(null);
                   handleEdit(viewingPermission);
                 }}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
               >
                 Edit Permission
               </button>

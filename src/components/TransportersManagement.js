@@ -256,11 +256,11 @@ export function TransportersManagement() {
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
         <div
-          className="rounded-t-xl px-6 py-5 bg-amber-600 text-white"
+          className="rounded-t-xl px-6 py-5 bg-white border border-zinc-200"
         >
           <h2 className="text-xl font-semibold">Transporters Management</h2>
           <p
-            className="text-sm text-amber-100"
+            className="text-sm text-zinc-500"
           >
             Manage all your logistics partners and carriers
           </p>
@@ -271,7 +271,7 @@ export function TransportersManagement() {
           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
-              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
             >
               + Add New Transporter
             </button>
@@ -304,189 +304,117 @@ export function TransportersManagement() {
         </div>
 
         {/* Table */}
-        <div
-          className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white"
-        >
+        <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[750px]">
-              <thead>
-                <tr
-                  className="text-left text-sm bg-zinc-800 text-white"
-                >
-                  <th className="px-4 py-3">#</th>
-                  <th className="px-4 py-3">TRANSPORTER DETAILS</th>
-                  <th className="px-4 py-3">CONTACT INFORMATION</th>
-                  <th className="px-4 py-3">STATUS</th>
-                  <th className="px-4 py-3">CREATED</th>
-                  <th className="px-4 py-3">ACTIONS</th>
+            <table className="w-full text-left text-sm text-zinc-600">
+              <thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
+                <tr>
+                  <th className="px-6 py-3 font-semibold w-16">Sr No.</th>
+                  <th className="px-6 py-3 font-semibold">Transporter Details</th>
+                  <th className="px-6 py-3 font-semibold">Contact Info</th>
+                  <th className="px-6 py-3 font-semibold text-center">Status</th>
+                  <th className="px-6 py-3 font-semibold">Created</th>
+                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {loading && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center">
-                      <div
-                        className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700"
-                      />
-                    </td>
-                  </tr>
-                )}
-                {!loading &&
-                  transporters.map((t, idx) => (
-                    <tr
-                      key={t.transporter_id}
-                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
-                    >
-                      <td
-                        className="px-4 py-3 text-sm text-zinc-600"
-                      >
-                        {idx + 1}
-                      </td>
-                      <td className="px-4 py-3">
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr><td colSpan="6" className="py-8 text-center">Loading...</td></tr>
+                ) : transporters.length === 0 && !error ? (
+                  <tr><td colSpan="6" className="py-8 text-center text-zinc-400">No transporters found</td></tr>
+                ) : error ? (
+                  <tr><td colSpan="6" className="py-8 text-center text-red-600">{error}</td></tr>
+                ) : (
+                  transporters.map((t, index) => (
+                    <tr key={t.transporter_id} className="hover:bg-zinc-50/50">
+                      <td className="px-6 py-3 text-zinc-500 font-mono text-xs">{index + 1}</td>
+                      <td className="px-6 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold bg-amber-100 text-amber-800"
-                          >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
                             {getInitials(t.name)}
                           </div>
                           <div>
-                            <p
-                              className="font-medium text-zinc-900"
-                            >
-                              {t.name}
-                            </p>
+                            <p className="font-medium text-zinc-900">{t.name}</p>
                             {t.service_type && (
-                              <p
-                                className="flex items-center gap-1 text-xs text-zinc-500"
-                              >
-                                <TruckIcon className="h-3 w-3" />{" "}
-                                {t.service_type}
+                              <p className="flex items-center gap-1 text-xs text-zinc-500">
+                                <TruckIcon className="h-3 w-3" /> {t.service_type}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-3">
                         <div className="space-y-1 text-sm">
-                          {t.contact_person && (
-                            <p
-                              className="text-zinc-700"
-                            >
-                              {t.contact_person}
-                            </p>
-                          )}
+                          {t.contact_person && <p className="text-zinc-700">{t.contact_person}</p>}
                           {t.contact_phone && (
-                            <p
-                              className="flex items-center gap-2 text-zinc-700"
-                            >
-                              <PhoneIcon
-                                className="h-3 w-3 text-zinc-400"
-                              />
+                            <p className="flex items-center gap-2 text-zinc-700">
+                              <PhoneIcon className="h-3 w-3 text-zinc-400" />
                               {t.contact_phone}
                             </p>
                           )}
                           {t.email && (
-                            <p
-                              className="flex items-center gap-2 text-zinc-700"
-                            >
-                              <MailIcon
-                                className="h-3 w-3 text-zinc-400"
-                              />
+                            <p className="flex items-center gap-2 text-zinc-700">
+                              <MailIcon className="h-3 w-3 text-zinc-400" />
                               {t.email}
                             </p>
                           )}
-                          {!t.contact_person &&
-                            !t.contact_phone &&
-                            !t.email && (
-                              <span
-                                className="text-zinc-400"
-                              >
-                                —
-                              </span>
-                            )}
+                          {!t.contact_person && !t.contact_phone && !t.email && <span className="text-zinc-400">—</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-                            t.status === "Active"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-zinc-100 text-zinc-600"
-                          }`}
-                        >
-                          {t.status === "Active" ? (
-                            <>
-                              <span
-                                className="h-1.5 w-1.5 rounded-full bg-emerald-500"
-                              />
-                              Active
-                            </>
-                          ) : (
-                            <>Inactive</>
-                          )}
+                      <td className="px-6 py-3 text-center">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                            t.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-600"
+                        }`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${t.status === 'Active' ? 'bg-emerald-500' : 'bg-zinc-400'}`}></span>
+                          {t.status}
                         </span>
                       </td>
-                      <td
-                        className="px-4 py-3 text-sm text-zinc-600"
-                      >
-                        {formatDate(t.created_at)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                      <td className="px-6 py-3 text-zinc-500">{formatDate(t.created_at)}</td>
+                      <td className="px-6 py-3 text-right">
+                        <div className="flex justify-end gap-2">
                           <button
-                            onClick={() => handleView(t)}
-                            className="rounded p-1.5 transition-colors bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                            title="View details"
+                            onClick={() => {
+                                setViewingTransporter(t);
+                                setModalOpen(true);
+                            }}
+                            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"
+                            title="View"
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
                           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
-                          <button
-                            onClick={() => handleEdit(t)}
-                            className="rounded p-1.5 transition-colors bg-blue-100 text-blue-600 hover:bg-blue-200"
-                            title="Edit"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
+                            <button
+                              onClick={() => {
+                                  setEditingTransporter(t);
+                                  setModalOpen(true);
+                              }}
+                              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"
+                              title="Edit"
+                            >
+                              <EditIcon className="h-4 w-4" />
+                            </button>
                           )}
                           {(user?.role_name === 'Admin' || hasPermission('delete_masters')) && (
-                          <button
-                            onClick={() => handleDelete(t)}
-                            disabled={deletingId === t.transporter_id}
-                            className="rounded p-1.5 transition-colors disabled:opacity-50 bg-red-100 text-red-600 hover:bg-red-200"
-                            title="Delete"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
+                            <button
+                              onClick={() => handleDelete(t)}
+                              disabled={deletingId === t.transporter_id}
+                              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 disabled:opacity-50"
+                              title="Delete"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-          {!loading && transporters.length > 0 && (
-            <div
-              className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500"
-            >
-              Showing {transporters.length} transporters
-            </div>
-          )}
-          {!loading && transporters.length === 0 && !error && (
-            <p
-              className="py-12 text-center text-sm text-zinc-500"
-            >
-              No transporters found
-            </p>
-          )}
-          {error && (
-            <p
-              className="py-12 text-center text-sm text-red-600"
-            >
-              {error}
-            </p>
-          )}
+          <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-3">
+             <p className="text-xs text-zinc-500">Showing {transporters.length} records</p>
+          </div>
         </div>
       </div>
 
@@ -528,7 +456,7 @@ export function TransportersManagement() {
               className="flex items-center gap-4 border-b pb-4 border-zinc-200"
             >
               <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold bg-amber-100 text-amber-800"
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold bg-blue-100 text-blue-800"
               >
                 {getInitials(viewingTransporter.name)}
               </div>
@@ -641,7 +569,7 @@ export function TransportersManagement() {
                     setViewingTransporter(null);
                     handleEdit(viewingTransporter);
                   }}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
                 >
                   Edit Transporter
                 </button>

@@ -169,11 +169,11 @@ export function ItemsManagement() {
       <div className="space-y-6">
         {/* Header - Fixed with theme */}
         <div
-          className="rounded-t-xl px-6 py-5 bg-amber-600 text-white"
+          className="rounded-t-xl px-6 py-5 bg-white border border-zinc-200"
         >
           <h2 className="text-xl font-semibold">Items Management</h2>
           <p
-            className="text-sm text-amber-100"
+            className="text-sm text-zinc-500"
           >
             Manage all items in your system.
           </p>
@@ -184,7 +184,7 @@ export function ItemsManagement() {
           {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
-              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-600 hover:bg-amber-700"
+              className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
             >
               + Add New Item
             </button>
@@ -208,124 +208,71 @@ export function ItemsManagement() {
         </div>
 
         {/* Table */}
-        <div
-          className="overflow-hidden rounded-xl border shadow-sm border-zinc-200 bg-white"
-        >
+        <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
-              <thead>
-                <tr
-                  className="text-left text-sm bg-zinc-800 text-white"
-                >
-                  <th className="px-4 py-3">#</th>
-                  <th className="px-4 py-3">NAME</th>
-                  <th className="px-4 py-3">STATUS</th>
-                  <th className="px-4 py-3">CREATED</th>
-                  <th className="px-4 py-3">ACTIONS</th>
+            <table className="w-full text-left text-sm text-zinc-600">
+              <thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
+                <tr>
+                  <th className="px-6 py-3 font-semibold w-16">Sr No.</th>
+                  <th className="px-6 py-3 font-semibold">Item Name</th>
+                  <th className="px-6 py-3 font-semibold">Status</th>
+                  <th className="px-6 py-3 font-semibold">Created</th>
+                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-
-              <tbody>
-                {loading && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center">
-                      <div
-                        className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700"
-                      />
-                    </td>
-                  </tr>
-                )}
-
-                {!loading &&
-                  items.map((item, idx) => (
-                    <tr
-                      key={item.item_id}
-                      className="border-b hover:transition-colors border-zinc-100 hover:bg-zinc-50"
-                    >
-                      <td
-                        className="px-4 py-3 text-sm text-zinc-600"
-                      >
-                        {idx + 1}
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr><td colSpan="5" className="py-8 text-center">Loading...</td></tr>
+                ) : items.length === 0 && !error ? (
+                  <tr><td colSpan="5" className="py-8 text-center text-zinc-400">No items found</td></tr>
+                ) : error ? (
+                  <tr><td colSpan="5" className="py-8 text-center text-red-600">{error}</td></tr>
+                ) : (
+                  items.map((item, index) => (
+                    <tr key={item.item_id} className="hover:bg-zinc-50/50">
+                      <td className="px-6 py-3 text-zinc-500 font-mono text-xs">{index + 1}</td>
+                      <td className="px-6 py-3 font-medium text-zinc-900">{item.item_name}</td>
+                      <td className="px-6 py-3">
+                         <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                            item.status === 'Active' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' : 'bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-600/20'
+                         }`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${item.status === 'Active' ? 'bg-emerald-600' : 'bg-zinc-400'}`}></span>
+                            {item.status}
+                         </span>
                       </td>
-
-                      <td className="px-4 py-3 flex items-center gap-2">
-                        <ClipboardIcon
-                          className="h-4 w-4 text-zinc-500"
-                        />
-                        <span
-                          className="text-zinc-900"
-                        >
-                          {item.item_name}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                            item.status === "Active"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-zinc-100 text-zinc-600"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-
-                      <td
-                        className="px-4 py-3 text-sm text-zinc-600"
-                      >
-                        {formatDate(item.created_at)}
-                      </td>
-
-                      <td className="px-4 py-3 flex gap-2">
-                        {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
-                          <button
-                            onClick={() => handleEdit(item)}
-                            className="rounded p-1.5 transition-colors bg-blue-100 text-blue-600 hover:bg-blue-200"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                        )}
-
-                        {(user?.role_name === 'Admin' || hasPermission('delete_masters')) && (
-                          <button
-                            onClick={() => handleDelete(item)}
-                            disabled={deletingId === item.item_id}
-                            className="rounded p-1.5 transition-colors disabled:opacity-50 bg-red-100 text-red-600 hover:bg-red-200"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        )}
+                      <td className="px-6 py-3 text-zinc-500">{formatDate(item.created_at)}</td>
+                      <td className="px-6 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"
+                              title="Edit"
+                            >
+                              <EditIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                          {(user?.role_name === 'Admin' || hasPermission('delete_masters')) && (
+                            <button
+                              onClick={() => handleDelete(item)}
+                              disabled={deletingId === item.item_id}
+                              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 disabled:opacity-50"
+                              title="Delete"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-
-          {!loading && items.length > 0 && (
-            <div
-              className="border-t px-4 py-2 text-sm border-zinc-200 text-zinc-500"
-            >
-              Showing {items.length} items
-            </div>
-          )}
-
-          {!loading && items.length === 0 && !error && (
-            <p
-              className="py-12 text-center text-sm text-zinc-500"
-            >
-              No items found
-            </p>
-          )}
-
-          {error && (
-            <p
-              className="py-12 text-center text-sm text-red-600"
-            >
-              {error}
-            </p>
-          )}
+          <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-3">
+             <p className="text-xs text-zinc-500">Showing {items.length} records</p>
+          </div>
         </div>
       </div>
 

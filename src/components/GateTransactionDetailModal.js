@@ -2,7 +2,7 @@
 
 import { STAGES, getStageStatus } from '@/lib/stageUtils';
 import { formatWeight } from '@/utils/formatters';
-import { CloseIcon, PrinterIcon } from '@/components/Icons';
+import { CheckIcon, ClockIcon, CloseIcon, PrinterIcon } from '@/components/Icons';
 
 function formatDate(d) {
   return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
@@ -57,12 +57,12 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold">Transaction Details</h3>
-            <p className="text-sm text-amber-100">Stage-wise progress view</p>
+            <h3 className="text-lg font-semibold text-zinc-900">Transaction Details</h3>
+            <p className="text-sm text-zinc-500">Stage-wise progress view</p>
           </div>
-          <button onClick={onClose} className="rounded p-2 hover:bg-amber-700 transition" aria-label="Close">
+          <button onClick={onClose} className="rounded p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 transition-colors" aria-label="Close">
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
@@ -72,7 +72,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             
             {/* Step-1 Card */}
-            <div className="rounded-xl border-2 border-rose-200 bg-rose-50 p-4 shadow-lg">
+            <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm">
               <div className="mb-3 border-b border-rose-200 pb-2">
                 <h4 className="text-sm font-bold text-rose-700">Step-1</h4>
                 <p className="text-xs text-rose-600">Parking • Gate In • Gate Out</p>
@@ -116,7 +116,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* Step-2 Card */}
-            <div className="rounded-xl border-2 border-purple-200 bg-purple-50 p-4 shadow-lg">
+            <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 shadow-sm">
               <div className="mb-3 border-b border-purple-200 pb-2">
                 <h4 className="text-sm font-bold text-purple-700">Step-2</h4>
                 <p className="text-xs text-purple-600">WeighBridge • Gate Pass • Campus</p>
@@ -170,7 +170,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* Step-3 Card */}
-            <div className="rounded-xl border-2 border-pink-200 bg-pink-50 p-4 shadow-lg">
+            <div className="rounded-xl border border-pink-200 bg-pink-50/50 p-4 shadow-sm">
               <div className="mb-3 border-b border-pink-200 pb-2">
                 <h4 className="text-sm font-bold text-pink-700">Step-3</h4>
                 <p className="text-xs text-pink-600">Campus In • Campus Out</p>
@@ -204,10 +204,10 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
             </div>
 
             {/* View Card */}
-            <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-4 shadow-lg">
-              <div className="mb-3 border-b border-amber-200 pb-2">
-                <h4 className="text-sm font-bold text-amber-700">View</h4>
-                <p className="text-xs text-amber-600">Transaction Summary</p>
+            <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-sm">
+              <div className="mb-3 border-b border-blue-200 pb-2">
+                <h4 className="text-sm font-bold text-blue-700">View</h4>
+                <p className="text-xs text-blue-600">Transaction Summary</p>
               </div>
               
               <div className="space-y-1">
@@ -224,7 +224,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 <DataRow label="Mobile No" value={transaction.mobile_number} />
                 <DataRow label="Remark - 1" value={remark1} />
                 <DataRow label="Remark - 2" value={remark2} />
-                <div className="border-t border-amber-200 my-2 pt-2">
+                <div className="border-t border-blue-200 my-2 pt-2">
                   <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
                   <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
                   <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
@@ -236,7 +236,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-2 border-t border-zinc-200 px-6 py-4 bg-zinc-50">
+        <div className="flex justify-end gap-3 border-t border-zinc-200 px-6 py-4 bg-zinc-50">
           <button
             onClick={onClose}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition"
@@ -251,7 +251,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
           </button>
           <button
             onClick={() => onPrint?.(transaction, 'gatepass')}
-            className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
           >
             <PrinterIcon className="h-4 w-4" /> Gate Pass
           </button>

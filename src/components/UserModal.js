@@ -14,6 +14,44 @@ export function UserModal({ open, onClose, onSuccess, user, roles }) {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateUsername = (value) => {
+      if (!value.trim()) return "Username is required";
+      if (value.trim().length < 3) return "Username must be at least 3 characters";
+      return "";
+  };
+
+  const validateEmail = (value) => {
+    if (!value.trim()) return "Email is required";
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!pattern.test(value.trim())) return "Invalid email format";
+    return "";
+  };
+
+  const validatePassword = (value) => {
+      if (!value) return "";
+      if (value.length < 6) return "Password must be at least 6 characters";
+      return "";
+  };
+
+  const handleFieldChange = (field, value, setter) => {
+    setter(value);
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleFieldBlur = (field, value) => {
+    let error = "";
+    switch (field) {
+      case "username": error = validateUsername(value); break;
+      case "email": error = validateEmail(value); break;
+      case "password": error = validatePassword(value); break;
+      default: break;
+    }
+    if (error) setFieldErrors((prev) => ({ ...prev, [field]: error }));
+  };
 
   useEffect(() => {
     if (open) {
@@ -32,12 +70,31 @@ export function UserModal({ open, onClose, onSuccess, user, roles }) {
     e.preventDefault();
     setError('');
 
-    if (!isEdit && (!password || password.length < 6)) {
-      setError('Password must be at least 6 characters');
-      return;
+    // Strict Validation
+    const errors = {};
+    let text = "";
+
+    text = validateUsername(username);
+    if (text) errors.username = text;
+
+    text = validateEmail(email);
+    if (text) errors.email = text;
+
+    if (!roleId) {
+        errors.role_id = 'Role is required';
     }
+
+    if (!isEdit) {
+        text = validatePassword(password);
+        if (text) errors.password = text;
+    }
+
     if (password && password !== confirmPassword) {
-      setError('Passwords do not match');
+      errors.confirm_password = 'Passwords do not match';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -79,156 +136,134 @@ export function UserModal({ open, onClose, onSuccess, user, roles }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl">
-        <div className="rounded-t-xl bg-amber-600 px-6 py-4">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="bg-white px-6 py-5 border-b border-zinc-100">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-amber-400 bg-white/20 text-white">
-                <UserIcon className="h-5 w-5" />
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-blue-600 shadow-sm">
+                <UserIcon className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">
-                  {isEdit ? 'Edit User' : 'Create New User'}
-                </h2>
-                <p className="text-sm text-amber-100">
-                  {isEdit ? 'Update user information and permissions.' : 'Add a new system user.'}
-                </p>
+                <h2 className="text-xl font-bold tracking-tight text-zinc-900">{isEdit ? "Edit User" : "Add New User"}</h2>
+                <p className="text-sm text-zinc-500 font-medium">Manage system access</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="rounded p-1 text-white/80 hover:bg-white/20 hover:text-white"
-              aria-label="Close"
-            >
-              <CloseIcon className="h-5 w-5" />
+            <button onClick={onClose} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 transition-colors">
+              <CloseIcon className="h-6 w-6" />
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">
-                Username <span className="text-red-500">*</span>
-              </label>
+        <form onSubmit={handleSubmit} className="p-8 space-y-5 max-h-[75vh] overflow-y-auto">
+          {error && (
+            <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-100 font-medium">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-zinc-700 ml-1">Username <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                placeholder="jdoe"
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
                 required
               />
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">
-                Email <span className="text-red-500">*</span>
-              </label>
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-zinc-700 ml-1">Email <span className="text-red-500">*</span></label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@example.com"
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                placeholder="john.doe@company.com"
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
                 required
               />
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter full name"
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
+
+            <div className="space-y-1.5">
+                <label className="text-sm font-bold text-zinc-700 ml-1">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
+                />
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">
-                Password {isEdit && '(leave empty to keep current)'}
-              </label>
+
+             <div className="space-y-1.5">
+              <label className="text-sm font-bold text-zinc-700 ml-1">Role <span className="text-red-500">*</span></label>
+              <select
+                value={roleId}
+                onChange={(e) => setRoleId(e.target.value)}
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
+                required
+              >
+                  <option value="">Select Role</option>
+                  {roles?.map(r => (
+                      <option key={r.role_id} value={r.role_id}>{r.name}</option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-zinc-700 ml-1">Password {isEdit && "(Leave blank to keep current)"} <span className="text-red-500">*</span></label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isEdit ? '••••••••' : 'Enter password (min 6 chars)'}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                placeholder="••••••••"
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
                 required={!isEdit}
               />
-              {isEdit && (
-                <p className="mt-1 text-xs text-zinc-500">
-                  Leave empty if you don&apos;t want to change the password.
-                </p>
-              )}
             </div>
-            {(!isEdit || password) && (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
-                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  required={!isEdit || !!password}
-                />
-              </div>
-            )}
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={roleId}
-                onChange={(e) => setRoleId(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                required
-              >
-                <option value="">Select role</option>
-                {Array.isArray(roles) &&
-                  roles.map((r) => (
-                    <option key={r.role_id} value={r.role_id}>
-                      {r.name}
-                    </option>
-                  ))}
-              </select>
+
+            <div className="space-y-1.5">
+               <label className="text-sm font-bold text-zinc-700 ml-1">Confirm Password <span className="text-red-500">*</span></label>
+               <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
+                required={!isEdit || password.length > 0}
+              />
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Status</label>
-              <select
-                value={isActive ? '1' : '0'}
-                onChange={(e) => setIsActive(e.target.value === '1')}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+
+             <div className="space-y-1.5">
+               <label className="text-sm font-bold text-zinc-700 ml-1">Status</label>
+               <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
               >
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
 
-          {error && (
-            <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-          )}
-
-          <div className="mt-6 flex justify-end gap-2">
+          <div className="flex gap-4 pt-4 sticky bottom-0 bg-white">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              className="flex-1 rounded-xl border-2 border-zinc-100 px-4 py-3.5 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-60"
+              className="flex-1 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              {loading ? 'Saving...' : isEdit ? 'Update User' : 'Create User'}
+              {loading ? "Saving..." : isEdit ? "Update User" : "Create User"}
             </button>
           </div>
         </form>

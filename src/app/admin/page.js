@@ -322,7 +322,7 @@ function StageStatusIcon({ stageKey, status, transaction }) {
         isCompleted
           ? "text-emerald-500 shadow-md"
           : isActive
-          ? "bg-amber-500 text-white shadow-md animate-pulse"
+          ? "bg-blue-500 text-white shadow-md animate-pulse"
           : "bg-zinc-200 text-zinc-400"
       } ${isPending ? "opacity-40" : "opacity-100"}`}
     >
@@ -503,45 +503,50 @@ function AdminDashboard() {
       </div>
 
       <div className="space-y-6 relative z-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
               Dashboard
             </h2>
             <p className="text-sm text-slate-500 mt-1 font-medium">Monitor and manage all transactions</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
-            />
-            <span className="text-slate-400 font-medium">to</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
-            />
-            <button
-              onClick={() => window.location.href = '/admin'}
-              className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
-            >
-              GO
-            </button>
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
-            >
-              <DownloadIcon className="h-4 w-4" />
-              Export To Excel
-            </button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2">
+                <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
+                />
+                <span className="text-slate-400 font-medium hidden sm:inline">to</span>
+                <span className="text-slate-400 font-medium sm:hidden text-center">↓</span>
+                <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
+                />
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                onClick={() => window.location.href = '/admin'}
+                className="flex-1 sm:flex-none rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider text-center"
+                >
+                GO
+                </button>
+                <button
+                onClick={handleExport}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                >
+                <DownloadIcon className="h-4 w-4" />
+                Export
+                </button>
+            </div>
           </div>
         </div>
 
         {/* Stats Cards - Top Row */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {[
             { label: "Total Employee", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
             { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
@@ -562,7 +567,7 @@ function AdminDashboard() {
         </div>
 
         {/* Category Filter Sections */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {/* Unloading Section */}
           <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
             <button

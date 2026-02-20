@@ -527,8 +527,19 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, "0")}`;
 
   const handleFilterClick = (type, item = "") => {
-    setFilterType(type);
-    setFilterItem(item);
+    if (filterType === type && filterItem === item) {
+        setFilterType("all");
+        setFilterItem("");
+    } else {
+        setFilterType(type);
+        setFilterItem(item);
+    }
+  };
+
+  const handleClearFilter = (e) => {
+    e.stopPropagation();
+    setFilterType("all");
+    setFilterItem("");
   };
 
   const totalLoading = itemCounts.loading.reduce((sum, item) => sum + item.count, 0);
@@ -733,10 +744,20 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         <UnloadingGoodsIcon className="h-6 w-6" />
                       </div>
                       <span className="font-bold text-rose-900">
-                        Unloading Goods [Inward]
+                        Unloading - {totalUnloading}
                       </span>
                     </div>
-                    <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-md text-sm font-bold shadow-sm">{totalUnloading}</span>
+                    {filterType === "Unloading" && (
+                      <div 
+                        onClick={handleClearFilter}
+                        className="rounded-full bg-rose-200/50 p-1 text-rose-700 hover:bg-rose-300 transition-colors"
+                        title="Clear Filter"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                    )}
                   </button>
                   <div className="p-3 space-y-1 bg-white max-h-[300px] overflow-y-auto custom-scrollbar">
                     {itemCounts.unloading.map((item, idx) => (
@@ -772,12 +793,22 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       <div className="rounded-lg bg-blue-100 p-2 text-blue-600 shadow-sm">
                         <LoadingGoodsIcon className="h-6 w-6" />
                       </div>
-                      <span className="font-bold text-blue-900">
-                        Loading Goods [Outward]
-                      </span>
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-sm font-bold shadow-sm">{totalLoading}</span>
-                  </button>
+                      <span className="font-semibold text-emerald-900">
+                  Loading - {totalLoading}
+                </span>
+              </div>
+              {filterType === "Loading" && (
+                <div 
+                  onClick={handleClearFilter}
+                  className="rounded-full bg-emerald-200/50 p-1 text-emerald-700 hover:bg-emerald-300 transition-colors"
+                  title="Clear Filter"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              )}
+            </button>
                   <div className="p-3 space-y-1 bg-white max-h-[300px] overflow-y-auto custom-scrollbar">
                     {itemCounts.loading.map((item, idx) => (
                       <button

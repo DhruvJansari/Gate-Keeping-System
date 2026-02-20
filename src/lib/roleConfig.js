@@ -19,6 +19,7 @@ export const ROLE_PANEL_MAP = {
   Admin: '/admin',
   SuperAdmin: '/admin',
   Gatekeeper: '/gatekeeper',
+  Driver: '/driver',
 };
 
 export function getPanelPathForRole(roleName) {
@@ -29,18 +30,43 @@ export function getPanelPathForRole(roleName) {
   if (roleName === 'Gatekeeper') {
     return '/gatekeeper';
   }
+  if (roleName === 'Driver') {
+    return '/driver';
+  }
   // All other users go to common user dashboard
   return '/dashboard';
 }
 
 // Nav items per role (path, label, IconComponent)
+// Updated structure to support nesting:
+// { label: 'Group Name', IconComponent: Icon, children: [ ...items ] }
 export const ROLE_NAV = {
   Admin: [
-    { path: '/admin', label: 'Dashboard', IconComponent: DashboardIcon },
+    { 
+      label: 'Dashboard', 
+      path: '/admin', // Click goes here
+      IconComponent: DashboardIcon,
+      children: [
+        { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: ['view_reports', '*'] },
+      ]
+    },
     { path: '/admin/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: ['view_reports', '*'] },
-    { path: '/admin/items', label: 'Items', IconComponent: ClipboardIcon, countKey: 'items', requiredPermissions: ['manage_masters', '*'] },
-    { path: '/admin/parties', label: 'Party Master', IconComponent: UsersIcon, countKey: 'parties', requiredPermissions: ['manage_masters', '*'] },
-    { path: '/admin/transporters', label: 'Transporter Master', IconComponent: TruckIcon, countKey: 'transporters', requiredPermissions: ['manage_masters', '*'] },
+    { 
+      label: 'Masters', 
+      path: '/admin/items', // Default to Items
+      IconComponent: ClipboardIcon,
+      requiredPermissions: ['manage_masters', '*'],
+      children: [
+        { path: '/admin/items', label: 'Items', IconComponent: ClipboardIcon, countKey: 'items', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/parties', label: 'Party Master', IconComponent: UsersIcon, countKey: 'parties', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/transporters', label: 'Transporter Master', IconComponent: TruckIcon, countKey: 'transporters', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/vehicles', label: 'Vehicle Master', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/drivers', label: 'Driver Master', IconComponent: UserIcon, countKey: 'drivers', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/brokers', label: 'Broker Master', IconComponent: UsersIcon, countKey: 'brokers', requiredPermissions: ['manage_masters', '*'] },
+      ]
+    },
     { path: '/admin/users', label: 'User', IconComponent: UserIcon, countKey: 'users', requiredPermissions: ['manage_users', '*'] },
     { path: '/admin/roles', label: 'Role', IconComponent: ShieldIcon, requiredPermissions: ['manage_roles', '*'] },
     { path: '/admin/permissions', label: 'Permission', IconComponent: KeyIcon, requiredPermissions: ['manage_roles', '*'] },
@@ -63,6 +89,9 @@ export const ROLE_NAV = {
   Viewer: [
     { path: '/dashboard', label: 'Dashboard', IconComponent: DashboardIcon },
   ],
+  Driver: [
+    { path: '/driver', label: 'Dashboard', IconComponent: DashboardIcon },
+  ],
 };
 
 export function getNavForRole(roleName) {
@@ -77,15 +106,39 @@ export function getNavForRole(roleName) {
  */
 export function filterNavByPermissions(navItems, userPermissions) {
   if (!navItems) return [];
-  if (!userPermissions || userPermissions.length === 0) return navItems.filter(item => !item.requiredPermissions);
+  if (!userPermissions || userPermissions.length === 0) {
+     // If no user perms, return items with no required perms
+     // Also recursively check children
+     return navItems.map(item => {
+        if (item.children) {
+           const filteredChildren = item.children.filter(child => !child.requiredPermissions);
+           if (filteredChildren.length === 0) return null;
+           return { ...item, children: filteredChildren };
+        }
+        return !item.requiredPermissions ? item : null;
+     }).filter(Boolean);
+  }
   
-  return navItems.filter(item => {
-    // If no permissions required, always show
-    if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
-      return true;
-    }
+  return navItems.map(item => {
+    // Check main item perms
+    const hasPerm = !item.requiredPermissions || item.requiredPermissions.length === 0 || 
+                   item.requiredPermissions.some(perm => userPermissions.includes(perm));
     
-    // Check if user has at least one of the required permissions
-    return item.requiredPermissions.some(perm => userPermissions.includes(perm));
-  });
+    if (item.children) {
+       // Filter children
+       const filteredChildren = item.children.filter(child => {
+          if (!child.requiredPermissions || child.requiredPermissions.length === 0) return true;
+          return child.requiredPermissions.some(perm => userPermissions.includes(perm));
+       });
+       
+       // If no children left, and this is a group (no path), don't show it unless it has a path itself?
+       // Actually, if it has children logically it's a menu. If all children hidden, hide menu.
+       if (filteredChildren.length > 0) {
+          return { ...item, children: filteredChildren };
+       }
+       return null;
+    }
+
+    return hasPerm ? item : null;
+  }).filter(Boolean);
 }

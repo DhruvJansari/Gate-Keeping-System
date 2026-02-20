@@ -49,10 +49,10 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
   // Validation functions
   const validateTruckNo = (value) => {
     if (!value.trim()) return "Truck number is required";
-    // Pattern: XX 00 XX 0000 (flexible spacing)
-    const pattern = /^[A-Z]{2}\s?\d{1,2}\s?[A-Z]{1,2}\s?\d{1,4}$/i;
+    // Flexible Pattern: XX 00 XX 0000 (allows spaces or no spaces)
+    const pattern = /^[A-Z]{2}\s*\d{1,2}\s*[A-Z]{0,3}\s*\d{4}$/i;
     if (!pattern.test(value.trim())) {
-      return "Invalid format. Example: MH 12 AB 1234";
+      return "Invalid format. Example: MH12AB1234 or MH 12 AB 1234";
     }
     return "";
   };
@@ -84,6 +84,11 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
     return "";
   };
 
+  const validateRequired = (value, label) => {
+      if (!value || (typeof value === 'string' && !value.trim())) return `${label} is required`;
+      return "";
+  };
+
   const handleFieldChange = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
     // Clear error when user starts typing
@@ -107,6 +112,18 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
       case "invoice_rate":
         error = validateInvoiceRate(form.invoice_rate);
         break;
+      case "item_id":
+        error = validateRequired(form.item_id, "Product");
+        break;
+      case "party_id":
+        error = validateRequired(form.party_id, "Party");
+        break;
+      case "invoice_number":
+         error = validateRequired(form.invoice_number, "Invoice Number");
+         break;
+      case "invoice_date":
+         error = validateRequired(form.invoice_date, "Invoice Date");
+         break;
       default:
         break;
     }
@@ -117,6 +134,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
 
   useEffect(() => {
     if (open) {
+      // ... (fetching logic remains same)
       Promise.all([
         fetch("/api/items?status=Active").then((r) => r.json()),
         fetch("/api/parties?status=Active").then((r) => r.json()),
@@ -155,7 +173,11 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
     errors.mobile_number = validateMobileNumber(form.mobile_number);
     errors.invoice_quantity = validateInvoiceQuantity(form.invoice_quantity);
     errors.invoice_rate = validateInvoiceRate(form.invoice_rate);
-    
+    errors.item_id = validateRequired(form.item_id, "Product");
+    errors.party_id = validateRequired(form.party_id, "Party");
+    errors.invoice_number = validateRequired(form.invoice_number, "Invoice Number");
+    errors.invoice_date = validateRequired(form.invoice_date, "Invoice Date");
+
     // Filter out empty errors
     const validationErrors = Object.fromEntries(
       Object.entries(errors).filter(([_, v]) => v !== "")
@@ -347,6 +369,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                             </svg>
                         </div>
                     </div>
+                    {fieldErrors.item_id && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.item_id}</p>}
                   </div>
                 </div>
               </div>
@@ -362,10 +385,13 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                     <div className="relative">
                         <select
                         value={form.party_id}
-                        onChange={(e) =>
-                            setForm((f) => ({ ...f, party_id: e.target.value }))
-                        }
-                        className="w-full appearance-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        onChange={(e) => handleFieldChange("party_id", e.target.value)}
+                        onBlur={() => handleFieldBlur("party_id")}
+                        className={`w-full appearance-none rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                            fieldErrors.party_id
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
                         required
                         >
                         <option value="" className="text-zinc-500">
@@ -495,13 +521,17 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                     <input
                       type="text"
                       value={form.invoice_number}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, invoice_number: e.target.value }))
-                      }
+                      onChange={(e) => handleFieldChange("invoice_number", e.target.value)}
+                      onBlur={() => handleFieldBlur("invoice_number")}
                       placeholder="INV-001"
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.invoice_number 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                      }`}
                       required
                     />
+                    {fieldErrors.invoice_number && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_number}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">
@@ -510,12 +540,16 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                     <input
                       type="date"
                       value={form.invoice_date}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, invoice_date: e.target.value }))
-                      }
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      onChange={(e) => handleFieldChange("invoice_date", e.target.value)}
+                      onBlur={() => handleFieldBlur("invoice_date")}
+                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                        fieldErrors.invoice_date 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                      }`}
                       required
                     />
+                    {fieldErrors.invoice_date && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_date}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">

@@ -92,7 +92,7 @@ export async function PUT(request, { params }) {
 
     if (!name?.trim()) {
       return NextResponse.json(
-        { error: "Role name is required" },
+        { error: 'Role name is required' },
         { status: 400 }
       );
     }

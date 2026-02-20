@@ -8,18 +8,38 @@ import { useAuth } from "@/context/AuthContext";
 import { getNavForRole, filterNavByPermissions } from "@/lib/roleConfig";
 import { SunIcon, MoonIcon, CloseIcon, MenuIcon } from "@/components/Icons";
 
+function ChevronDownIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }) {
+   return (
+     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+     </svg>
+   );
+ }
+
 export function PanelLayout({
   children,
   title,
   roleName,
   sidebarCounts: countsProp,
 }) {
-  // This replacement content is just for `PanelLayout.js`. I will do `Icons.js` in a separate step or inline.
-  // Actually, let's just use inline SVG for the chevron in the button to keep it simple and self-contained in this file modification if possible, or simpler: I will add the icons to Icons.js first in a separate tool call.
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false); // New state for desktop collapse
   
+  // Track open menus
+  const [openMenus, setOpenMenus] = useState({});
+
+  const toggleMenu = (label) => {
+     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
   // Persist collapsed state
   useEffect(() => {
     const saved = localStorage.getItem("sidebarCollapsed");
@@ -38,6 +58,10 @@ export function PanelLayout({
   const [partiesCount, setPartiesCount] = useState(null);
   const [transportersCount, setTransportersCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
+  const [vehiclesCount, setVehiclesCount] = useState(null);
+  const [driversCount, setDriversCount] = useState(null);
+  const [brokersCount, setBrokersCount] = useState(null);
+
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout, permissions } = useAuth();
@@ -46,58 +70,32 @@ export function PanelLayout({
 
   useEffect(() => {
     if (!user) return;
-    if (countsProp?.items !== undefined) setTimeout(() => setItemsCount(countsProp.items), 0);
-    else
-      fetch("/api/items/count")
-        .then((r) => r.json())
-        .then((d) => setItemsCount(d.count ?? 0))
-        .catch(() => setItemsCount(0));
-    if (countsProp?.parties !== undefined) setTimeout(() => setPartiesCount(countsProp.parties), 0);
-    else
-      fetch("/api/parties/count")
-        .then((r) => r.json())
-        .then((d) => setPartiesCount(d.count ?? 0))
-        .catch(() => setPartiesCount(0));
-    if (countsProp?.transporters !== undefined)
-      setTimeout(() => setTransportersCount(countsProp.transporters), 0);
-    else
-      fetch("/api/transporters/count")
-        .then((r) => r.json())
-        .then((d) => setTransportersCount(d.count ?? 0))
-        .catch(() => setTransportersCount(0));
-    if (countsProp?.users !== undefined) setTimeout(() => setUsersCount(countsProp.users), 0);
-    else
-      fetch("/api/users/count")
-        .then((r) => r.json())
-        .then((d) => setUsersCount(d.count ?? 0))
-        .catch(() => setUsersCount(0));
-  }, [
-    role,
-    countsProp?.items,
-    countsProp?.parties,
-    countsProp?.transporters,
-    countsProp?.users,
-  ]);
+    
+    const fetchCount = (url, setter, propVal) => {
+       if (propVal !== undefined) setTimeout(() => setter(propVal), 0);
+       else fetch(url).then(r => r.json()).then(d => setter(d.count ?? 0)).catch(() => setter(0));
+    };
+
+    fetchCount("/api/items/count", setItemsCount, countsProp?.items);
+    fetchCount("/api/parties/count", setPartiesCount, countsProp?.parties);
+    fetchCount("/api/transporters/count", setTransportersCount, countsProp?.transporters);
+    fetchCount("/api/users/count", setUsersCount, countsProp?.users);
+    fetchCount("/api/vehicles/count", setVehiclesCount, countsProp?.vehicles);
+    fetchCount("/api/drivers/count", setDriversCount, countsProp?.drivers);
+    fetchCount("/api/brokers/count", setBrokersCount, countsProp?.brokers);
+
+  }, [role, countsProp]);
 
   useEffect(() => {
     const handler = () => {
       if (user) {
-        fetch("/api/items/count")
-          .then((r) => r.json())
-          .then((d) => setItemsCount(d.count ?? 0))
-          .catch(() => setItemsCount(0));
-        fetch("/api/parties/count")
-          .then((r) => r.json())
-          .then((d) => setPartiesCount(d.count ?? 0))
-          .catch(() => setPartiesCount(0));
-        fetch("/api/transporters/count")
-          .then((r) => r.json())
-          .then((d) => setTransportersCount(d.count ?? 0))
-          .catch(() => setTransportersCount(0));
-        fetch("/api/users/count")
-          .then((r) => r.json())
-          .then((d) => setUsersCount(d.count ?? 0))
-          .catch(() => setUsersCount(0));
+         fetch("/api/items/count").then(r => r.json()).then(d => setItemsCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/parties/count").then(r => r.json()).then(d => setPartiesCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/transporters/count").then(r => r.json()).then(d => setTransportersCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/users/count").then(r => r.json()).then(d => setUsersCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/vehicles/count").then(r => r.json()).then(d => setVehiclesCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/drivers/count").then(r => r.json()).then(d => setDriversCount(d.count ?? 0)).catch(() => {});
+         fetch("/api/brokers/count").then(r => r.json()).then(d => setBrokersCount(d.count ?? 0)).catch(() => {});
       }
     };
     window.addEventListener("sidebar-counts-refresh", handler);
@@ -117,9 +115,132 @@ export function PanelLayout({
     parties: countsProp?.parties ?? partiesCount,
     transporters: countsProp?.transporters ?? transportersCount,
     users: countsProp?.users ?? usersCount,
+    vehicles: countsProp?.vehicles ?? vehiclesCount,
+    drivers: countsProp?.drivers ?? driversCount,
+    brokers: countsProp?.brokers ?? brokersCount,
   };
 
+  // Helper to check if a group should be open based on current path
+  useEffect(() => {
+     if (navItems) {
+        navItems.forEach(item => {
+           if (item.children) {
+              const hasActiveChild = item.children.some(child => pathname === child.path || pathname.startsWith(child.path + "/"));
+              if (hasActiveChild) {
+                 setOpenMenus(prev => ({ ...prev, [item.label]: true }));
+              }
+           }
+        });
+     }
+  }, [pathname, navItems]); // Only run when path changes or nav items load
 
+  const renderNavItem = (item, i, depth = 0) => {
+      // Logic: 
+      // If item has children:
+      //   - If item.path exists: The main area is a Link to item.path. The Chevron is a button to toggle children.
+      //   - If item.path does NOT exist: The whole area is a button to toggle children.
+      
+      const isOpen = openMenus[item.label];
+      const hasChildren = item.children && item.children.length > 0;
+      const IconComp = item.IconComponent;
+      
+      // Check active states
+      const isActive = item.path && (pathname === item.path);
+      const isChildActive = hasChildren && item.children.some(child => pathname === child.path || pathname.startsWith(child.path + "/"));
+      // Main item is "active" if it's the current path OR one of its children is active
+      const isMainActive = isActive || isChildActive;
+
+      const baseClasses = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+         isMainActive
+         ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200"
+         : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+      } ${isCollapsed ? "justify-center" : "justify-between"} ${depth > 0 ? "ml-4" : ""}`;
+
+      if (hasChildren) {
+         return (
+            <div key={`${item.label}-${i}`} className="space-y-1">
+               <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} ${
+                  isMainActive ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200" : "hover:bg-zinc-50 text-zinc-600"
+               } rounded-lg transition-colors`}>
+                  
+                  {/* Left Side: Link or Button */}
+                  {item.path ? (
+                     <Link
+                        href={item.path}
+                        onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); }}
+                        className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-sm font-medium ${isCollapsed ? "justify-center" : ""}`}
+                        title={isCollapsed ? item.label : ""}
+                     >
+                        {IconComp && <IconComp className={`h-5 w-5 shrink-0 ${isMainActive ? "text-blue-600" : "text-zinc-500"}`} />}
+                        {!isCollapsed && <span>{item.label}</span>}
+                     </Link>
+                  ) : (
+                     <button
+                        onClick={() => !isCollapsed && toggleMenu(item.label)}
+                        className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-sm font-medium ${isCollapsed ? "justify-center" : "text-left"}`}
+                        title={isCollapsed ? item.label : ""}
+                     >
+                        {IconComp && <IconComp className={`h-5 w-5 shrink-0 ${isMainActive ? "text-blue-600" : "text-zinc-500"}`} />}
+                        {!isCollapsed && <span>{item.label}</span>}
+                     </button>
+                  )}
+
+                  {/* Right Side: Chevron Toggle */}
+                  {!isCollapsed && (
+                     <button
+                        onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           toggleMenu(item.label);
+                        }}
+                        className="p-2.5 hover:bg-black/5 rounded-r-lg transition-colors"
+                     >
+                        <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                     </button>
+                  )}
+               </div>
+               
+               {/* Dropdown Content */}
+               {!isCollapsed && isOpen && (
+                  <div className="pl-4 space-y-1 relative">
+                     <div className="absolute left-6 top-0 bottom-0 w-px bg-zinc-200" />
+                     {item.children.map((child, j) => renderNavItem(child, j, depth + 1))}
+                  </div>
+               )}
+            </div>
+         );
+      }
+
+      // Standard Item (No Children)
+      const count = item.countKey ? sidebarCounts?.[item.countKey] : null;
+
+      return (
+         <Link
+            key={`${item.path}-${item.label}-${i}`}
+            href={item.path}
+            onClick={() => {
+               if (window.innerWidth < 1024) setSidebarOpen(false);
+            }}
+            title={isCollapsed ? item.label : ""}
+            className={baseClasses}
+         >
+            <div className={`flex items-center gap-3 ${depth > 0 ? "text-xs" : ""}`}>
+               {IconComp && <IconComp className={`h-5 w-5 shrink-0 ${isActive ? "text-blue-600" : "text-zinc-500"}`} />}
+               {!isCollapsed && <span>{item.label}</span>}
+            </div>
+            {!isCollapsed && count !== null && count !== undefined && (
+               <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  isActive ? "bg-blue-100 text-blue-700" : "bg-zinc-100 text-zinc-600"
+               }`}>
+                  {count}
+               </span>
+            )}
+            {isCollapsed && count !== null && count !== undefined && (
+               <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
+            )}
+         </Link>
+      );
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
@@ -162,42 +283,7 @@ export function PanelLayout({
           </div>
 
           <nav className="flex-1 space-y-1 p-3 min-h-0 overflow-y-auto">
-            {navItems.map((item, i) => {
-              const isActive =
-                pathname === item.path || pathname.startsWith(item.path + "/");
-              const count = item.countKey
-                ? sidebarCounts?.[item.countKey]
-                : null;
-              const IconComp = item.IconComponent;
-              return (
-                <Link
-                  key={`${item.path}-${item.label}-${i}`}
-                  href={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  title={isCollapsed ? item.label : ""}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200"
-                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                  } ${isCollapsed ? "justify-center" : "justify-between"}`}
-                >
-                  <div className="flex items-center gap-3">
-                    {IconComp && <IconComp className={`h-5 w-5 shrink-0 ${isActive ? "text-blue-600" : "text-zinc-500"}`} />}
-                    {!isCollapsed && <span>{item.label}</span>}
-                  </div>
-                  {!isCollapsed && count !== null && count !== undefined && (
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                       isActive ? "bg-blue-100 text-blue-700" : "bg-zinc-100 text-zinc-600"
-                    }`}>
-                      {count}
-                    </span>
-                  )}
-                  {isCollapsed && count !== null && count !== undefined && (
-                     <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
-                  )}
-                </Link>
-              );
-            })}
+            {navItems.map((item, i) => renderNavItem(item, i))}
           </nav>
 
           <div className="flex-shrink-0 border-t border-zinc-200 p-3 bg-zinc-50/50">

@@ -82,17 +82,26 @@ export async function POST(request) {
     if (!canManage) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json();
-    const { username, email, password, full_name, role_id, is_active } = body;
+    const { username, email, full_name, role_id, is_active } = body;
+    let { password } = body;
 
-    if (!username?.trim() || !email?.trim() || !password) {
+    if (!username?.trim() || !email?.trim()) {
       return NextResponse.json(
-        { error: 'Username, email and password are required' },
+        { error: 'Username and email are required' },
         { status: 400 }
       );
     }
 
     if (!role_id) {
-      return NextResponse.json({ error: 'Role is required' }, { status: 400 });
+        return NextResponse.json({ error: 'Role is required' }, { status: 400 });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    if (password && password.length < 6) {
+        return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
     }
 
     const db = await getDb();
