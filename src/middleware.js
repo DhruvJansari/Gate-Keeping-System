@@ -43,6 +43,12 @@ export function middleware(request) {
        if (role === 'Gatekeeper') {
          return NextResponse.redirect(new URL('/gatekeeper', request.url));
        }
+       if (role === 'Logistics Manager') {
+         return NextResponse.redirect(new URL('/logistics', request.url));
+       }
+       if (role === 'Contract Manager') {
+         return NextResponse.redirect(new URL('/contracts', request.url));
+       }
        return NextResponse.redirect(new URL('/login', request.url));
     }
   }
@@ -56,6 +62,42 @@ export function middleware(request) {
     }
   }
 
+  if (pathname.startsWith('/logistics')) {
+    if (!role || role !== 'Logistics Manager') {
+      if (role === 'Admin' || role === 'SuperAdmin') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      if (role === 'Contract Manager') {
+        return NextResponse.redirect(new URL('/contracts', request.url));
+      }
+      if (role === 'Gatekeeper') {
+        return NextResponse.redirect(new URL('/gatekeeper', request.url));
+      }
+      if (role === 'Driver') {
+        return NextResponse.redirect(new URL('/driver', request.url));
+      }
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  if (pathname.startsWith('/contracts')) {
+    if (!role || role !== 'Contract Manager') {
+      if (role === 'Admin' || role === 'SuperAdmin') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      if (role === 'Logistics Manager') {
+        return NextResponse.redirect(new URL('/logistics', request.url));
+      }
+      if (role === 'Gatekeeper') {
+        return NextResponse.redirect(new URL('/gatekeeper', request.url));
+      }
+      if (role === 'Driver') {
+        return NextResponse.redirect(new URL('/driver', request.url));
+      }
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
@@ -63,6 +105,8 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/gatekeeper/:path*',
+    '/logistics/:path*',
+    '/contracts/:path*',
     '/api/:path*',
   ],
 };

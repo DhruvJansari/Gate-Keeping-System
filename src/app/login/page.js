@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 // import { useTheme } from "@/context/ThemeContext";
 import { getPanelPathForRole } from "@/lib/roleConfig";
 import { SunIcon, MoonIcon } from "@/components/Icons";
+import { InstallPWAButton } from "@/components/InstallPWAButton";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -46,6 +47,11 @@ export default function LoginPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
 
+      {/* Install PWA Button — top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <InstallPWAButton />
+      </div>
+
       <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 shadow-xl relative z-10">
         <div className="mb-6 flex justify-center">
           <img 
@@ -55,7 +61,7 @@ export default function LoginPage() {
           />
         </div>
         <h1 className="mb-2 text-2xl font-bold text-slate-900 text-center">
-          Gate Keeping System
+          Vaishnodevi Agro Resources Pvt. Ltd.
         </h1>
         <p className="mb-8 text-sm text-slate-500 text-center">
           Sign in to your account

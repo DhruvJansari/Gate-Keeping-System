@@ -338,7 +338,7 @@ export default function LogisticDashboard() {
                             Export
                         </button>
                         <button 
-                            onClick={() => router.push("/admin/logistic-dashboard/all")}
+                            onClick={() => router.push(user?.role_name === 'Logistics Manager' ? "/logistics/all" : "/admin/logistic-dashboard/all")}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-semibold rounded-lg text-sm transition-all shadow-sm h-[42px] whitespace-nowrap"
                         >
                             <ListIcon className="h-4 w-4" />

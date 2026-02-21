@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ToastProvider } from "@/components/ToastProvider";
+import { PWARegister } from "@/components/PWARegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,13 +16,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Gate Keeping System",
-  description: "Gate keeping and weighbridge management",
+  title: "VARPL — Vaishnodevi Agro Resources Pvt. Ltd.",
+  description: "Agro resource management system by VARPL",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+
+        {/* Theme color for browser chrome */}
+        <meta name="theme-color" content="#2563eb" />
+
+        {/* Apple PWA meta tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="VARPL" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -30,7 +44,9 @@ export default function RootLayout({ children }) {
             <ToastProvider>{children}</ToastProvider>
           </AuthProvider>
         </ThemeProvider>
+        <PWARegister />
       </body>
     </html>
   );
 }
+

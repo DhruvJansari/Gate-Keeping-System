@@ -269,7 +269,7 @@ export function PanelLayout({
               />
               {!isCollapsed && (
                 <span className="font-bold text-zinc-900 whitespace-nowrap opacity-100 transition-opacity duration-300">
-                  Gate System
+                  VARPL
                 </span>
               )}
             </div>

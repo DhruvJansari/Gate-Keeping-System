@@ -20,6 +20,8 @@ export const ROLE_PANEL_MAP = {
   SuperAdmin: '/admin',
   Gatekeeper: '/gatekeeper',
   Driver: '/driver',
+  'Logistics Manager': '/logistics',
+  'Contract Manager': '/contracts',
 };
 
 export function getPanelPathForRole(roleName) {
@@ -32,6 +34,12 @@ export function getPanelPathForRole(roleName) {
   }
   if (roleName === 'Driver') {
     return '/driver';
+  }
+  if (roleName === 'Logistics Manager') {
+    return '/logistics';
+  }
+  if (roleName === 'Contract Manager') {
+    return '/contracts';
   }
   // All other users go to common user dashboard
   return '/dashboard';
@@ -91,6 +99,17 @@ export const ROLE_NAV = {
   ],
   Driver: [
     { path: '/driver', label: 'Dashboard', IconComponent: DashboardIcon },
+  ],
+  'Logistics Manager': [
+    { path: '/logistics', label: 'Logistic Dashboard', IconComponent: TruckIcon },
+    { path: '/logistics/items', label: 'Items', IconComponent: ClipboardIcon },
+    { path: '/logistics/vehicles', label: 'Vehicles', IconComponent: TruckIcon },
+  ],
+  'Contract Manager': [
+    { path: '/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon },
+    { path: '/contracts/parties', label: 'Party Master', IconComponent: UsersIcon },
+    { path: '/contracts/brokers', label: 'Broker Master', IconComponent: UsersIcon },
+    { path: '/contracts/items', label: 'Items', IconComponent: ClipboardIcon },
   ],
 };
 
