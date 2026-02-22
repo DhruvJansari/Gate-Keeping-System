@@ -545,6 +545,21 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
   const totalLoading = itemCounts.loading.reduce((sum, item) => sum + item.count, 0);
   const totalUnloading = itemCounts.unloading.reduce((sum, item) => sum + item.count, 0);
 
+  // Compute per-stage counts from current transaction list
+  const stageCounts = (() => {
+    const counts = { closed: 0 };
+    STAGES.forEach(s => { counts[s.key] = 0; });
+    transactions.forEach(t => {
+      const next = getNextStageToConfirm(t);
+      if (next === null) {
+        counts.closed++;
+      } else {
+        counts[next] = (counts[next] || 0) + 1;
+      }
+    });
+    return counts;
+  })();
+
   // Filter transactions based on search query and selected stage
   const filteredTransactions = transactions.filter((t) => {
     // Search query filter
@@ -565,7 +580,11 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     // Stage filter
     if (selectedStage) {
       const currentStage = getNextStageToConfirm(t);
-      if (currentStage !== selectedStage) return false;
+      if (selectedStage === 'closed') {
+        if (currentStage !== null) return false;
+      } else {
+        if (currentStage !== selectedStage) return false;
+      }
     }
     
     return true;
@@ -840,35 +859,76 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
                 Filter by Stage
              </h3>
-             {selectedStage && (
-                <button onClick={() => setSelectedStage(null)} className="text-xs text-blue-600 hover:underline font-medium">Clear Filter</button>
-             )}
+             <div className="flex items-center gap-3">
+               <span className="text-xs text-zinc-400 font-medium">{transactions.length} total</span>
+               {selectedStage && (
+                 <button onClick={() => setSelectedStage(null)} className="text-xs text-blue-600 hover:underline font-medium">Clear Filter</button>
+               )}
+             </div>
           </div>
           <div className="overflow-x-auto -mx-2 px-2 pb-2 scrollbar-thin scrollbar-thumb-zinc-200 scrollbar-track-transparent">
             <div className="flex gap-2 min-w-max">
+              {/* All Stages */}
               <button
                 onClick={() => setSelectedStage(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
                   selectedStage === null
                     ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md ring-2 ring-blue-100'
                     : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                 }`}
               >
                 All Stages
+                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                  selectedStage === null ? 'bg-white/20 text-white' : 'bg-zinc-200 text-zinc-600'
+                }`}>
+                  {transactions.length}
+                </span>
               </button>
+
+              {/* Per-Stage buttons */}
               {visibleStages.map((stage) => (
                 <button
                   key={stage.key}
                   onClick={() => setSelectedStage(stage.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
                     selectedStage === stage.key
                       ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md ring-2 ring-blue-100'
                       : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 >
                   {stage.label}
+                  <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                    selectedStage === stage.key
+                      ? 'bg-white/20 text-white'
+                      : stageCounts[stage.key] > 0
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-zinc-200 text-zinc-500'
+                  }`}>
+                    {stageCounts[stage.key] ?? 0}
+                  </span>
                 </button>
               ))}
+
+              {/* Closed */}
+              <button
+                onClick={() => setSelectedStage('closed')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-sm border ${
+                  selectedStage === 'closed'
+                    ? 'bg-zinc-800 text-white border-zinc-800 shadow-md'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-800 hover:text-white hover:border-zinc-800'
+                }`}
+              >
+                CLOSED
+                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                  selectedStage === 'closed'
+                    ? 'bg-white/20 text-white'
+                    : stageCounts.closed > 0
+                      ? 'bg-zinc-800 text-white'
+                      : 'bg-zinc-200 text-zinc-500'
+                }`}>
+                  {stageCounts.closed}
+                </span>
+              </button>
             </div>
           </div>
         </div>

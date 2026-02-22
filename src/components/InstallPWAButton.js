@@ -60,7 +60,7 @@ export function InstallPWAButton() {
   return (
     <button
       onClick={handleInstallClick}
-      className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm hover:bg-blue-100 active:scale-95 transition-all"
+      className="flex items-center gap-1.5 rounded-xs border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm hover:bg-blue-100 active:scale-95 transition-all"
       aria-label="Install VARPL app"
     >
       <svg

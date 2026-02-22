@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.webmanifest" />
 
         {/* Theme color for browser chrome */}
-        <meta name="theme-color" content="#2563eb" />
+        <meta name="theme-color" content="#b8935a" />
 
         {/* Apple PWA meta tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

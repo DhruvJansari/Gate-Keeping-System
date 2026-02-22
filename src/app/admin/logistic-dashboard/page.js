@@ -406,7 +406,7 @@ export default function LogisticDashboard() {
               <thead className="bg-zinc-50 text-xs uppercase text-zinc-500 border-b border-zinc-200">
                 <tr>
                   <th className="px-4 py-4 font-bold border-r border-zinc-200">S/N</th>
-                  <th className="px-4 py-4 font-bold border-r border-zinc-200">Item</th>
+                  {/* <th className="px-4 py-4 font-bold border-r border-zinc-200">Item</th> */}
                   <th className="px-4 py-4 font-bold border-r border-zinc-200">Vehicle No</th>
                   <th className="px-4 py-4 font-bold border-r border-zinc-200">Date</th>
                   {STAGES.map(s => (
@@ -428,7 +428,7 @@ export default function LogisticDashboard() {
                         className="hover:bg-blue-50/50 transition-colors"
                     >
                       <td className="px-4 py-3 border-r border-zinc-100 font-mono text-xs text-zinc-500">{i + 1}</td>
-                      <td className="px-4 py-3 border-r border-zinc-100 font-bold text-zinc-900">{entry.product}</td>
+                      {/* <td className="px-4 py-3 border-r border-zinc-100 font-bold text-zinc-900">{entry.product}</td> */}
                       <td className="px-4 py-3 border-r border-zinc-100 font-mono font-bold text-zinc-800">{entry.truck_no}</td>
                       <td className="px-4 py-3 border-r border-zinc-100 whitespace-nowrap">{fmtDate(entry.entry_date)}</td>
                       

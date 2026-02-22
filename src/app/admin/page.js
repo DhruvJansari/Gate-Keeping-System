@@ -458,6 +458,21 @@ function AdminDashboard() {
   const totalLoading = itemCounts.loading.reduce((sum, item) => sum + item.count, 0);
   const totalUnloading = itemCounts.unloading.reduce((sum, item) => sum + item.count, 0);
 
+  // Compute per-stage counts from the current transaction list
+  const stageCounts = (() => {
+    const counts = { closed: 0 };
+    STAGES.forEach(s => { counts[s.key] = 0; });
+    transactions.forEach(t => {
+      const next = getNextStageToConfirm(t);
+      if (next === null) {
+        counts.closed++;
+      } else {
+        counts[next] = (counts[next] || 0) + 1;
+      }
+    });
+    return counts;
+  })();
+
   // Filter transactions based on search query and selected stage
   const filteredTransactions = transactions.filter((t) => {
     // Search query filter
@@ -478,7 +493,11 @@ function AdminDashboard() {
     // Stage filter
     if (selectedStage) {
       const currentStage = getNextStageToConfirm(t);
-      if (currentStage !== selectedStage) return false;
+      if (selectedStage === 'closed') {
+        if (currentStage !== null) return false;
+      } else {
+        if (currentStage !== selectedStage) return false;
+      }
     }
     
     return true;
@@ -649,32 +668,73 @@ function AdminDashboard() {
 
         {/* Stage Filter Buttons */}
         <div className="rounded-xl border border-zinc-200 bg-white shadow-sm p-4">
-          <h3 className="text-sm font-semibold text-zinc-700 mb-3">Filter by Current Stage</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-zinc-700">Filter by Current Stage</h3>
+            <span className="text-xs text-zinc-400 font-medium">{transactions.length} total transactions</span>
+          </div>
           <div className="overflow-x-auto -mx-2 px-2">
             <div className="flex gap-2 min-w-max pb-2">
+              {/* All Stages */}
               <button
                 onClick={() => setSelectedStage(null)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    selectedStage === null
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
-                  }`}
+                className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  selectedStage === null
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                }`}
               >
                 All Stages
+                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                  selectedStage === null ? 'bg-white/20 text-white' : 'bg-zinc-300 text-zinc-700'
+                }`}>
+                  {transactions.length}
+                </span>
               </button>
+
+              {/* Per-Stage buttons */}
               {STAGES.map((stage) => (
                 <button
                   key={stage.key}
                   onClick={() => setSelectedStage(stage.key)}
-                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     selectedStage === stage.key
                       ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
                   }`}
                 >
                   {stage.label}
+                  <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                    selectedStage === stage.key
+                      ? 'bg-white/20 text-white'
+                      : stageCounts[stage.key] > 0
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-zinc-200 text-zinc-500'
+                  }`}>
+                    {stageCounts[stage.key] ?? 0}
+                  </span>
                 </button>
               ))}
+
+              {/* Closed */}
+              <button
+                onClick={() => setSelectedStage('closed')}
+                className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  selectedStage === 'closed'
+                    ? 'bg-zinc-800 text-white shadow-md'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-800 hover:text-white'
+                }`}
+              >
+                CLOSED
+                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
+                  selectedStage === 'closed'
+                    ? 'bg-white/20 text-white'
+                    : stageCounts.closed > 0
+                      ? 'bg-zinc-800 text-white'
+                      : 'bg-zinc-200 text-zinc-500'
+                }`}>
+                  {stageCounts.closed}
+                </span>
+              </button>
             </div>
           </div>
         </div>

@@ -41,7 +41,7 @@ export function DriverModal({ open, onClose, onSuccess, driver, readOnly }) {
   };
 
   const validateLicence = (value) => {
-      if (!value.trim()) return "Licence number is required";
+      // Licence is optional — only validate format if provided
       return "";
   };
 
@@ -88,8 +88,8 @@ export function DriverModal({ open, onClose, onSuccess, driver, readOnly }) {
   }, [open, driver]);
 
   async function handleSubmit(e) {
+    e.preventDefault(); // Always prevent default first
     if (isView) return;
-    e.preventDefault();
     setError("");
 
     // Strict Validation
@@ -110,6 +110,7 @@ export function DriverModal({ open, onClose, onSuccess, driver, readOnly }) {
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      toast.error("Please fix the highlighted fields");
       return;
     }
 
