@@ -138,52 +138,69 @@ export function ReportsPanel() {
     try {
       // Dynamically import xlsx library
       const XLSX = await import('xlsx');
-      
-      // Format filtered transactions for export
-      const exportData = transactions.map((t, idx) => ({
-        'S/N': idx + 1,
-        'Transaction No': txnNo(t),
-        'Type': t.transaction_type,
-        'Party Name': t.party_name,
-        'Item Name': t.item_name,
-        'Transporter': t.transporter_name,
-        'Truck Number': t.truck_no,
-        'Invoice No': t.invoice_number || '—',
-        'Invoice Date': formatDate(t.invoice_date),
-        'PO/DO Number': t.po_do_number || '—',
-        'LR Number': t.lr_number || '—',
-        'Mobile': t.mobile_number || '—',
-        'First Weight': t.first_weight ? parseFloat(t.first_weight) : '—',
-        'Second Weight': t.second_weight ? parseFloat(t.second_weight) : '—',
-        'Net Weight': t.net_weight ? parseFloat(t.net_weight) : '—',
-        'Status': t.current_status || 'In Progress',
-        'Remark 1': t.remark1 || '',
-        'Remark 2': t.remark2 || '',
-        'Created Date': formatDate(t.created_at),
-        'Gate In': formatDate(t.gate_in_at),
-        'Gate Out': formatDate(t.gate_out_at),
-        'First Weigh': formatDate(t.first_weigh_at),
-        'Second Weigh': formatDate(t.second_weigh_at),
-      }));
+
+      // Labels in Column A
+      const LABELS = [
+        'Item:',
+        'Truck No:',
+        'Party Name:',
+        'Invoice No',
+        'Invoice Date',
+        'Invoice Qty',
+        'PO / Do No:',
+        'Transporter:',
+        'Lr Number',
+        'Mobile No',
+        'Remark - 1',
+        'Remark - 2',
+        'First Weight',
+        'Second Weight',
+        'Net Weight',
+      ];
+
+      // Build array-of-arrays: each row = [label, txn1Value, txn2Value, ...]
+      const aoa = LABELS.map((label) => [label]);
+
+      transactions.forEach((t) => {
+        const invoiceDate = formatDate(t.invoice_date);
+        const values = [
+          t.item_name || '',
+          t.truck_no || '',
+          t.party_name || '',
+          t.invoice_number || '',
+          invoiceDate,
+          t.invoice_quantity != null ? Number(t.invoice_quantity) : '',
+          t.po_do_number || '',
+          t.transporter_name || '',
+          t.lr_number || '',
+          t.mobile_number || '',
+          t.remark1 || '',
+          t.remark2 || '',
+          t.first_weight != null ? Math.round(parseFloat(t.first_weight)) : '',
+          t.second_weight != null ? Math.round(parseFloat(t.second_weight)) : '',
+          t.net_weight != null ? Math.round(parseFloat(t.net_weight)) : '',
+        ];
+        values.forEach((val, rowIdx) => {
+          aoa[rowIdx].push(val);
+        });
+      });
 
       // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      
-      // Add worksheet to workbook
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
       XLSX.utils.book_append_sheet(wb, ws, 'Filtered Report');
-      
+
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `Report_Filtered_${timestamp}.xlsx`;
-      
+
       // Download file
       XLSX.writeFile(wb, filename);
     } catch (err) {
       console.error('Export error:', err);
       alert('Failed to export data. Please try again.');
     }
-  }, [transactions, formatDate, txnNo]);
+  }, [transactions, formatDate]);
 
   return (
     <PanelLayout title="Reports" roleName={user?.role_name || "User"}>
@@ -409,7 +426,7 @@ export function ReportsPanel() {
                     {transactions.map((t, idx) => (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
+                        className={`border-b border-zinc-100 hover:bg-blue-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                       >
                         <td className="px-4 py-3 text-sm text-zinc-700">{idx + 1}</td>
                         <td className="px-4 py-3 text-sm font-medium text-zinc-900">{txnNo(t)}</td>

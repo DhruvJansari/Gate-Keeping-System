@@ -18,6 +18,15 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "VARPL — Vaishnodevi Agro Resources Pvt. Ltd.",
   description: "Agro resource management system by VARPL",
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -176,12 +176,12 @@ export function GateTransactionsPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((t) => {
+                  {transactions.map((t, idx) => {
                     const status = getStageStatus(t);
                     return (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 hover:bg-zinc-50"
+                        className={`border-b border-zinc-100 hover:bg-blue-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                       >
                         <td className="px-4 py-3">
                           <button

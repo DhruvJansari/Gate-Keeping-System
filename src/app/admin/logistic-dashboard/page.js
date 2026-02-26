@@ -6,6 +6,7 @@ import { PanelLayout } from "@/components/PanelLayout";
 import { TruckIcon, ViewIcon, EditIcon, DeleteIcon, CloseIcon, SearchIcon, DownloadIcon, ListIcon } from "@/components/Icons";
 import { ComposeLogisticModal } from "@/components/ComposeLogisticModal";
 import { LogisticEntryDetail } from "@/components/LogisticEntryDetail";
+import { LogisticReceiptPrint } from "@/components/LogisticReceiptPrint";
 import toast from "react-hot-toast";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useRouter } from "next/navigation";
@@ -75,7 +76,7 @@ function DateFilter({ label, value, onChange }) {
 }
 
 export default function LogisticDashboard() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const router = useRouter();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,9 @@ export default function LogisticDashboard() {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [detailModal, setDetailModal] = useState({ open: false, id: null, readOnly: false });
   
+  // Print State
+  const [printEntry, setPrintEntry] = useState(null);
+
   // Confirmation State
   const [confirmState, setConfirmState] = useState({ open: false, title: "", message: "", action: null, isDestructive: false });
 
@@ -270,7 +274,8 @@ export default function LogisticDashboard() {
   const StageCell = ({ entry, field, index }) => {
       const isDone = !!entry[field];
       const isPreviousDone = index === 0 || !!entry[STAGES[index - 1].field];
-      const isActive = !isDone && isPreviousDone && entry.status !== "Closed";
+      const hasPerm = user?.role_name === 'Admin' || hasPermission('edit_transactions');
+      const isActive = !isDone && isPreviousDone && entry.status !== "Closed" && hasPerm;
 
       return (
           <td className={`px-2 py-3 border-r border-zinc-100 text-center transition-all ${isActive ? 'bg-blue-50/30 cursor-pointer' : 'cursor-default'}`}
@@ -344,12 +349,14 @@ export default function LogisticDashboard() {
                             <ListIcon className="h-4 w-4" />
                             View All
                         </button>
-                        <button 
-                            onClick={() => setIsComposeOpen(true)}
-                            className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-blue-500/20 shadow-lg text-sm transition-all active:scale-95 h-[42px] whitespace-nowrap"
-                        >
-                            + New
-                        </button>
+                        {(user?.role_name === 'Admin' || hasPermission('edit_transactions')) && (
+                          <button 
+                              onClick={() => setIsComposeOpen(true)}
+                              className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-blue-500/20 shadow-lg text-sm transition-all active:scale-95 h-[42px] whitespace-nowrap"
+                          >
+                              + New
+                          </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -357,7 +364,7 @@ export default function LogisticDashboard() {
             {/* Filters Toolbar */}
             <div className="px-6 py-4 bg-zinc-50/50 flex flex-col xl:flex-row items-stretch gap-4">
                  <div className="relative flex-1 min-w-[200px]">
-                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-2/2 h-4 w-4 text-zinc-400" />
                     <input 
                         type="text" 
                         placeholder="Search entries..." 
@@ -451,20 +458,34 @@ export default function LogisticDashboard() {
                               >
                                   <ViewIcon className="h-4 w-4" />
                               </button>
-                               <button 
-                                onClick={() => setDetailModal({ open: true, id: entry.logistic_id, readOnly: false })}
-                                className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                title="Edit Entry"
+                              {(user?.role_name === 'Admin' || hasPermission('edit_transactions')) && (
+                                <button 
+                                  onClick={() => setDetailModal({ open: true, id: entry.logistic_id, readOnly: false })}
+                                  className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                  title="Edit Entry"
+                                >
+                                    <EditIcon className="h-4 w-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setPrintEntry(entry)}
+                                className="p-1.5 text-zinc-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                                title="Print Transport Receipt"
                               >
-                                  <EditIcon className="h-4 w-4" />
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
                               </button>
-                               <button 
-                                onClick={() => handleDeleteClick(entry.logistic_id)}
-                                className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Delete Entry"
-                              >
-                                  <DeleteIcon className="h-4 w-4" />
-                              </button>
+                              {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && (
+                                <button 
+                                  onClick={() => handleDeleteClick(entry.logistic_id)}
+                                  className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Delete Entry"
+                                >
+                                    <DeleteIcon className="h-4 w-4" />
+                                </button>
+                              )}
                           </div>
                       </td>
                     </tr>
@@ -508,12 +529,14 @@ export default function LogisticDashboard() {
                                 >
                                     <ViewIcon className="h-4 w-4" />
                                 </button>
-                                <button 
-                                    onClick={() => handleDeleteClick(entry.logistic_id)}
-                                    className="p-2 bg-red-50 text-red-600 rounded-lg"
-                                >
-                                    <DeleteIcon className="h-4 w-4" />
-                                </button>
+                                {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && (
+                                  <button 
+                                      onClick={() => handleDeleteClick(entry.logistic_id)}
+                                      className="p-2 bg-red-50 text-red-600 rounded-lg"
+                                  >
+                                      <DeleteIcon className="h-4 w-4" />
+                                  </button>
+                                )}
                             </div>
                         </div>
 
@@ -568,6 +591,10 @@ export default function LogisticDashboard() {
         onSuccess={fetchEntries} 
       />
       
+      {printEntry && (
+          <LogisticReceiptPrint entry={printEntry} onClose={() => setPrintEntry(null)} />
+      )}
+
       {detailModal.open && (
           <LogisticEntryDetail 
             entryId={detailModal.id} 

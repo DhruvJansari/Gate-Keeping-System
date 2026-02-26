@@ -81,7 +81,7 @@ function ShieldIcon({ className }) {
 }
 
 function UsersManagement() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
@@ -204,13 +204,17 @@ function UsersManagement() {
 
         {/* Toolbar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            onClick={handleAdd}
-            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
-          >
-            <UserIcon className="h-4 w-4" />
-            Create New User
-          </button>
+          {hasPermission("manage_users") ? (
+            <button
+              onClick={handleAdd}
+              className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
+            >
+              <UserIcon className="h-4 w-4" />
+              Create New User
+            </button>
+          ) : (
+            <div className="flex w-fit items-center gap-2 px-4 py-2" />
+          )}
           <div className="flex flex-wrap gap-3">
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
@@ -301,21 +305,25 @@ function UsersManagement() {
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleEdit(u)}
-                            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"
-                            title="Edit"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(u)}
-                            disabled={deletingId === u.user_id || u.user_id === user?.user_id}
-                            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={u.user_id === user?.user_id ? "Cannot delete own account" : "Delete"}
-                          >
-                            <DeleteIcon className="h-4 w-4" />
-                          </button>
+                          {hasPermission("manage_users") && (
+                            <>
+                              <button
+                                onClick={() => handleEdit(u)}
+                                className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"
+                                title="Edit"
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(u)}
+                                disabled={deletingId === u.user_id || u.user_id === user?.user_id}
+                                className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={u.user_id === user?.user_id ? "Cannot delete own account" : "Delete"}
+                              >
+                                <DeleteIcon className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -418,15 +426,17 @@ function UsersManagement() {
               >
                 Close
               </button>
-              <button
-                onClick={() => {
-                  setViewingUser(null);
-                  handleEdit(viewingUser);
-                }}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
-              >
-                Edit User
-              </button>
+              {hasPermission("manage_users") && (
+                <button
+                  onClick={() => {
+                    setViewingUser(null);
+                    handleEdit(viewingUser);
+                  }}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
+                >
+                  Edit User
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -437,7 +447,7 @@ function UsersManagement() {
 
 export default function UsersPage() {
   return (
-    <ProtectedRoute allowedRoles={["Admin"]}>
+    <ProtectedRoute allowedRoles={["Admin", "View Only Admin"]}>
       <UsersManagement />
     </ProtectedRoute>
   );

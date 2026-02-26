@@ -27,6 +27,7 @@ export async function GET(request, context) {
         gst_no,
         pan_no,
         address,
+        city,
         contact_phone,
         status,
         created_at
@@ -75,6 +76,7 @@ export async function PUT(request, context) {
       email,
       contact_phone,
       address,
+      city,
       gst_no,
       pan_no,
       status
@@ -94,6 +96,7 @@ export async function PUT(request, context) {
       email: email?.trim() ?? null,
       contact_phone: contact_phone?.trim() ?? null,
       address: address?.trim() ?? null,
+      city: city?.trim() ?? null,
       gst_no: gst_no?.trim() ?? null,
       pan_no: pan_no?.trim() ?? null,
       status: status === 'Inactive' ? 'Inactive' : 'Active'
@@ -109,6 +112,7 @@ export async function PUT(request, context) {
         email = ?,
         contact_phone = ?,
         address = ?,
+        city = ?,
         gst_no = ?,
         pan_no = ?,
         status = ?
@@ -119,6 +123,7 @@ export async function PUT(request, context) {
         payload.email,
         payload.contact_phone,
         payload.address,
+        payload.city,
         payload.gst_no,
         payload.pan_no,
         payload.status,

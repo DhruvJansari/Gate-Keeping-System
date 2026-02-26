@@ -48,6 +48,12 @@ export async function POST(request) {
 
     const permissions = permRows.map((r) => r.code);
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET environment variable is not set');
+      }
+    }
     const token = jwt.sign(
       {
         userId: user.user_id,
@@ -55,7 +61,7 @@ export async function POST(request) {
         roleId: user.role_id,
         roleName: user.role_name,
       },
-      process.env.JWT_SECRET || 'fallback-secret-change-me',
+      jwtSecret || 'dev-only-fallback-secret',
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 

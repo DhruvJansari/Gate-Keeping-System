@@ -20,7 +20,7 @@ export function ThemeProvider({ children }) {
   }, []);
 
   const toggleTheme = () => {
-    console.log("Theme is locked to light mode (Tally Prime Style)");
+    // Theme is locked to light mode (Tally Prime Style) — no-op
   };
 
   const setTheme = () => {}; // No-op

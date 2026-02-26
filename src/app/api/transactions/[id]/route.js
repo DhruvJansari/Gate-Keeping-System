@@ -6,8 +6,10 @@ function getUserId(request) {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') return null;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-change-me');
+    const decoded = jwt.verify(token, secret || 'dev-only-fallback-secret');
     return decoded.userId;
   } catch {
     return null;

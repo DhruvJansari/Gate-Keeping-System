@@ -8,6 +8,7 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
   const isEdit = !!party;
   const [partyName, setPartyName] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
   const [gstNo, setGstNo] = useState("");
   const [panNo, setPanNo] = useState("");
   const [phone, setPhone] = useState("");
@@ -68,6 +69,7 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
     if (open) {
       setPartyName(party?.party_name || "");
       setAddress(party?.address || "");
+      setCity(party?.city || "");
       setGstNo(party?.gst_no || "");
       setPanNo(party?.pan_no || "");
       setPhone(party?.contact_phone || "");
@@ -113,6 +115,7 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
         body: JSON.stringify({
           party_name: partyName.trim(),
           address: address.trim(),
+          city: city.trim(),
           gst_no: gstNo.trim(),
           pan_no: panNo.trim(),
           contact_phone: phone.trim(),
@@ -231,9 +234,20 @@ export function PartyModal({ open, onClose, onSuccess, party }) {
             <textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Street, City, Pin code"
-              rows={3}
+              placeholder="Street / Area"
+              rows={2}
               className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium resize-none"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-bold text-zinc-700 ml-1">City / Place</label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="City, Town or Village"
+              className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-3 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
             />
           </div>
 

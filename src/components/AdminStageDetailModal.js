@@ -125,7 +125,7 @@ export function AdminStageDetailModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-transparent/50 backdrop-blur-sm p-0 sm:p-4 transition-all">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-transparent p-0 sm:p-4 transition-all">
       <div
         className={`w-full ${isFullView ? 'sm:max-w-5xl' : 'sm:max-w-lg'} h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden ring-1 ring-black/5`}
         onClick={(e) => e.stopPropagation()}

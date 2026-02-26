@@ -344,6 +344,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     parties: 0,
     transporters: 0,
     users: 0,
+    vehicles: 0,
   });
   const [itemCounts, setItemCounts] = useState({ loading: [], unloading: [] });
   // Determine if user has restricted view (Weighbridge/Yard)
@@ -601,6 +602,19 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     currentPage * itemsPerPage
   );
 
+  // Per-stage counts for the *filtered* list — drives table column header badges
+  const filteredStageCounts = (() => {
+    const counts = {};
+    STAGES.forEach(s => { counts[s.key] = 0; });
+    filteredTransactions.forEach(t => {
+      const next = getNextStageToConfirm(t);
+      if (next && counts[next] !== undefined) {
+        counts[next]++;
+      }
+    });
+    return counts;
+  })();
+
   return (
     <PanelLayout title="Dashboard" roleName={roleName}>
       {/* Background decorative elements - Subtle Light */}
@@ -663,10 +677,10 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
             {/* Stats Items */}
             <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-5 md:gap-4 md:pb-0 scrollbar-hide px-1">
               {[
-                { label: "Total Emp", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
+                { label: "Total Parties", value: counts.parties, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
                 { label: "Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
-                { label: "Transporters", value: counts.parties, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
-                { label: "Vehicles", value: counts.transporters, icon: TruckIcon, gradient: "from-fuchsia-500 to-fuchsia-600" }, 
+                { label: "Transporters", value: counts.transporters, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
+                { label: "Vehicles", value: counts.vehicles, icon: TruckIcon, gradient: "from-fuchsia-500 to-fuchsia-600" },
                 { label: "Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
               ].map((stat, idx) => (
                 <div key={idx} className={`relative flex-shrink-0 min-w-[130px] md:min-w-0 rounded-xl bg-gradient-to-br ${stat.gradient} p-4 text-white shadow-lg ring-1 ring-white/20`}>
@@ -1032,7 +1046,16 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         key={s.key}
                         className="px-2 py-3 text-center min-w-[100px]"
                       >
-                        {s.shortLabel || s.label}
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span>{s.shortLabel || s.label}</span>
+                          <span className={`inline-flex items-center justify-center min-w-[20px] h-4 px-1.5 rounded-full text-[10px] font-bold ${
+                            filteredStageCounts[s.key] > 0
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-zinc-100 text-zinc-400'
+                          }`}>
+                            {filteredStageCounts[s.key] ?? 0}
+                          </span>
+                        </div>
                       </th>
                     ))}
                     <th className="px-4 py-3 text-center min-w-[120px]">Actions</th>

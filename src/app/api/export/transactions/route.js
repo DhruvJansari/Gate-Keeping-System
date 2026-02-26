@@ -9,6 +9,7 @@ export async function GET(request) {
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     const type = searchParams.get('type');
+    const item = searchParams.get('item');
 
     let sql = `SELECT 
       t.transaction_id, t.gate_pass_no, t.transaction_type, t.invoice_number, t.invoice_date,
@@ -27,29 +28,66 @@ export async function GET(request) {
     if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
     if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
     if (type && type !== 'all') { sql += ' AND t.transaction_type = ?'; params.push(type); }
-    sql += ' ORDER BY t.transaction_id DESC';
+    if (item) { sql += ' AND i.item_name = ?'; params.push(item); }
+    sql += ' ORDER BY t.transaction_id ASC';
 
     const [rows] = await db.execute(sql, params);
-    const data = rows.map((r) => ({
-      'TXN NO': r.gate_pass_no || `TRN${String(r.transaction_id).padStart(5, '0')}`,
-      'Truck No': r.truck_no,
-      'Item': r.item_name,
-      'Party': r.party_name,
-      'Type': r.transaction_type,
-      'Invoice No': r.invoice_number,
-      'Invoice No': r.invoice_number,
-      'Invoice Date': r.invoice_date ? new Date(r.invoice_date).toLocaleDateString('en-GB') : '',
-      'Qty': r.invoice_quantity,
-      'Status': r.current_status,
-      'Remark 1': r.remark1 || '',
-      'Remark 2': r.remark2 || '',
-      'First Weight': r.first_weight ? parseFloat(r.first_weight) : '',
-      'Second Weight': r.second_weight ? parseFloat(r.second_weight) : '',
-      'Net Weight': r.net_weight ? parseFloat(r.net_weight) : '',
-      'Created': r.created_at ? new Date(r.created_at).toLocaleString('en-GB') : '',
-    }));
 
-    const ws = XLSX.utils.json_to_sheet(data);
+    // ── Vertical Format ──────────────────────────────────────────
+    // Row 1 = Label row, Cols B, C, D … = one transaction each
+    // Labels in Column A (index 0)
+    const LABELS = [
+      'Item:',
+      'Truck No:',
+      'Party Name:',
+      'Invoice No',
+      'Invoice Date',
+      'Invoice Qty',
+      'PO / Do No:',
+      'Transporter:',
+      'Lr Number',
+      'Mobile No',
+      'Remark - 1',
+      'Remark - 2',
+      'First Weight',
+      'Second Weight',
+      'Net Weight',
+    ];
+
+    // Build array-of-arrays: each row starts with its label, then one value per transaction
+    const aoa = LABELS.map((label) => [label]);
+
+    rows.forEach((r) => {
+      const invoiceNo = r.invoice_number || '';
+      const poDoNo = r.po_do_number || '';
+      const invoiceDate = r.invoice_date
+        ? new Date(r.invoice_date).toLocaleDateString('en-IN')
+        : '';
+
+      const values = [
+        r.item_name || '',
+        r.truck_no || '',
+        r.party_name || '',
+        invoiceNo,
+        invoiceDate,
+        r.invoice_quantity != null ? Number(r.invoice_quantity) : '',
+        poDoNo,
+        r.transporter_name || '',
+        r.lr_number || '',
+        r.mobile_number || '',
+        r.remark1 || '',
+        r.remark2 || '',
+        r.first_weight != null ? Math.round(parseFloat(r.first_weight)) : '',
+        r.second_weight != null ? Math.round(parseFloat(r.second_weight)) : '',
+        r.net_weight != null ? Math.round(parseFloat(r.net_weight)) : '',
+      ];
+
+      values.forEach((val, rowIdx) => {
+        aoa[rowIdx].push(val);
+      });
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
     const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });

@@ -60,7 +60,8 @@ function PartyAutocomplete({ label, required, error, prefix, form, onChange }) {
     onChange(`${prefix}_name`, party.party_name);
     onChange(`${prefix}_address`, party.address || "");
     onChange(`${prefix}_gst`, party.gst_no || "");
-    // place is not a party field — leave as-is
+    // Auto-fill city/place from party master
+    onChange(`${prefix}_place`, party.city || "");
   };
 
   return (
@@ -243,6 +244,7 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
                   label="Address"
                   value={form.consignor_address}
                   onChange={(v) => handleFieldChange("consignor_address", v)}
+                  rows={2}
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <InputField label="City/Place" value={form.consignor_place} onChange={(v) => handleFieldChange("consignor_place", v)} />
@@ -270,6 +272,7 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
                   label="Address"
                   value={form.consignee_address}
                   onChange={(v) => handleFieldChange("consignee_address", v)}
+                  rows={2}
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <InputField label="City/Place" value={form.consignee_place} onChange={(v) => handleFieldChange("consignee_place", v)} />

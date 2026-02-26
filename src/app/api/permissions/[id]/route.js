@@ -11,11 +11,10 @@ function getCurrentUser(request) {
 
   if (!token) return null;
 
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') return null;
   try {
-    return jwt.verify(
-      token,
-      process.env.JWT_SECRET || "fallback-secret-change-me"
-    );
+    return jwt.verify(token, secret || 'dev-only-fallback-secret');
   } catch {
     return null;
   }

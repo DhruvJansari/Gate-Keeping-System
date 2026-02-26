@@ -26,6 +26,7 @@ export async function GET(request) {
     const [parties] = await db.execute('SELECT COUNT(*) AS cnt FROM parties');
     const [transporters] = await db.execute('SELECT COUNT(*) AS cnt FROM transporters');
     const [users] = await db.execute('SELECT COUNT(*) AS cnt FROM users');
+    const [vehicles] = await db.execute('SELECT COUNT(*) AS cnt FROM vehicles');
 
     return NextResponse.json({
       loading: loading[0]?.cnt ?? 0,
@@ -34,6 +35,7 @@ export async function GET(request) {
       parties: parties[0]?.cnt ?? 0,
       transporters: transporters[0]?.cnt ?? 0,
       users: users[0]?.cnt ?? 0,
+      vehicles: vehicles[0]?.cnt ?? 0,
     });
   } catch (err) {
     console.error('Counts error:', err);

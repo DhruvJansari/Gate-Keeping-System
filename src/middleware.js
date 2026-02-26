@@ -39,7 +39,7 @@ export function middleware(request) {
 
   // Role Access Rules for Pages
   if (pathname.startsWith('/admin')) {
-    if (!role || (role !== 'Admin' && role !== 'SuperAdmin')) {
+    if (!role || (role !== 'Admin' && role !== 'SuperAdmin' && role !== 'View Only Admin')) {
        if (role === 'Gatekeeper') {
          return NextResponse.redirect(new URL('/gatekeeper', request.url));
        }

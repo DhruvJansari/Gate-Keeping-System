@@ -12,7 +12,11 @@ export function PWARegister() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
-        .then((reg) => console.log('[VARPL PWA] Service worker registered', reg.scope))
+        .then((reg) => {
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[VARPL PWA] Service worker registered', reg.scope);
+          }
+        })
         .catch((err) => console.warn('[VARPL PWA] Service worker registration failed', err));
     }
   }, []);

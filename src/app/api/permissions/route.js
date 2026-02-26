@@ -6,8 +6,10 @@ function getCurrentUser(request) {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') return null;
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-change-me');
+    return jwt.verify(token, secret || 'dev-only-fallback-secret');
   } catch {
     return null;
   }

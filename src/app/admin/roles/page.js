@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PanelLayout } from "@/components/PanelLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
 import { RoleModal } from "@/components/RoleModal";
 import { EyeIcon, EditIcon, DeleteIcon } from "@/components/Icons";
 
@@ -44,6 +45,7 @@ function ShieldIcon({ className }) {
 }
 
 function RolesManagement() {
+  const { hasPermission } = useAuth();
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [search, setSearch] = useState("");
@@ -190,12 +192,16 @@ function RolesManagement() {
 
         {/* Toolbar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            onClick={handleAdd}             
-            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
-          >
-            + Create New Role
-          </button>
+          {/* {hasPermission("manage_roles") ? (
+            <button
+              onClick={handleAdd}             
+              className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
+            >
+              + Create New Role
+            </button>
+          ) : (
+             <div className="flex w-fit items-center gap-2 px-4 py-2" />
+          )} */}
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <input
@@ -263,21 +269,25 @@ function RolesManagement() {
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleEdit(r)}
-                            className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                            title="Edit Role"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(r)}
-                            disabled={deletingId === r.role_id}
-                            className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
-                            title="Delete Role"
-                          >
-                            <DeleteIcon className="h-4 w-4" />
-                          </button>
+                          {hasPermission("manage_roles") && (
+                            <>
+                              {/* <button
+                                onClick={() => handleEdit(r)}
+                                className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                                title="Edit Role"
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </button> */}
+                              {/* <button
+                                onClick={() => handleDelete(r)}
+                                disabled={deletingId === r.role_id}
+                                className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
+                                title="Delete Role"
+                              >
+                                <DeleteIcon className="h-4 w-4" />
+                              </button> */}
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -367,15 +377,17 @@ function RolesManagement() {
               >
                 Close
               </button>
-              <button
-                onClick={() => {
-                  setViewingRole(null);
-                  handleEdit(viewingRole);
-                }}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
-              >
-                Edit Role
-              </button>
+              {hasPermission("manage_roles") && (
+                <button
+                  onClick={() => {
+                    setViewingRole(null);
+                    handleEdit(viewingRole);
+                  }}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
+                >
+                  Edit Role
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -386,7 +398,7 @@ function RolesManagement() {
 
 export default function RolesPage() {
   return (
-    <ProtectedRoute allowedRoles={["Admin"]}>
+    <ProtectedRoute allowedRoles={["Admin", "View Only Admin"]}>
       <RolesManagement />
     </ProtectedRoute>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PanelLayout } from "@/components/PanelLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
 import { PermissionModal } from "@/components/PermissionModal";
 import { EyeIcon, EditIcon, DeleteIcon } from "@/components/Icons";
 
@@ -44,6 +45,7 @@ function KeyIcon({ className }) {
 }
 
 function PermissionsManagement() {
+  const { hasPermission } = useAuth();
   const [permissions, setPermissions] = useState([]);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -145,13 +147,17 @@ function PermissionsManagement() {
 
         {/* Toolbar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            onClick={handleAdd}
-            className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
-          >
-            <KeyIcon className="h-4 w-4" />
-            Create New Permission
-          </button>
+          {hasPermission("manage_roles") ? (
+            <button
+              onClick={handleAdd}
+              className="flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-zinc-600 hover:bg-zinc-700"
+            >
+              <KeyIcon className="h-4 w-4" />
+              Create New Permission
+            </button>
+          ) : (
+            <div className="flex w-fit items-center gap-2 px-4 py-2" />
+          )}
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <input
@@ -219,21 +225,25 @@ function PermissionsManagement() {
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleEdit(p)}
-                            className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                            title="Edit Permission"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p)}
-                            disabled={deletingId === p.permission_id}
-                            className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
-                            title="Delete Permission"
-                          >
-                            <DeleteIcon className="h-4 w-4" />
-                          </button>
+                          {hasPermission("manage_roles") && (
+                            <>
+                              <button
+                                onClick={() => handleEdit(p)}
+                                className="rounded p-2 transition-colors bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                                title="Edit Permission"
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(p)}
+                                disabled={deletingId === p.permission_id}
+                                className="rounded p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-red-100 text-red-700 hover:bg-red-200"
+                                title="Delete Permission"
+                              >
+                                <DeleteIcon className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -322,15 +332,17 @@ function PermissionsManagement() {
               >
                 Close
               </button>
-              <button
-                onClick={() => {
-                  setViewingPermission(null);
-                  handleEdit(viewingPermission);
-                }}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
-              >
-                Edit Permission
-              </button>
+              {hasPermission("manage_roles") && (
+                <button
+                  onClick={() => {
+                    setViewingPermission(null);
+                    handleEdit(viewingPermission);
+                  }}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
+                >
+                  Edit Permission
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -341,7 +353,7 @@ function PermissionsManagement() {
 
 export default function PermissionsPage() {
   return (
-    <ProtectedRoute allowedRoles={["Admin"]}>
+    <ProtectedRoute allowedRoles={["Admin", "View Only Admin"]}>
       <PermissionsManagement />
     </ProtectedRoute>
   );

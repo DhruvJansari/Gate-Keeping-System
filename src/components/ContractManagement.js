@@ -505,20 +505,28 @@ export function ContractManagement() {
                         <td className="px-4 py-3 text-right font-bold text-zinc-900">{c.contract_quantity}</td>
                         
                         <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
-                            defaultValue={c.rec_qty}
-                            onBlur={(e) => handleInlineUpdate(c.contract_id, 'rec_qty', e.target.value)}
-                          />
+                          {hasPermission('manage_contracts') ? (
+                            <input 
+                              type="number" 
+                              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                              defaultValue={c.rec_qty}
+                              onBlur={(e) => handleInlineUpdate(c.contract_id, 'rec_qty', e.target.value)}
+                            />
+                          ) : (
+                            <span className="font-mono text-xs">{c.rec_qty || 0}</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
-                            defaultValue={c.settal_qty}
-                            onBlur={(e) => handleInlineUpdate(c.contract_id, 'settal_qty', e.target.value)}
-                          />
+                          {hasPermission('manage_contracts') ? (
+                            <input 
+                              type="number" 
+                              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                              defaultValue={c.settal_qty}
+                              onBlur={(e) => handleInlineUpdate(c.contract_id, 'settal_qty', e.target.value)}
+                            />
+                          ) : (
+                            <span className="font-mono text-xs">{c.settal_qty || 0}</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <input 
@@ -531,19 +539,29 @@ export function ContractManagement() {
                         </td>
                         
                         <td className="px-4 py-3 text-center">
-                          <select
-                            className={`text-xs border rounded-lg px-2 py-1 font-bold cursor-pointer outline-none transition-all ${
+                          {hasPermission('manage_contracts') ? (
+                            <select
+                              className={`text-xs border rounded-lg px-2 py-1 font-bold cursor-pointer outline-none transition-all ${
+                                c.contract_status === 'Complete' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                                c.contract_status === 'Pending' ? 'bg-zinc-100 text-zinc-700 border-zinc-200' : 
+                                'bg-zinc-50 text-zinc-600 border-zinc-200'
+                              }`}
+                              value={c.contract_status || 'Pending'}
+                              onChange={(e) => handleInlineUpdate(c.contract_id, 'contract_status', e.target.value)}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Incomplete">Incomplete</option>
+                              <option value="Complete">Complete</option>
+                            </select>
+                          ) : (
+                            <span className={`text-xs border rounded-lg px-2 py-1 font-bold outline-none transition-all ${
                               c.contract_status === 'Complete' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                               c.contract_status === 'Pending' ? 'bg-zinc-100 text-zinc-700 border-zinc-200' : 
                               'bg-zinc-50 text-zinc-600 border-zinc-200'
-                            }`}
-                            value={c.contract_status || 'Pending'}
-                            onChange={(e) => handleInlineUpdate(c.contract_id, 'contract_status', e.target.value)}
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Incomplete">Incomplete</option>
-                            <option value="Complete">Complete</option>
-                          </select>
+                            }`}>
+                              {c.contract_status || 'Pending'}
+                            </span>
+                          )}
                         </td>
 
                         <td className="px-4 py-3 text-zinc-600">{c.ex_paint || "—"}</td>
@@ -565,20 +583,24 @@ export function ContractManagement() {
                             >
                               <ViewIcon className="h-4 w-4" />
                             </button>
-                            <button 
-                              onClick={() => handleEdit(c)} 
-                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
-                              title="Edit Contract"
-                            >
-                              <EditIcon className="h-4 w-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(c.contract_id)} 
-                              className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
-                              title="Delete Contract"
-                            >
-                              <DeleteIcon className="h-4 w-4" />
-                            </button>
+                            {(user?.role_name === 'Admin' || hasPermission('manage_contracts')) && (
+                              <>
+                                <button 
+                                  onClick={() => handleEdit(c)} 
+                                  className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
+                                  title="Edit Contract"
+                                >
+                                  <EditIcon className="h-4 w-4" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDelete(c.contract_id)} 
+                                  className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
+                                  title="Delete Contract"
+                                >
+                                  <DeleteIcon className="h-4 w-4" />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -628,12 +650,14 @@ export function ContractManagement() {
                                 >
                                     <ViewIcon className="h-4 w-4" />
                                 </button>
-                                <button 
-                                    onClick={() => handleEdit(c)}
-                                    className="p-2 bg-blue-50 text-blue-600 rounded-lg"
-                                >
-                                    <EditIcon className="h-4 w-4" />
-                                </button>
+                                {(user?.role_name === 'Admin' || hasPermission('manage_contracts')) && (
+                                    <button 
+                                        onClick={() => handleEdit(c)}
+                                        className="p-2 bg-blue-50 text-blue-600 rounded-lg"
+                                    >
+                                        <EditIcon className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -681,12 +705,14 @@ export function ContractManagement() {
                                 }`}>
                                     {c.contract_status}
                                 </span>
-                                <button 
-                                    onClick={() => handleDelete(c.contract_id)} 
-                                    className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1"
-                                >
-                                    Delete
-                                </button>
+                                {(user?.role_name === 'Admin' || hasPermission('manage_contracts')) && (
+                                    <button 
+                                        onClick={() => handleDelete(c.contract_id)} 
+                                        className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1"
+                                    >
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

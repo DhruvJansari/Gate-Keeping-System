@@ -16,8 +16,15 @@ export async function getAuthUser(request) {
     
     if (!token) return null;
 
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-change-me');
+    // Verify token — in production JWT_SECRET must be set via environment variable
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET environment variable is not set');
+      }
+      // dev-only fallback (never use in production)
+    }
+    const decoded = jwt.verify(token, secret || 'dev-only-fallback-secret');
     return decoded;
   } catch (error) {
     return null;

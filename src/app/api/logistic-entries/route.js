@@ -95,17 +95,31 @@ export async function POST(request) {
     }
 
     const db = await getDb();
-    
+
+    // Generate next LR No (VL0001 format)
+    let lr_no = 'VL0001';
+    try {
+      const [lrRows] = await db.execute(
+        `SELECT lr_no FROM logistic_entries WHERE lr_no LIKE 'VL%' ORDER BY CAST(SUBSTRING(lr_no, 3) AS UNSIGNED) DESC LIMIT 1`
+      );
+      if (lrRows.length > 0 && lrRows[0].lr_no) {
+        const lastNum = parseInt(lrRows[0].lr_no.replace(/^VL/, ''), 10);
+        if (!isNaN(lastNum)) lr_no = 'VL' + String(lastNum + 1).padStart(4, '0');
+      }
+    } catch { /* column may not exist yet — fall back to VL0001 */ }
+
     // 1. Insert Logistic Entry
     const [result] = await db.execute(`
       INSERT INTO logistic_entries (
+        lr_no,
         consignor_name, consignor_address, consignor_place, consignor_gst,
         consignee_name, consignee_address, consignee_place, consignee_gst,
         truck_no, product,
         gross_weight, tare_weight, net_weight, rate, amounts,
         entry_date, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
+      lr_no,
       body.consignor_name || null,
       body.consignor_address || null,
       body.consignor_place || null,

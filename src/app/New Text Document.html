@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VARPL Transport Receipt</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .receipt {
+      background: white;
+      width: 850px;
+      border: 2px solid #000;
+      font-size: 11px;
+    }
+
+    .header-row {
+      display: flex;
+      border-bottom: 1px solid #000;
+    }
+
+    .header-main {
+      flex: 1;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-top-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .jurisdiction {
+      font-size: 10px;
+      text-decoration: underline;
+    }
+
+    .transport-receipt-title {
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .mobile-no {
+      font-size: 13px;
+      font-weight: bold;
+      margin-left: auto;
+    }
+
+    .company-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .company-full-name {
+      font-size: 20px;
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+    }
+
+    .lr-date-box {
+      width: 140px;
+      border-left: 1px solid #000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lr-date-box div {
+      padding: 6px 8px;
+      border-bottom: 1px solid #000;
+      font-size: 11px;
+      min-height: 34px;
+    }
+
+    .lr-date-box div:last-child {
+      border-bottom: none;
+      flex: 1;
+    }
+
+    .address-row {
+      padding: 4px 8px;
+      font-size: 10px;
+      border-bottom: 1px solid #000;
+    }
+
+    .gstin-pan-row {
+      display: flex;
+      border-bottom: 1px solid #000;
+    }
+
+    .gstin-pan-row>div {
+      flex: 1;
+      padding: 4px 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .gstin-pan-row>div:first-child {
+      border-right: 1px solid #000;
+    }
+
+    .owners-risk-row {
+      text-align: center;
+      font-weight: bold;
+      padding: 4px;
+      border-bottom: 1px solid #000;
+      font-size: 12px;
+    }
+
+    .consignor-consignee-header {
+      display: flex;
+      border-bottom: 1px solid #000;
+      background: #f9f9f9;
+    }
+
+    .consignor-consignee-header>div {
+      flex: 1;
+      padding: 4px 8px;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .consignor-consignee-header>div:first-child {
+      border-right: 1px solid #000;
+    }
+
+    .main-body {
+      display: flex;
+      border-bottom: 1px solid #000;
+    }
+
+    .left-col {
+      flex: 1;
+      border-right: 1px solid #000;
+    }
+
+    .right-col {
+      flex: 1;
+    }
+
+    .address-lines {
+      display: flex;
+    }
+
+    .address-lines>div {
+      flex: 1;
+      border-right: 1px solid #000;
+    }
+
+    .addr-block {
+      height: 60px;
+    }
+
+    .addr-line {
+      border-bottom: 1px solid #ccc;
+      padding: 4px 8px;
+      height: 20px;
+    }
+
+    .field-row {
+      display: flex;
+      border-top: 1px solid #000;
+      min-height: 22px;
+    }
+
+    .field-row .label {
+      padding: 3px 8px;
+      min-width: 90px;
+      white-space: nowrap;
+    }
+
+    .field-row .value {
+      flex: 1;
+      padding: 3px 8px;
+      border-left: 1px solid #ccc;
+    }
+
+    .right-field-row {
+      display: flex;
+      border-top: 1px solid #000;
+      min-height: 22px;
+      align-items: center;
+      padding: 3px 8px;
+      gap: 6px;
+    }
+
+    .right-field-label {
+      min-width: 100px;
+      white-space: nowrap;
+    }
+
+    .right-field-value {
+      flex: 1;
+      border-bottom: 1px solid #888;
+      min-height: 14px;
+    }
+
+    .split-right-row {
+      display: flex;
+      border-top: 1px solid #000;
+      min-height: 22px;
+      align-items: center;
+      padding: 3px 6px;
+      gap: 6px;
+    }
+
+    .split-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+    }
+
+    .split-half .sl {
+      min-width: 80px;
+    }
+
+    .split-half .sv {
+      flex: 1;
+      border-bottom: 1px solid #888;
+      min-height: 14px;
+    }
+
+    .to-pay-freight-row {
+      display: flex;
+      border-top: 1px solid #000;
+      min-height: 22px;
+      align-items: center;
+      padding: 3px 6px;
+    }
+
+    .to-pay-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .to-pay-right {
+      font-weight: bold;
+    }
+
+    .wt-freight-section {
+      display: flex;
+      border-top: 1px solid #000;
+    }
+
+    .wt-left {
+      flex: 1;
+      border-right: 1px solid #000;
+    }
+
+    .wt-headers {
+      display: flex;
+      border-bottom: 1px solid #000;
+    }
+
+    .wt-headers>div {
+      flex: 1;
+      text-align: center;
+      font-weight: bold;
+      padding: 3px 4px;
+      border-right: 1px solid #ccc;
+      font-size: 10.5px;
+    }
+
+    .wt-headers>div:last-child {
+      border-right: none;
+    }
+
+    .wt-values {
+      display: flex;
+      height: 28px;
+    }
+
+    .wt-values>div {
+      flex: 1;
+      border-right: 1px solid #ccc;
+    }
+
+    .wt-values>div:last-child {
+      border-right: none;
+    }
+
+    .freight-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .freight-headers {
+      display: flex;
+      border-bottom: 1px solid #000;
+    }
+
+    .freight-headers>div {
+      flex: 1;
+      text-align: center;
+      font-weight: bold;
+      padding: 3px 4px;
+      border-right: 1px solid #ccc;
+      font-size: 10.5px;
+    }
+
+    .freight-headers>div:last-child {
+      border-right: none;
+    }
+
+    .freight-values {
+      display: flex;
+      height: 28px;
+    }
+
+    .freight-values>div {
+      flex: 1;
+      border-right: 1px solid #ccc;
+    }
+
+    .freight-values>div:last-child {
+      border-right: none;
+    }
+
+    .received-consignee-row {
+      display: flex;
+      border-top: 1px solid #000;
+    }
+
+    .received-left {
+      flex: 1;
+      border-right: 1px solid #000;
+    }
+
+    .received-label {
+      padding: 3px 8px;
+      border-bottom: 1px solid #ccc;
+      font-size: 10.5px;
+    }
+
+    .date-qty-short-rows {
+      display: flex;
+    }
+
+    .dqs-left {
+      display: flex;
+      flex-direction: column;
+      width: 60px;
+      border-right: 1px solid #ccc;
+    }
+
+    .dqs-cell {
+      padding: 3px 6px;
+      border-bottom: 1px solid #ccc;
+      min-height: 22px;
+      font-size: 10px;
+    }
+
+    .dqs-right {
+      flex: 1;
+      padding: 3px 8px;
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .consignee-stamp-col {
+      flex: 1;
+      padding: 3px 8px;
+      font-size: 10.5px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .remarks-section {
+      flex: 1;
+      padding: 3px 8px;
+    }
+
+    .remarks-line {
+      padding: 4px 0;
+      border-bottom: 1px solid #ccc;
+      font-size: 10.5px;
+      min-height: 22px;
+    }
+
+    .not-unload-row {
+      padding: 4px 8px;
+      font-size: 10px;
+      text-decoration: underline;
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .driver-row {
+      display: flex;
+      border-bottom: 1px solid #000;
+      min-height: 22px;
+      align-items: center;
+      padding: 4px 8px;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .driver-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .driver-field .dl {
+      font-weight: bold;
+      font-size: 10.5px;
+      white-space: nowrap;
+    }
+
+    .driver-field .dv {
+      flex: 1;
+      border-bottom: 1px solid #000;
+      min-height: 14px;
+    }
+
+    .bottom-section {
+      display: flex;
+      border-top: 1px solid #000;
+    }
+
+    .driver-info-left {
+      flex: 1;
+      border-right: 1px solid #000;
+    }
+
+    .signature-boxes {
+      display: flex;
+      width: 240px;
+    }
+
+    .sig-box {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 6px 4px;
+      font-weight: bold;
+      font-size: 10.5px;
+      text-align: center;
+      border-left: 1px solid #000;
+      min-height: 60px;
+    }
+
+    .mobile-row {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      gap: 8px;
+      font-size: 10.5px;
+      min-height: 22px;
+    }
+
+    .mobile-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .mobile-field .ml {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .mobile-field .mv {
+      flex: 1;
+      border-bottom: 1px solid #000;
+      min-height: 14px;
+    }
+
+    .copy-label {
+      font-size: 10px;
+      padding: 2px 8px;
+    }
+
+    input[type=text],
+    textarea {
+      border: none;
+      outline: none;
+      font-size: 11px;
+      font-family: Arial, sans-serif;
+      width: 100%;
+      background: transparent;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="receipt">
+
+    <!-- Header -->
+    <div class="header-row">
+      <div class="header-main">
+        <div class="header-top-line">
+          <span class="jurisdiction">Subject to DEESA Jurisdiction</span>
+          <span class="transport-receipt-title">TRANSPORT RECEIPT</span>
+          <span class="mobile-no">Mo. 90999 95309</span>
+        </div>
+        <div class="company-name-row">
+          <img src="./logo.png"
+            style="height:48px; filter:brightness(0) saturate(100%) invert(13%) sepia(97%) saturate(7488%) hue-rotate(1deg) brightness(91%) contrast(118%);"
+            alt="VARPL">
+          <span class="company-full-name">Vaishnodevi Agro Resources Pvt. Ltd.</span>
+        </div>
+      </div>
+      <div class="lr-date-box">
+        <div>L.R. No. : <input type="text" style="width:80px;"></div>
+        <div>Date : <input type="text" style="width:80px;"></div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="address-row">
+      Survey No. 317, Village : Nani Pipali, Kandla-Radhanpur Highway (NH-14), Taluka-Radhanpur, District-Patan, Gujarat
+      (India)-385340.
+    </div>
+
+    <!-- GSTIN / PAN -->
+    <div class="gstin-pan-row">
+      <div>GSTIN : 24AAHCV4950E1ZD</div>
+      <div>PAN : AAHCV4950E</div>
+    </div>
+
+    <!-- At Owners Risk -->
+    <div class="owners-risk-row">AT OWNERS RISK</div>
+
+    <!-- Consignor / Consignee Header -->
+    <div class="consignor-consignee-header">
+      <div>Consignor Name &amp; Address</div>
+      <div>Consignee Name &amp; Address</div>
+    </div>
+
+    <!-- Main Body -->
+    <div class="main-body">
+      <!-- Left Column -->
+      <div class="left-col">
+        <!-- Address lines -->
+        <div class="addr-block">
+          <div class="addr-line"><input type="text"></div>
+          <div class="addr-line"><input type="text"></div>
+          <div class="addr-line" style="border-bottom:none;"><input type="text"></div>
+        </div>
+        <div class="field-row">
+          <span class="label">GST No.&nbsp;&nbsp;&nbsp;:</span>
+          <span class="value"><input type="text"></span>
+        </div>
+        <div class="field-row">
+          <span class="label">Product&nbsp;&nbsp;&nbsp;:</span>
+          <span class="value"><input type="text"></span>
+        </div>
+        <div class="field-row">
+          <span class="label">Invoice No.&nbsp;:</span>
+          <span class="value"><input type="text"></span>
+        </div>
+        <div class="field-row">
+          <span class="label">Invoice Value :</span>
+          <span class="value"><input type="text"></span>
+        </div>
+        <div class="field-row">
+          <span class="label">Seal No. 1&nbsp;&nbsp;:</span>
+          <span class="value"><input type="text"></span>
+        </div>
+        <div class="field-row">
+          <span class="label">Seal No. 2&nbsp;&nbsp;:</span>
+          <span class="value"><input type="text"></span>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-col">
+        <!-- Address lines -->
+        <div class="addr-block">
+          <div class="addr-line"><input type="text"></div>
+          <div class="addr-line"><input type="text"></div>
+          <div class="addr-line" style="border-bottom:none;"><input type="text"></div>
+        </div>
+        <div class="right-field-row">
+          <span class="right-field-label">Tanker No. :</span>
+          <span class="right-field-value"><input type="text"></span>
+        </div>
+        <div class="right-field-row">
+          <span class="right-field-label">RC Number. :</span>
+          <span class="right-field-value"><input type="text"></span>
+        </div>
+        <div class="split-right-row">
+          <div class="split-half">
+            <span class="sl">Insurance Expiry. :</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+          <div class="split-half">
+            <span class="sl">Permit Expiry. :</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+        </div>
+        <div class="split-right-row">
+          <div class="split-half">
+            <span class="sl">Fitness Expiry.&nbsp;&nbsp;:</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+          <div class="split-half">
+            <span class="sl">PUC Expiry.&nbsp;&nbsp;:</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+        </div>
+        <div class="split-right-row">
+          <div class="split-half">
+            <span class="sl">Rate Pmt.&nbsp;&nbsp;:</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+          <div class="split-half">
+            <span class="sl">Advance&nbsp;&nbsp;&nbsp;:</span>
+            <span class="sv"><input type="text"></span>
+          </div>
+        </div>
+        <div class="to-pay-freight-row">
+          <div class="to-pay-left">
+            <span>To Pay</span>&nbsp;&nbsp;:&nbsp;
+            <span
+              style="flex:1;border-bottom:1px solid #888;min-height:14px;display:inline-block;min-width:60px;"></span>
+          </div>
+          <div class="to-pay-right">FREIGHT</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weight / Freight Section -->
+    <div class="wt-freight-section">
+      <div class="wt-left">
+        <div class="wt-headers">
+          <div>Gross WT.</div>
+          <div>Tare WT.</div>
+          <div>Net WT.</div>
+        </div>
+        <div class="wt-values">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="freight-right">
+        <div class="freight-headers">
+          <div>Freight</div>
+          <div>To Be Billed</div>
+        </div>
+        <div class="freight-values">
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Received / Remarks -->
+    <div class="received-consignee-row">
+      <div class="received-left" style="display:flex; flex-direction:column;">
+        <div style="display:flex; border-bottom:1px solid #000;">
+          <div style="flex:1; padding:3px 8px; font-size:10.5px; border-right:1px solid #ccc;">Received the above goods
+          </div>
+          <div style="flex:1; padding:3px 8px; font-size:10.5px;">Consignee stamp &amp; signalure</div>
+        </div>
+        <div style="display:flex; flex:1;">
+          <div style="display:flex; flex-direction:column; border-right:1px solid #ccc;">
+            <div class="dqs-cell" style="font-weight:bold;">Date</div>
+            <div class="dqs-cell" style="font-weight:bold;">Qty.</div>
+            <div class="dqs-cell" style="font-weight:bold; border-bottom:none;">Shortage</div>
+          </div>
+          <div style="flex:1; padding:3px 8px;"></div>
+          <div style="flex:1.5; padding:3px 8px; border-left:1px solid #ccc;"></div>
+        </div>
+      </div>
+      <div class="remarks-section">
+        <div class="remarks-line">Remarks : <input type="text"></div>
+        <div class="remarks-line" style="margin-top:2px;">Person Liable for GST IN : <input type="text"></div>
+        <div class="remarks-line" style="border-bottom:none; margin-top:2px;">Consignee / Consignor : <input
+            type="text"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+      <div class="driver-info-left">
+        <div class="not-unload-row">Not to be unloaded without receiol of modvale copy of Invoice.</div>
+        <div class="driver-row">
+          <div class="driver-field">
+            <span class="dl">Driver Name :</span>
+            <span class="dv"><input type="text"></span>
+          </div>
+          <div class="driver-field">
+            <span class="dl">Aadhaar No :</span>
+            <span class="dv"><input type="text"></span>
+          </div>
+        </div>
+        <div class="mobile-row">
+          <div class="mobile-field">
+            <span class="ml">Mobile No. :</span>
+            <span class="mv"><input type="text"></span>
+          </div>
+          <div class="mobile-field">
+            <span class="ml">License No</span>
+            <span class="mv"><input type="text"></span>
+          </div>
+          <div class="mobile-field">
+            <span class="ml">License Expiry.</span>
+            <span class="mv"><input type="text"></span>
+          </div>
+        </div>
+        <div class="copy-label">(1)</div>
+      </div>
+      <div class="signature-boxes">
+        <div class="sig-box" style="border-left:1px solid #000;">Driver Signature</div>
+        <div class="sig-box" style="border-left:1px solid #000;">Authorised Signature</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

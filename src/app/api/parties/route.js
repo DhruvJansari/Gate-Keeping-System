@@ -8,7 +8,7 @@ export async function GET(request) {
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
 
-    let sql = `SELECT party_id, party_name, email, gst_no, pan_no, address, contact_phone, status, created_at 
+    let sql = `SELECT party_id, party_name, email, gst_no, pan_no, address, city, contact_phone, status, created_at 
                FROM parties WHERE 1=1`;
     const params = [];
 
@@ -35,7 +35,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { party_name, email, contact_phone, address, gst_no, pan_no, status } = body;
+    const { party_name, email, contact_phone, address, city, gst_no, pan_no, status } = body;
 
     if (!party_name?.trim()) {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
@@ -49,12 +49,13 @@ export async function POST(request) {
     const s = status === 'Inactive' ? 'Inactive' : 'Active';
 
     const [result] = await db.execute(
-      `INSERT INTO parties (party_name, email, contact_phone, address, gst_no, pan_no, status) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO parties (party_name, email, contact_phone, address, city, gst_no, pan_no, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         party_name.trim(),
         email?.trim() || null,
         contact_phone?.trim() || null,
         address?.trim() || null,
+        city?.trim() || null,
         gst_no?.trim() || null,
         pan_no?.trim() || null,
         s,

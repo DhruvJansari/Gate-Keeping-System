@@ -18,6 +18,7 @@ import {
 export const ROLE_PANEL_MAP = {
   Admin: '/admin',
   SuperAdmin: '/admin',
+  'View Only Admin': '/admin',
   Gatekeeper: '/gatekeeper',
   Driver: '/driver',
   'Logistics Manager': '/logistics',
@@ -26,7 +27,7 @@ export const ROLE_PANEL_MAP = {
 
 export function getPanelPathForRole(roleName) {
   // Admin and SuperAdmin go to admin dashboard
-  if (roleName === 'Admin' || roleName === 'SuperAdmin') {
+  if (roleName === 'Admin' || roleName === 'SuperAdmin' || roleName === 'View Only Admin') {
     return '/admin';
   }
   if (roleName === 'Gatekeeper') {
@@ -77,8 +78,39 @@ export const ROLE_NAV = {
     },
     { path: '/admin/users', label: 'User', IconComponent: UserIcon, countKey: 'users', requiredPermissions: ['manage_users', '*'] },
     { path: '/admin/roles', label: 'Role', IconComponent: ShieldIcon, requiredPermissions: ['manage_roles', '*'] },
-    { path: '/admin/permissions', label: 'Permission', IconComponent: KeyIcon, requiredPermissions: ['manage_roles', '*'] },
+    // { path: '/admin/permissions', label: 'Permission', IconComponent: KeyIcon, requiredPermissions: ['manage_roles', '*'] },
     { path: '/admin/gate', label: 'Gate', IconComponent: GateIcon, requiredPermissions: ['create_transactions', 'confirm_stages', '*'] },
+  ],
+  'View Only Admin': [
+    { 
+      label: 'Dashboard', 
+      path: '/admin', // Click goes here
+      IconComponent: DashboardIcon,
+      children: [
+        { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: [] },
+        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: [] },
+        { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: [] },
+      ]
+    },
+    { path: '/admin/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: [] },
+    { 
+      label: 'Masters', 
+      path: '/admin/items', // Default to Items
+      IconComponent: ClipboardIcon,
+      requiredPermissions: [],
+      children: [
+        { path: '/admin/items', label: 'Items', IconComponent: ClipboardIcon, countKey: 'items', requiredPermissions: [] },
+        { path: '/admin/parties', label: 'Party Master', IconComponent: UsersIcon, countKey: 'parties', requiredPermissions: [] },
+        { path: '/admin/transporters', label: 'Transporter Master', IconComponent: TruckIcon, countKey: 'transporters', requiredPermissions: [] },
+        { path: '/admin/vehicles', label: 'Vehicle Master', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: [] },
+        { path: '/admin/drivers', label: 'Driver Master', IconComponent: UserIcon, countKey: 'drivers', requiredPermissions: [] },
+        { path: '/admin/brokers', label: 'Broker Master', IconComponent: UsersIcon, countKey: 'brokers', requiredPermissions: [] },
+      ]
+    },
+    // { path: '/admin/users', label: 'User', IconComponent: UserIcon, countKey: 'users', requiredPermissions: [] },
+    // { path: '/admin/roles', label: 'Role', IconComponent: ShieldIcon, requiredPermissions: [] },
+    // { path: '/admin/permissions', label: 'Permission', IconComponent: KeyIcon, requiredPermissions: [] },
+    { path: '/admin/gate', label: 'Gate', IconComponent: GateIcon, requiredPermissions: [] },
   ],
   Gatekeeper: [
     { path: '/gatekeeper', label: 'Dashboard', IconComponent: DashboardIcon },
@@ -86,6 +118,7 @@ export const ROLE_NAV = {
     { path: '/gatekeeper/items', label: 'Items', IconComponent: ClipboardIcon, requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/parties', label: 'Parties', IconComponent: UsersIcon, requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/transporters', label: 'Transporters', IconComponent: TruckIcon, requiredPermissions: ['view_masters'] },
+    { path: '/gatekeeper/vehicles', label: 'Vehicles', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: ['view_reports'] },
   ],
   Weighbridge: [
@@ -126,36 +159,36 @@ export function getNavForRole(roleName) {
 export function filterNavByPermissions(navItems, userPermissions) {
   if (!navItems) return [];
   if (!userPermissions || userPermissions.length === 0) {
-     // If no user perms, return items with no required perms
-     // Also recursively check children
      return navItems.map(item => {
+        const hasPerm = !item.requiredPermissions || item.requiredPermissions.length === 0;
+        
         if (item.children) {
-           const filteredChildren = item.children.filter(child => !child.requiredPermissions);
-           if (filteredChildren.length === 0) return null;
-           return { ...item, children: filteredChildren };
+           const filteredChildren = item.children.filter(child => !child.requiredPermissions || child.requiredPermissions.length === 0);
+           if (filteredChildren.length > 0) {
+              return { ...item, children: filteredChildren };
+           }
+           return hasPerm && item.path ? item : null;
         }
-        return !item.requiredPermissions ? item : null;
+        return hasPerm ? item : null;
      }).filter(Boolean);
   }
   
   return navItems.map(item => {
-    // Check main item perms
     const hasPerm = !item.requiredPermissions || item.requiredPermissions.length === 0 || 
                    item.requiredPermissions.some(perm => userPermissions.includes(perm));
     
     if (item.children) {
-       // Filter children
        const filteredChildren = item.children.filter(child => {
           if (!child.requiredPermissions || child.requiredPermissions.length === 0) return true;
           return child.requiredPermissions.some(perm => userPermissions.includes(perm));
        });
        
-       // If no children left, and this is a group (no path), don't show it unless it has a path itself?
-       // Actually, if it has children logically it's a menu. If all children hidden, hide menu.
        if (filteredChildren.length > 0) {
           return { ...item, children: filteredChildren };
        }
-       return null;
+       // If a menu has NO filtered children, but the parent itself has permission and no explicit path, it usually should be hidden (empty folder).
+       // However, if it HAS an explicit path and permission, show it.
+       return hasPerm && item.path ? item : null;
     }
 
     return hasPerm ? item : null;

@@ -11,11 +11,10 @@ function getUser(request) {
 
   if (!token) return null;
 
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') return null;
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "fallback-secret-change-me"
-    );
+    const decoded = jwt.verify(token, secret || 'dev-only-fallback-secret');
     return decoded; // Returns { userId, roleId ... }
   } catch {
     return null;

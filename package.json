@@ -2,12 +2,16 @@
   "name": "gks",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "eslint",
     "db:seed": "node --env-file=.env.local scripts/seed.js",
+    "db:seed-permissions": "node --env-file=.env.local scripts/seed-permissions.js",
     "db:seed-masters": "node --env-file=.env.local scripts/seed-masters.js"
   },
   "dependencies": {

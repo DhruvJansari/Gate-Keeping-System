@@ -11,9 +11,13 @@ export async function GET(request) {
       return NextResponse.json({ error: 'No token' }, { status: 401 });
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret && process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'fallback-secret-change-me'
+      jwtSecret || 'dev-only-fallback-secret'
     );
 
     const db = await getDb();

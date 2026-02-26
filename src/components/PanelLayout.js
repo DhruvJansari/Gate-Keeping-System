@@ -340,13 +340,6 @@ export function PanelLayout({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Theme Toggle - Locked to Light */}
-            <button
-              className="rounded-lg p-2 hover:bg-zinc-100 text-zinc-400 cursor-default"
-              title="Light theme is active"
-            >
-              <SunIcon className="h-5 w-5" />
-            </button>
 
             <button
               onClick={handleLogout}

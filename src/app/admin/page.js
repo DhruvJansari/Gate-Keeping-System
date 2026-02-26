@@ -567,11 +567,11 @@ function AdminDashboard() {
         {/* Stats Cards - Top Row */}
         <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: "Total Employee", value: counts.loading + counts.unloading, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
+            { label: "Total Employee", value: counts.users, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
             { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
-            { label: "Total Transporter", value: counts.parties, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
-            { label: "Total Items", value: counts.transporters, icon: ClipboardIcon, gradient: "from-fuchsia-500 to-fuchsia-600" },
-            { label: "Total Gate Pass", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
+            { label: "Total Parties", value: counts.parties, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
+            { label: "Total Transporters", value: counts.transporters, icon: ClipboardIcon, gradient: "from-fuchsia-500 to-fuchsia-600" },
+            { label: "Total Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
           ].map((stat, idx) => (
             <div key={idx} className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-lg ring-1 ring-white/20 hover:shadow-xl transition-all hover:-translate-y-1`}>
               <div className="flex flex-col h-full justify-between relative z-10">
@@ -841,8 +841,12 @@ function AdminDashboard() {
                     ))}
                     <th className="px-3 py-3 text-center font-semibold">View</th>
                     <th className="px-3 py-3 text-center font-semibold">Print</th>
-                    <th className="px-3 py-3 text-center font-semibold">Edit</th>
-                    <th className="px-3 py-3 text-center font-semibold">Delete</th>
+                    {hasPermission("edit_transactions") && (
+                      <>
+                        <th className="px-3 py-3 text-center font-semibold">Edit</th>
+                        <th className="px-3 py-3 text-center font-semibold">Delete</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -852,7 +856,7 @@ function AdminDashboard() {
                     return (
                       <tr
                         key={t.transaction_id}
-                        className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
+                        className={`border-b border-zinc-100 transition-colors hover:bg-blue-50/40 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                       >
                         <td className="px-4 py-3 text-sm font-medium text-zinc-700">
                           {serialNumber}
@@ -907,24 +911,28 @@ function AdminDashboard() {
                             <PrinterIcon className="h-4 w-4" />
                           </button>
                         </td>
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() => setEditModal(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-orange-600 shadow-sm transition-all"
-                            title="Edit"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() => setDeleteConfirm(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-red-600 shadow-sm transition-all"
-                            title="Delete"
-                          >
-                            <DeleteIcon className="h-4 w-4" />
-                          </button>
-                        </td>
+                        {hasPermission("edit_transactions") && (
+                          <>
+                            <td className="px-3 py-3 text-center">
+                              <button
+                                onClick={() => setEditModal(t)}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-orange-600 shadow-sm transition-all"
+                                title="Edit"
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </button>
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              <button
+                                onClick={() => setDeleteConfirm(t)}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-red-600 shadow-sm transition-all"
+                                title="Delete"
+                              >
+                                <DeleteIcon className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </>
+                        )}
                       </tr>
                     );
                   })}
@@ -1150,7 +1158,7 @@ function AdminDashboard() {
 
 export default function AdminPage() {
   return (
-    <ProtectedRoute allowedRoles={["Admin"]}>
+    <ProtectedRoute allowedRoles={["Admin", "View Only Admin"]}>
       <AdminDashboard />
     </ProtectedRoute>
   );
