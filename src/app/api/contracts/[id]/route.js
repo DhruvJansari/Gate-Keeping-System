@@ -50,10 +50,16 @@ export async function PUT(request, { params }) {
       ex_paint,
       for_field,
       payment_terms,
-      contract_due_date,
+      contract_due_date: _contract_due_date,
+      to_date,
+      from_date,
       party_contract_number,
       remark1
     } = body;
+
+    // Support both legacy contract_due_date and new to_date / from_date fields
+    const contract_due_date = _contract_due_date ?? to_date; // unchanged if omitted
+    const contract_from_date = from_date; // unchanged if omitted
 
     const db = await getDb();
     
@@ -62,6 +68,7 @@ export async function PUT(request, { params }) {
     if (check.length === 0) {
       return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
     }
+    const existing = check[0];
 
     // Auto-Calculate Pending & Validate
     const cQty = parseFloat(contract_quantity) || 0;
@@ -74,7 +81,12 @@ export async function PUT(request, { params }) {
 
     const newPendingQty = Math.max(0, cQty - rQty - sQty);
 
-    const cleanDate = (d) => (d ? new Date(d) : null);
+    // Avoid new Date() timezone shift for YYYY-MM-DD strings
+    const cleanDate = (d) => {
+      if (!d) return null;
+      if (typeof d === 'string') return d.split('T')[0];
+      try { return d.toISOString().split('T')[0]; } catch(e) { return null; }
+    };
 
     await db.execute(`
       UPDATE contracts SET
@@ -92,12 +104,13 @@ export async function PUT(request, { params }) {
         for_field = ?,
         payment_terms = ?,
         contract_due_date = ?,
+        contract_from_date = ?,
         party_contract_number = ?,
         remark1 = ?,
         updated_at = NOW()
       WHERE contract_id = ?
     `, [
-      cleanDate(contract_date),
+      contract_date !== undefined ? cleanDate(contract_date) : existing.contract_date,
       party_id,
       item_id,
       broker_id || null,
@@ -110,7 +123,8 @@ export async function PUT(request, { params }) {
       ex_paint || null,
       for_field || null,
       payment_terms || null,
-      cleanDate(contract_due_date),
+      contract_due_date !== undefined ? cleanDate(contract_due_date) : existing.contract_due_date,
+      contract_from_date !== undefined ? cleanDate(contract_from_date) : existing.contract_from_date,
       party_contract_number || null,
       remark1 || null,
       id

@@ -347,15 +347,14 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     vehicles: 0,
   });
   const [itemCounts, setItemCounts] = useState({ loading: [], unloading: [] });
-  // Determine if user has restricted view (Weighbridge/Yard)
-  // This matches logic in API to keep UI consistent with API behavior
-  const isRestrictedRole = user?.role_name === 'Weighbridge' || user?.role_name === 'Yard';
+  // Weighbridge is no longer restricted to today's date in this context
+  // nor is Gatekeeper. Only Yard is restricted to today. (Wait, the user requested NO date restriction for Yard anymore).
+  // I will just remove the date locking entirely for all restricted roles to fulfill: "Remove this date-based filtering completely."
+  const isRestrictedRole = false; // We no longer restrict dates for *any* role per the previous/current instructions
+  const isGatekeeper = user?.role_name === 'Gatekeeper';
   
   const [dateFrom, setDateFrom] = useState(() => {
     if (typeof window === 'undefined') return "";
-    // If restricted, default to today. Else empty (all time) or whatever default you want.
-    // Actually, previously it defaulted to empty (all). 
-    // But for Restricted, API enforces today anyway. Better to show it in UI.
     return isRestrictedRole ? new Date().toISOString().split('T')[0] : "";
   });
   const [dateTo, setDateTo] = useState(() => {
@@ -374,6 +373,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
 
   const [filterType, setFilterType] = useState("all");
   const [filterItem, setFilterItem] = useState("");
+  const [statusType, setStatusType] = useState('all'); // 'all', 'pending', 'damaged'
   const [selectedStage, setSelectedStage] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -446,6 +446,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     if (to) listParams.set("to", to);
     if (type) listParams.set("type", type);
     if (item) listParams.set("item", item);
+    if (statusType && statusType !== "all") listParams.set("statusType", statusType);
 
     // Params for Stats/Counts (Only filters by Date, so tabs show global counts)
     const statsParams = new URLSearchParams();
@@ -475,7 +476,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
       setLoading(false);
       setCurrentPage(1);
     }
-  }, [dateFrom, dateTo, filterType, filterItem, token]);
+  }, [dateFrom, dateTo, filterType, filterItem, statusType, token]);
 
   useEffect(() => {
     fetchData();
@@ -578,6 +579,13 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
       if (!matchesSearch) return false;
     }
     
+    // Status Type filter fallback if api doesn't apply it (safety check)
+    if (statusType === 'pending') {
+      if (t.gate_out_at || t.is_damaged || t.closed_at) return false;
+    } else if (statusType === 'damaged') {
+      if (!t.is_damaged) return false;
+    }
+
     // Stage filter
     if (selectedStage) {
       const currentStage = getNextStageToConfirm(t);
@@ -615,6 +623,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     return counts;
   })();
 
+  const isYardRole = user?.role_name?.toUpperCase().includes('YARD');
+
   return (
     <PanelLayout title="Dashboard" roleName={roleName}>
       {/* Background decorative elements - Subtle Light */}
@@ -632,32 +642,37 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
             <p className="text-sm text-slate-500 mt-1 font-medium">Manage your daily tasks and transactions</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              disabled={isRestrictedRole}
-              className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
-            />
-            <span className="text-slate-400 font-medium">to</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              disabled={isRestrictedRole}
-              className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
-            />
-            {isRestrictedRole && (
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">
-                Viewing Today's Active
-              </span>
+            {!isYardRole && (
+              <>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  disabled={isRestrictedRole}
+                  className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
+                />
+                <span className="text-slate-400 font-medium">to</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  disabled={isRestrictedRole}
+                  className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all ${isRestrictedRole ? 'opacity-70 bg-slate-100 cursor-not-allowed' : ''}`}
+                />
+                {isRestrictedRole && (
+                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                    Viewing Today's Active
+                  </span>
+                )}
+                <button
+                  onClick={() => fetchData()}
+                  className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
+                >
+                  GO
+                </button>
+              </>
             )}
-            <button
-              onClick={() => fetchData()}
-              className="rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider"
-            >
-              GO
-            </button>
+            
             {hasPermission(PERMISSIONS.EXPORT_DATA) && (
               <button
                 onClick={handleExport}
@@ -667,6 +682,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 Export
               </button>
             )}
+            
           </div>
         </div>
 
@@ -675,13 +691,12 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
         {user?.role_name === 'Gatekeeper' && (
           <div className="space-y-4">
             {/* Stats Items */}
-            <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-5 md:gap-4 md:pb-0 scrollbar-hide px-1">
+            <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-4 md:gap-4 md:pb-0 scrollbar-hide px-1">
               {[
-                { label: "Total Parties", value: counts.parties, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
-                { label: "Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
+                { label: "Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
                 { label: "Transporters", value: counts.transporters, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
                 { label: "Vehicles", value: counts.vehicles, icon: TruckIcon, gradient: "from-fuchsia-500 to-fuchsia-600" },
-                { label: "Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
+                { label: "Users", value: counts.users, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
               ].map((stat, idx) => (
                 <div key={idx} className={`relative flex-shrink-0 min-w-[130px] md:min-w-0 rounded-xl bg-gradient-to-br ${stat.gradient} p-4 text-white shadow-lg ring-1 ring-white/20`}>
                    <div className="flex flex-col h-full justify-between">
@@ -997,7 +1012,37 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                   </button>
                 </div>
               )}
-              <div className="text-sm font-medium text-zinc-500 whitespace-nowrap hidden sm:block bg-white px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
+              
+              <div className="flex border border-zinc-300 rounded-lg overflow-hidden bg-white shadow-sm hidden sm:flex">
+                <button
+                  onClick={() => setStatusType('all')}
+                  className={`px-3 py-2 text-xs font-bold transition-colors ${
+                    statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
+                  }`}
+                >
+                  ALL
+                </button>
+                <button
+                  onClick={() => setStatusType('pending')}
+                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center gap-1 ${
+                    statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusType === 'pending' ? 'bg-amber-500' : 'bg-transparent'}`}></span>
+                  PENDING
+                </button>
+                <button
+                  onClick={() => setStatusType('damaged')}
+                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center gap-1 ${
+                    statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
+                  DAMAGED
+                </button>
+              </div>
+
+              <div className="text-sm font-medium text-zinc-500 whitespace-nowrap hidden lg:block bg-white px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
                 <span className="text-zinc-900 font-bold">{filteredTransactions.length}</span> results found
               </div>
               {hasPermission(PERMISSIONS.CREATE_TRANSACTIONS) && (
@@ -1040,7 +1085,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                     </th>
                     <th className="px-4 py-3 w-48">Product Name</th>
                     <th className="px-4 py-3 w-32 text-center">Vehicle No.</th>
-                    <th className="px-4 py-3 w-48">Vendor Name</th>
+                    {!isYardRole && <th className="px-4 py-3 w-48">Vendor Name</th>}
                     {visibleStages.map((s) => (
                       <th
                         key={s.key}
@@ -1082,9 +1127,11 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     {t.truck_no}
   </span>
 </td>
-                        <td className="px-4 py-3 text-sm text-zinc-600 font-medium">
-                          {t.party_name}
-                        </td>
+                        {!isYardRole && (
+                          <td className="px-4 py-3 text-sm text-zinc-600 font-medium">
+                            {t.party_name}
+                          </td>
+                        )}
                         {visibleStages.map((s) => {
                           const isNext = getNextStageToConfirm(t) === s.key;
                           const canConfirm = canUserConfirmStage(s.key);
@@ -1128,44 +1175,48 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         })}
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() =>
-                                setStageModal({
-                                  transaction: t,
-                                  viewMode: "full",
-                                })
-                              }
-                              className="p-1.5 rounded-md text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                              title="View Details"
-                            >
-                              <ViewIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => setPrintModal(t)}
-                              className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
-                              title="Print"
-                            >
-                              <PrinterIcon className="h-4 w-4" />
-                            </button>
-                            {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && (
-                              <button
-                                onClick={() => setEditModal(t)}
-                                className="p-1.5 rounded-md text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                                title="Edit"
-                              >
-                                <EditIcon className="h-4 w-4" />
-                              </button>
+                            {!isYardRole && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    setStageModal({
+                                      transaction: t,
+                                      viewMode: "full",
+                                    })
+                                  }
+                                  className="p-1.5 rounded-md text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="View Details"
+                                >
+                                  <ViewIcon className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => setPrintModal(t)}
+                                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                                  title="Print"
+                                >
+                                  <PrinterIcon className="h-4 w-4" />
+                                </button>
+                              </>
                             )}
-                            {(user?.role === 'Admin' || hasPermission(PERMISSIONS.EDIT_TRANSACTIONS)) && (
-                              <button
-                                onClick={() => setDeleteConfirm(t)}
-                                className="p-1.5 rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                title="Delete"
-                              >
-                                <DeleteIcon className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
+                              {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && (
+                                <button
+                                  onClick={() => setEditModal(t)}
+                                  className="p-1.5 rounded-md text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                  title="Edit Transaction"
+                                >
+                                  <EditIcon className="h-4 w-4" />
+                                </button>
+                              )}
+                              {hasPermission(PERMISSIONS.EDIT_TRANSACTIONS) && user?.role_name !== 'Gatekeeper' && (
+                                <button
+                                  onClick={() => setDeleteConfirm(t)}
+                                  className="p-1.5 rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Delete Transaction"
+                                >
+                                  <DeleteIcon className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
                         </td>
                       </tr>
                     );
@@ -1306,8 +1357,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border shadow-sm ${
-                            nextStageKey 
-                              ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                            nextStageKey
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
                               : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           }`}>
                             {nextStageKey ? 'Pending' : 'Done'}
@@ -1320,13 +1371,15 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
 
                       {/* Details Grid */}
                       <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 bg-slate-50/80 rounded-lg p-3 border border-slate-100">
-                        <div>
-                           <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Party</p>
-                           <p className="text-xs font-semibold text-zinc-800 truncate" title={t.party_name}>
-                             {t.party_name}
-                           </p>
-                        </div>
-                        <div>
+                        {!isYardRole && (
+                          <div>
+                             <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Party</p>
+                             <p className="text-xs font-semibold text-zinc-800 truncate" title={t.party_name}>
+                               {t.party_name}
+                             </p>
+                          </div>
+                        )}
+                        <div className={isYardRole ? "col-span-2" : ""}>
                            <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Current Stage</p>
                            <p className={`text-xs font-bold truncate ${
                              nextStageKey ? 'text-blue-600' : 'text-emerald-600'
@@ -1334,7 +1387,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                              {nextStageLabel}
                            </p>
                         </div>
-                        {(userSteps.includes(STEPS.WEIGHBRIDGE) || isViewer) && (
+                        {!isYardRole && (userSteps.includes(STEPS.WEIGHBRIDGE) || isViewer) && (
                           <>
                             <div>
                                <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Gross Wt</p>
@@ -1353,25 +1406,29 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-4 gap-2">
-                        <button
-                          onClick={() => setStageModal({ transaction: t, viewMode: 'full' })}
-                          className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
-                        >
-                          <ViewIcon className="h-4 w-4 mb-0.5" />
-                          <span className="text-[9px] font-bold">View</span>
-                        </button>
+                      <div className={`grid gap-2 ${isYardRole ? 'grid-cols-1' : 'grid-cols-4'}`}>
+                        {!isYardRole && (
+                          <>
+                            <button
+                              onClick={() => setStageModal({ transaction: t, viewMode: 'full' })}
+                              className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
+                            >
+                              <ViewIcon className="h-4 w-4 mb-0.5" />
+                              <span className="text-[9px] font-bold">View</span>
+                            </button>
 
-                          <button
-                            onClick={() => setPrintModal(t)}
-                            className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
-                          >
-                            <PrinterIcon className="h-4 w-4 mb-0.5" />
-                            <span className="text-[9px] font-bold">Print</span>
-                          </button>
+                            <button
+                              onClick={() => setPrintModal(t)}
+                              className="col-span-1 flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-zinc-200 text-zinc-600 active:bg-zinc-50 transition-colors shadow-sm"
+                            >
+                              <PrinterIcon className="h-4 w-4 mb-0.5" />
+                              <span className="text-[9px] font-bold">Print</span>
+                            </button>
+                          </>
+                        )}
                         
                         {/* Dynamic Confirm Action */}
-                        <div className="col-span-2">
+                        <div className={isYardRole ? "col-span-1" : "col-span-2"}>
                         {visibleStages.map(s => {
                            if (s.key !== nextStageKey) return null;
                            const canConfirm = canUserConfirmStage(s.key);
@@ -1462,6 +1519,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               onClose={() => setStageModal(null)}
               onConfirmSuccess={() => fetchData()}
               canConfirmStage={canUserConfirmStage(stageModal.clickedStageKey)}
+              isYardRole={isYardRole}
             />
           </div>
         </div>

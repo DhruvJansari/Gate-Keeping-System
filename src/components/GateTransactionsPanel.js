@@ -38,6 +38,7 @@ export function GateTransactionsPanel() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [statusType, setStatusType] = useState('all'); // 'all', 'pending', 'damaged'
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,6 +55,7 @@ export function GateTransactionsPanel() {
     if (from) params.set('from', from);
     if (to) params.set('to', to);
     if (type) params.set('type', type);
+    if (statusType && statusType !== 'all') params.set('statusType', statusType);
 
     try {
       setLoading(true);
@@ -79,7 +81,7 @@ export function GateTransactionsPanel() {
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo, filterType, token]);
+  }, [dateFrom, dateTo, filterType, statusType, token]);
 
   useEffect(() => {
     fetchData();
@@ -130,11 +132,40 @@ export function GateTransactionsPanel() {
               <option value="Loading">Loading</option>
               <option value="Unloading">Unloading</option>
             </select>
+            {/* Filter buttons moved to main actions section */}
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto">
+            <div className="flex border border-zinc-300 rounded-lg overflow-hidden bg-white/80 backdrop-blur shadow-sm hidden sm:flex shrink-0">
+              <button
+                onClick={() => setStatusType('all')}
+                className={`px-4 py-2 text-sm font-bold transition-colors ${
+                  statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setStatusType('pending')}
+                className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                  statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${statusType === 'pending' ? 'bg-amber-500' : 'bg-transparent'}`}></span>
+                Pending
+              </button>
+              <button
+                onClick={() => setStatusType('damaged')}
+                className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                  statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
+                Damaged
+              </button>
+            </div>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg shrink-0"
             >
               <DownloadIcon className="h-4 w-4" /> Export
             </button>

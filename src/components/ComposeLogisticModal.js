@@ -117,12 +117,13 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
 
   const [vehicles, setVehicles] = useState([]);
   const [items, setItems] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [loadingMasters, setLoadingMasters] = useState(false);
 
   const emptyForm = {
     consignor_name: "", consignor_address: "", consignor_place: "", consignor_gst: "",
     consignee_name: "", consignee_address: "", consignee_place: "", consignee_gst: "",
-    truck_no: "", product: "",
+    truck_no: "", product: "", driver_id: "",
     gross_weight: "", tare_weight: "", net_weight: "", rate: "", amounts: "",
   };
 
@@ -139,12 +140,14 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
   const fetchMasters = async () => {
     try {
       setLoadingMasters(true);
-      const [resVehicles, resItems] = await Promise.all([
+      const [resVehicles, resItems, resDrivers] = await Promise.all([
         fetch("/api/vehicles?status=Active"),
         fetch("/api/items?status=Active"),
+        fetch("/api/drivers?status=Active"),
       ]);
       if (resVehicles.ok) { const d = await resVehicles.json(); setVehicles(Array.isArray(d) ? d : []); }
       if (resItems.ok) { const d = await resItems.json(); setItems(Array.isArray(d) ? d : []); }
+      if (resDrivers.ok) { const d = await resDrivers.json(); setDrivers(Array.isArray(d) ? d : []); }
     } catch {
       toast.error("Failed to load vehicle data");
     } finally {
@@ -179,6 +182,7 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
     if (!form.product?.trim())         errors.product        = "Product is required";
     if (!form.consignor_name?.trim())  errors.consignor_name = "Consignor Name is required";
     if (!form.consignee_name?.trim())  errors.consignee_name = "Consignee Name is required";
+    if (!form.driver_id)               errors.driver_id      = "Driver is required";
 
     if (Object.values(errors).some(Boolean)) {
       setFieldErrors(errors);
@@ -348,9 +352,34 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
               <InputField label="Rate"     type="number" value={form.rate} onChange={(v) => handleFieldChange("rate", v)} />
             </div>
 
+            {/* Driver */}
+            <div className="space-y-1 w-full">
+              <label className="text-sm font-medium text-zinc-700">
+                Driver <span className="text-red-500">*</span>
+              </label>
+              <select
+                className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all ${
+                  fieldErrors.driver_id
+                    ? "border-red-300 bg-red-50 focus:border-red-500"
+                    : "border-zinc-300 bg-white focus:border-blue-500"
+                }`}
+                value={form.driver_id}
+                onChange={(e) => handleFieldChange("driver_id", e.target.value)}
+                disabled={loadingMasters}
+              >
+                <option value="">Select Driver</option>
+                {drivers.map((d) => (
+                  <option key={d.driver_id} value={d.driver_id}>
+                    {d.driver_name}{d.mobile ? ` (${d.mobile})` : ""}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.driver_id && <p className="text-xs text-red-500 font-medium">{fieldErrors.driver_id}</p>}
+            </div>
+
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Total Amount</label>
-              <div className="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-700 text-right">
+              <div className="w-45 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-700 text-right">
                 {form.amounts || "0.00"} ₹
               </div>
             </div>

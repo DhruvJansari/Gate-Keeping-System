@@ -8,7 +8,17 @@ export async function GET(request, context) {
 
     const db = await getDb();
     const [rows] = await db.execute(
-      "SELECT * FROM logistic_entries WHERE logistic_id = ?",
+      `SELECT
+         le.*,
+         d.driver_id   AS driver_id,
+         d.driver_name AS driver_name,
+         d.mobile      AS driver_mobile,
+         d.adhar_number AS adhar_number,
+         d.licence     AS licence,
+         d.licence_expiry AS licence_expiry
+       FROM logistic_entries le
+       LEFT JOIN drivers d ON le.driver_id = d.driver_id
+       WHERE le.logistic_id = ?`,
       [id]
     );
 

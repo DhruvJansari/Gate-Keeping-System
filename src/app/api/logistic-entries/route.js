@@ -16,46 +16,72 @@ export async function GET(request) {
         const [consignees] = await db.execute("SELECT DISTINCT consignee_name FROM logistic_entries WHERE consignee_name IS NOT NULL ORDER BY consignee_name");
         const [trucks] = await db.execute("SELECT DISTINCT truck_no FROM logistic_entries WHERE truck_no IS NOT NULL ORDER BY truck_no");
         const [products] = await db.execute("SELECT DISTINCT product FROM logistic_entries WHERE product IS NOT NULL ORDER BY product");
+        const [drivers] = await db.execute(`
+            SELECT DISTINCT d.driver_id, d.driver_name
+            FROM logistic_entries le
+            JOIN drivers d ON le.driver_id = d.driver_id
+            WHERE le.driver_id IS NOT NULL
+            ORDER BY d.driver_name
+        `);
         
         return NextResponse.json({
             consignors: consignors.map(c => c.consignor_name),
             consignees: consignees.map(c => c.consignee_name),
             trucks: trucks.map(t => t.truck_no),
-            products: products.map(p => p.product)
+            products: products.map(p => p.product),
+            drivers: drivers.map(d => ({ driver_id: d.driver_id, driver_name: d.driver_name }))
         });
     }
 
     // List logic with filters
-    let query = "SELECT * FROM logistic_entries WHERE 1=1";
+    let query = `
+      SELECT
+        le.*,
+        d.driver_id   AS driver_id,
+        d.driver_name AS driver_name,
+        d.mobile      AS driver_mobile,
+        d.adhar_number AS adhar_number,
+        d.licence     AS licence,
+        d.licence_expiry AS licence_expiry
+      FROM logistic_entries le
+      LEFT JOIN drivers d ON le.driver_id = d.driver_id
+      WHERE 1=1
+    `;
     const params = [];
 
     const consignor = searchParams.get("consignor");
     if (consignor) {
-        query += " AND consignor_name = ?";
+        query += " AND le.consignor_name = ?";
         params.push(consignor);
     }
 
     const consignee = searchParams.get("consignee");
     if (consignee) {
-        query += " AND consignee_name = ?";
+        query += " AND le.consignee_name = ?";
         params.push(consignee);
     }
 
     const truck_no = searchParams.get("truck_no");
     if (truck_no) {
-        query += " AND truck_no = ?";
+        query += " AND le.truck_no = ?";
         params.push(truck_no);
     }
 
     const product = searchParams.get("product");
     if (product) {
-        query += " AND product = ?";
+        query += " AND le.product = ?";
         params.push(product);
+    }
+
+    const driver_id_filter = searchParams.get("driver_id");
+    if (driver_id_filter) {
+        query += " AND le.driver_id = ?";
+        params.push(driver_id_filter);
     }
 
     const search = searchParams.get("search");
     if (search) {
-        query += " AND (consignor_name LIKE ? OR consignee_name LIKE ? OR truck_no LIKE ? OR product LIKE ? OR consignor_address LIKE ? OR consignee_address LIKE ?)";
+        query += " AND (le.consignor_name LIKE ? OR le.consignee_name LIKE ? OR le.truck_no LIKE ? OR le.product LIKE ? OR le.consignor_address LIKE ? OR le.consignee_address LIKE ?)";
         const searchTerm = `%${search}%`;
         params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
@@ -65,17 +91,19 @@ export async function GET(request) {
     const to = searchParams.get("to");
 
     if (from && to) {
-        query += " AND DATE(entry_date) BETWEEN ? AND ?";
+        query += " AND DATE(le.created_at) BETWEEN ? AND ?";
         params.push(from, to);
     } else if (from) {
-        query += " AND DATE(entry_date) >= ?";
+        query += " AND DATE(le.created_at) >= ?";
         params.push(from);
     } else if (to) {
-        query += " AND DATE(entry_date) <= ?";
+        query += " AND DATE(le.created_at) <= ?";
         params.push(to);
     }
 
-    query += " ORDER BY created_at DESC";
+    const orderParam = searchParams.get("order");
+    const sortDir = orderParam === 'asc' ? 'ASC' : 'DESC';
+    query += ` ORDER BY le.logistic_id ${sortDir}`;
 
     const [entries] = await db.execute(query, params);
     return NextResponse.json(entries);
@@ -114,10 +142,10 @@ export async function POST(request) {
         lr_no,
         consignor_name, consignor_address, consignor_place, consignor_gst,
         consignee_name, consignee_address, consignee_place, consignee_gst,
-        truck_no, product,
+        truck_no, driver_id, product,
         gross_weight, tare_weight, net_weight, rate, amounts,
         entry_date, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       lr_no,
       body.consignor_name || null,
@@ -129,6 +157,7 @@ export async function POST(request) {
       body.consignee_place || null,
       body.consignee_gst || null,
       body.truck_no,
+      body.driver_id || null,
       body.product,
       body.gross_weight || 0,
       body.tare_weight || 0,

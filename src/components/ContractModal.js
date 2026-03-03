@@ -15,7 +15,8 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
   const [form, setForm] = useState({
     contract_no: "",
     contract_date: "",
-    contract_due_date: "",
+    from_date: "",
+    to_date: "",
     contract_type: "Purchase Order",
     party_contract_number: "",
     party_id: "",
@@ -53,7 +54,8 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
         setForm({
           contract_no: contract.contract_no || "",
           contract_date: contract.contract_date ? contract.contract_date.split('T')[0] : "",
-          contract_due_date: contract.contract_due_date ? contract.contract_due_date.split('T')[0] : "",
+          from_date: contract.contract_from_date ? contract.contract_from_date.split('T')[0] : "",
+          to_date: contract.to_date ? contract.to_date.split('T')[0] : (contract.contract_due_date ? contract.contract_due_date.split('T')[0] : ""),
           contract_type: contract.contract_type || "Purchase Order",
           party_contract_number: contract.party_contract_number || "",
           party_id: contract.party_id || "",
@@ -77,7 +79,8 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
         setForm({
           contract_no: "",
           contract_date: "",
-          contract_due_date: "",
+          from_date: "",
+          to_date: "",
           contract_type: "Purchase Order",
           party_contract_number: "",
           party_id: "",
@@ -133,7 +136,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
         }
         
         const pQty = Math.max(0, cQty - rQty - sQty);
-        newForm.pending_qty = pQty.toFixed(4); // Keep precision
+        newForm.pending_qty = pQty.toFixed(3); // Keep precision
     }
 
     setForm(newForm);
@@ -158,6 +161,14 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
         setLoading(false);
         toast.error("Received + Settled Quantity cannot exceed Contract Quantity");
         return;
+    }
+
+    // Date range validation
+    if (form.from_date && form.to_date && form.from_date > form.to_date) {
+      setFieldErrors({ from_date: "From Date cannot be after To Date" });
+      toast.error("From Date cannot be after To Date");
+      setLoading(false);
+      return;
     }
 
     const errors = {};
@@ -188,10 +199,18 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
       const url = contract ? `/api/contracts/${contract.contract_id}` : "/api/contracts";
       const method = contract ? "PUT" : "POST";
 
+      const payload = {
+        ...form,
+        // Ensure backend always receives contract_due_date regardless of form field naming
+        contract_due_date: form.to_date || form.contract_due_date || null,
+        from_date: form.from_date || null,
+        to_date: form.to_date || null,
+      };
+
       const res = await fetch(url, {
         method,
         headers,
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -351,17 +370,39 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                       </p>
                     )}
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-700">
-                      Due Date
-                    </label>
-                    <input
-                      type="date"
-                      disabled={viewMode}
-                      value={form.contract_due_date}
-                      onChange={(e) => handleFieldChange("contract_due_date", e.target.value)}
-                      className={`w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm ${viewMode ? "bg-zinc-50 text-zinc-600 cursor-not-allowed border-zinc-200" : ""}`}
-                    />
+                  {/* Duration: From Date → To Date */}
+                  <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">Due From Date</label>
+                      <input
+                        type="date"
+                        disabled={viewMode}
+                        value={form.from_date}
+                        onChange={(e) => handleFieldChange("from_date", e.target.value)}
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.from_date
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                            : "border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20"
+                        } ${viewMode ? "bg-zinc-50 text-zinc-600 cursor-not-allowed border-zinc-200" : ""}`}
+                      />
+                      {fieldErrors.from_date && (
+                        <p className="text-xs font-medium text-red-600 mt-1">{fieldErrors.from_date}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">Due To Date</label>
+                      <input
+                        type="date"
+                        disabled={viewMode}
+                        value={form.to_date}
+                        onChange={(e) => handleFieldChange("to_date", e.target.value)}
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.from_date
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                            : "border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20"
+                        } ${viewMode ? "bg-zinc-50 text-zinc-600 cursor-not-allowed border-zinc-200" : ""}`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -393,13 +434,13 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                           </option>
                         ))}
                       </select>
-                      {!viewMode && (
+                      {/* {!viewMode && (
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
-                      )}
+                      )} */}
                     </div>
                     {fieldErrors.party_id && (
                       <p className="text-xs font-medium text-red-600 mt-1">
@@ -425,13 +466,13 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                           </option>
                         ))}
                       </select>
-                      {!viewMode && (
+                      {/* {!viewMode && (
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>
@@ -464,13 +505,13 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                           </option>
                         ))}
                       </select>
-                      {!viewMode && (
+                      {/* {!viewMode && (
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
-                      )}
+                      )} */}
                     </div>
                     {fieldErrors.item_id && (
                       <p className="text-xs font-medium text-red-600 mt-1">
@@ -619,7 +660,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                     </label>
                     <input
                       type="number"
-                      step="0.0001"
+                      step="0.001"
                       value={form.settal_qty}
                       onChange={(e) => handleFieldChange("settal_qty", e.target.value)}
                       disabled={viewMode}
@@ -633,11 +674,11 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                     </label>
                     <input
                       type="number"
-                      step="0.0001"
+                      step="0.01"
                       value={form.pending_qty}
                       disabled
                       readOnly
-                      placeholder="0.000"
+                      placeholder="0.00"
                       className="w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2.5 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none cursor-not-allowed shadow-sm font-medium"
                     />
                   </div>
@@ -653,14 +694,14 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                         className="w-full appearance-none rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-900 focus:outline-none cursor-not-allowed shadow-sm"
                       >
                         <option value="Pending">Pending</option>
-                        <option value="Incomplete">Incomplete</option>
+                        {/* <option value="Incomplete">Incomplete</option> */}
                         <option value="Complete">Complete</option>
                       </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                      {/* <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

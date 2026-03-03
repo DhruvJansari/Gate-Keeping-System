@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 export function ContractManagement() {
   const { user, hasPermission } = useAuth();
   const [contracts, setContracts] = useState([]);
+  const [stats, setStats] = useState({ total: 0, po: 0, so: 0, pending: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingContract, setEditingContract] = useState(null);
@@ -35,6 +36,18 @@ export function ContractManagement() {
   const [contractType, setContractType] = useState("all"); // 'all', 'Purchase Order', 'Sales Order'
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  // Admin: default to today's date on first mount
+  useEffect(() => {
+    if (!user) return;
+    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin') {
+      // Generate 'YYYY-MM-DD' in local timezone to prevent UTC shift
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      setDateFrom(today);
+      setDateTo(today);
+    }
+  }, [user?.role_name]); // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedItem, setSelectedItem] = useState(""); // Filter by Item
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -42,17 +55,25 @@ export function ContractManagement() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      // Fetch all for the date range to calculate board stats
-      if (dateFrom) params.set("start_date", dateFrom);
-      if (dateTo) params.set("end_date", dateTo);
+      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin';
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (dateFrom || (isAdmin && !dateFrom)) params.set("start_date", dateFrom || today);
+      if (dateTo || (isAdmin && !dateTo)) params.set("end_date", dateTo || today);
       
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const res = await fetch(`/api/contracts?${params}`, { headers });
+      const [res, statsRes] = await Promise.all([
+        fetch(`/api/contracts?${params}`, { headers }),
+        fetch(`/api/contracts/counts`, { headers })
+      ]);
       if (!res.ok) throw new Error("Failed to load contracts");
       const data = await res.json();
+      const statsData = await statsRes.ok ? await statsRes.json() : { total: 0, po: 0, so: 0, pending: 0, completed: 0 };
+      
       setContracts(Array.isArray(data) ? data : []);
+      setStats(statsData);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -63,17 +84,6 @@ export function ContractManagement() {
   useEffect(() => {
     fetchContracts();
   }, [fetchContracts]);
-
-  // Derived Data: Stats
-  const stats = useMemo(() => {
-    const total = contracts.length;
-    const po = contracts.filter(c => c.contract_type === "Purchase Order").length;
-    const so = contracts.filter(c => c.contract_type === "Sales Order").length;
-    const pending = contracts.filter(c => c.contract_status === "Pending").length;
-    const completed = contracts.filter(c => c.contract_status === "Complete").length;
-    
-    return { total, po, so, pending, completed };
-  }, [contracts]);
 
   // Derived Data: Category Item Counts
   const { poItems, soItems } = useMemo(() => {
@@ -193,7 +203,7 @@ export function ContractManagement() {
                 const cQty = parseFloat(updated.contract_quantity) || 0;
                 const rQty = parseFloat(updated.rec_qty) || 0;
                 const sQty = parseFloat(updated.settal_qty) || 0;
-                updated.pending_qty = Math.max(0, cQty - rQty - sQty).toFixed(4);
+                updated.pending_qty = Math.max(0, cQty - rQty - sQty).toFixed(3);
             }
             return updated;
         }
@@ -232,6 +242,11 @@ export function ContractManagement() {
     setContractType("all");
     setSelectedItem("");
   };
+function formatQty(value) {
+  const num = parseFloat(value);
+  if (isNaN(num)) return "0.000";
+  return num.toFixed(3);
+}
 
   function formatDate(d) {
     if (!d) return "—";
@@ -316,105 +331,155 @@ export function ContractManagement() {
 
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {/* Purchase Order Button Section */}
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 overflow-hidden shadow-sm">
-            <button
-              onClick={() => handleFilterClick("Purchase Order", "")}
-              className={`w-full flex items-center justify-between p-4 border-b border-indigo-100 transition-all ${
-                contractType === "Purchase Order" && !selectedItem
-                  ? "bg-indigo-100 shadow-inner"
-                  : "hover:bg-indigo-100/50"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-indigo-500 p-2 shadow-sm text-white">
-                  <UnloadingGoodsIcon className="h-5 w-5" />
-                </div>
-                <span className="font-semibold text-indigo-900">
-                  Purchase Orders - {totalInwardItems}
-                </span>
-              </div>
-              {contractType === "Purchase Order" && (
-                <div 
-                  onClick={handleClearFilter}
-                  className="rounded-full bg-indigo-200/50 p-1 text-indigo-700 hover:bg-indigo-300 transition-colors"
-                  title="Clear Filter"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              )}
-            </button>
-            <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto">
-              {poItems.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleFilterClick("Purchase Order", item.name)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                    contractType === "Purchase Order" && selectedItem === item.name
-                      ? "bg-indigo-100 text-indigo-900 font-medium shadow-sm"
-                      : "text-indigo-700 hover:bg-indigo-100/50"
-                  }`}
-                >
-                   <div className="flex justify-between items-center">
-                     <span>{item.name}</span>
-                     <span className="bg-indigo-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
-                   </div>
-                </button>
-              ))}
-              {poItems.length === 0 && <p className="p-4 text-center text-indigo-600/50 italic text-sm">No items</p>}
-            </div>
-          </div>
+<div className="rounded-xl border border-indigo-200 bg-indigo-50/50 overflow-hidden shadow-sm">
+  <button
+    onClick={() => handleFilterClick("Purchase Order", "")}
+    className={`w-full flex items-center justify-between p-4 border-b border-indigo-100 transition-all ${
+      contractType === "Purchase Order" && !selectedItem
+        ? "bg-indigo-100 shadow-inner"
+        : "hover:bg-indigo-100/50"
+    }`}
+  >
+    <div className="flex items-center gap-3">
+      <div className="rounded-lg bg-indigo-500 p-2 shadow-sm text-white">
+        <UnloadingGoodsIcon className="h-5 w-5" />
+      </div>
+      <span className="font-semibold text-indigo-900">
+        Purchase Orders - {totalInwardItems}
+      </span>
+    </div>
 
-          <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
-            <button
-              onClick={() => handleFilterClick("Sales Order", "")}
-              className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
-                contractType === "Sales Order" && !selectedItem
-                  ? "bg-blue-100/50 shadow-inner"
-                  : "hover:bg-blue-100/30"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
-                  <LoadingGoodsIcon className="h-5 w-5" />
-                </div>
-                <span className="font-semibold text-blue-900">
-                  Sales Orders - {totalOutwardItems}
-                </span>
-              </div>
-              {contractType === "Sales Order" && (
-                <div 
-                  onClick={handleClearFilter}
-                  className="rounded-full bg-blue-200/50 p-1 text-blue-700 hover:bg-blue-300 transition-colors"
-                  title="Clear Filter"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              )}
-            </button>
-            <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto">
-              {soItems.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleFilterClick("Sales Order", item.name)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                    contractType === "Sales Order" && selectedItem === item.name
-                      ? "bg-blue-100 text-blue-900 font-medium shadow-sm"
-                      : "text-blue-700 hover:bg-blue-100/50"
-                  }`}
-                >
-                   <div className="flex justify-between items-center">
-                     <span>{item.name}</span>
-                     <span className="bg-blue-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
-                   </div>
-                </button>
-              ))}
-              {soItems.length === 0 && <p className="p-4 text-center text-blue-600/50 italic text-sm">No items</p>}
-            </div>
-          </div>
+    {contractType === "Purchase Order" && (
+      <div
+        onClick={handleClearFilter}
+        className="rounded-full bg-indigo-200/50 p-1 text-indigo-700 hover:bg-indigo-300 transition-colors"
+        title="Clear Filter"
+      >
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </div>
+    )}
+  </button>
+
+  <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto">
+    {poItems.map((item, idx) => (
+      <button
+        key={idx}
+        onClick={() => handleFilterClick("Purchase Order", item.name)}
+        className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+          contractType === "Purchase Order" && selectedItem === item.name
+            ? "bg-indigo-100 text-indigo-900 shadow-sm"
+            : "text-indigo-700 hover:bg-indigo-100/50"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-base">
+            {item.name}
+          </span>
+
+          {/* If you want count near name, just uncomment below */}
+          {/* 
+          <span className="bg-indigo-200/60 px-2 py-0.5 rounded text-xs font-medium">
+            ({item.count})
+          </span> 
+          */}
+        </div>
+      </button>
+    ))}
+
+    {poItems.length === 0 && (
+      <p className="p-4 text-center text-indigo-600/50 italic text-sm">
+        No items
+      </p>
+    )}
+  </div>
+</div>
+
+<div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
+  <button
+    onClick={() => handleFilterClick("Sales Order", "")}
+    className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
+      contractType === "Sales Order" && !selectedItem
+        ? "bg-blue-100/50 shadow-inner"
+        : "hover:bg-blue-100/30"
+    }`}
+  >
+    <div className="flex items-center gap-3">
+      <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
+        <LoadingGoodsIcon className="h-5 w-5" />
+      </div>
+      <span className="font-semibold text-blue-900">
+        Sales Orders - {totalOutwardItems}
+      </span>
+    </div>
+
+    {contractType === "Sales Order" && (
+      <div
+        onClick={handleClearFilter}
+        className="rounded-full bg-blue-200/50 p-1 text-blue-700 hover:bg-blue-300 transition-colors"
+        title="Clear Filter"
+      >
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </div>
+    )}
+  </button>
+
+  <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto">
+    {soItems.map((item, idx) => (
+      <button
+        key={idx}
+        onClick={() => handleFilterClick("Sales Order", item.name)}
+        className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+          contractType === "Sales Order" && selectedItem === item.name
+            ? "bg-blue-100 text-blue-900 shadow-sm"
+            : "text-blue-700 hover:bg-blue-100/50"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-base">
+            {item.name}
+          </span>
+
+          {/* Enable this if you want count next to name */}
+          {/*
+          <span className="bg-blue-200/60 px-2 py-0.5 rounded text-xs font-medium">
+            ({item.count})
+          </span>
+          */}
+        </div>
+      </button>
+    ))}
+
+    {soItems.length === 0 && (
+      <p className="p-4 text-center text-blue-600/50 italic text-sm">
+        No items
+      </p>
+    )}
+  </div>
+</div>
         </div>
 
         <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden">
@@ -465,155 +530,208 @@ export function ContractManagement() {
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
               </div>
             ) : (
-              <table className="w-full min-w-[1200px] text-sm text-left">
-                  <thead className="bg-zinc-100 text-zinc-700 border-b border-zinc-200">
-                    <tr>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Contract No</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Date</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Due Date</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Party Contract No</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Party Name</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Item</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Broker Name</th>
-                      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Rate</th>
-                      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Contract Qty</th>
-                      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Rec Qty</th>
-                      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Set. Qty</th>
-                      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Pen. Qty</th>
-                      <th className="px-4 py-3 font-semibold text-center whitespace-nowrap">Status</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Ex_Plant</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">For</th>
-                      <th className="px-4 py-3 font-semibold whitespace-nowrap">Payment Terms</th>
-                      <th className="px-4 py-3 font-semibold text-center whitespace-nowrap sticky right-0 bg-zinc-100">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {filteredContracts.map((c) => (
-                      <tr key={c.contract_id} className="hover:bg-blue-50/30 transition-colors">
-                        <td className="px-4 py-3 font-bold text-zinc-900">{c.contract_no}</td>
-                        <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{formatDate(c.contract_date)}</td>
-                        <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{formatDate(c.contract_due_date)}</td>
-                        <td className="px-4 py-3 text-zinc-600">{c.party_contract_number || "—"}</td>
-                        <td className="px-4 py-3">
-                          <div className="font-semibold text-zinc-900 truncate max-w-[200px]" title={c.party_name}>
-                            {c.party_name}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-zinc-700">{c.item_name}</td>
-                        <td className="px-4 py-3 text-zinc-600">{c.broker_name || "—"}</td>
-                        <td className="px-4 py-3 text-right font-mono">₹{c.contract_rate}</td>
-                        <td className="px-4 py-3 text-right font-bold text-zinc-900">{c.contract_quantity}</td>
-                        
-                        <td className="px-4 py-3">
-                          {hasPermission('manage_contracts') ? (
-                            <input 
-                              type="number" 
-                              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
-                              defaultValue={c.rec_qty}
-                              onBlur={(e) => handleInlineUpdate(c.contract_id, 'rec_qty', e.target.value)}
-                            />
-                          ) : (
-                            <span className="font-mono text-xs">{c.rec_qty || 0}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          {hasPermission('manage_contracts') ? (
-                            <input 
-                              type="number" 
-                              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
-                              defaultValue={c.settal_qty}
-                              onBlur={(e) => handleInlineUpdate(c.contract_id, 'settal_qty', e.target.value)}
-                            />
-                          ) : (
-                            <span className="font-mono text-xs">{c.settal_qty || 0}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            className="w-24 bg-zinc-100 border border-zinc-200 rounded px-2 py-1 text-right text-xs font-semibold text-zinc-600 outline-none cursor-not-allowed"
-                            value={c.pending_qty}
-                            disabled
-                            readOnly
-                          />
-                        </td>
-                        
-                        <td className="px-4 py-3 text-center">
-                          {hasPermission('manage_contracts') ? (
-                            <select
-                              className={`text-xs border rounded-lg px-2 py-1 font-bold cursor-pointer outline-none transition-all ${
-                                c.contract_status === 'Complete' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
-                                c.contract_status === 'Pending' ? 'bg-zinc-100 text-zinc-700 border-zinc-200' : 
-                                'bg-zinc-50 text-zinc-600 border-zinc-200'
-                              }`}
-                              value={c.contract_status || 'Pending'}
-                              onChange={(e) => handleInlineUpdate(c.contract_id, 'contract_status', e.target.value)}
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Incomplete">Incomplete</option>
-                              <option value="Complete">Complete</option>
-                            </select>
-                          ) : (
-                            <span className={`text-xs border rounded-lg px-2 py-1 font-bold outline-none transition-all ${
-                              c.contract_status === 'Complete' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
-                              c.contract_status === 'Pending' ? 'bg-zinc-100 text-zinc-700 border-zinc-200' : 
-                              'bg-zinc-50 text-zinc-600 border-zinc-200'
-                            }`}>
-                              {c.contract_status || 'Pending'}
-                            </span>
-                          )}
-                        </td>
+    <table className="w-full min-w-[1200px] text-sm text-left">
+  <thead className="bg-zinc-100 text-zinc-700 border-b border-zinc-200">
+    <tr>
+      <th className="px-2 py-3 font-semibold whitespace-nowrap">Cont.No</th>
+      <th className="px-2 py-3 font-semibold whitespace-nowrap">Date</th>
+      <th className="px-2 py-3 font-semibold whitespace-nowrap">Due Date</th>
+      <th className="px-2 py-3 font-semibold whitespace-nowrap">Party.Cont.No</th>
 
-                        <td className="px-4 py-3 text-zinc-600">{c.ex_paint || "—"}</td>
-                        <td className="px-4 py-3 text-zinc-600">{c.for_field || "—"}</td>
-                        <td 
-                          className="px-4 py-3 text-zinc-600 truncate max-w-[150px] cursor-pointer hover:text-blue-600 hover:underline"
-                          title="Click to view full text"
-                          onClick={() => handleViewText("Payment Terms", c.payment_terms)}
-                        >
-                          {c.payment_terms || "—"}
-                        </td>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">Party Name</th>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">Item</th>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">Broker Name</th>
+      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Rate</th>
+      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Contract Qty</th>
+      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Rec Qty</th>
+      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Set. Qty</th>
+      <th className="px-4 py-3 font-semibold text-right whitespace-nowrap">Pen. Qty</th>
+      <th className="px-4 py-3 font-semibold text-center whitespace-nowrap">Status</th>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">Ex_Plant</th>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">For</th>
+      <th className="px-4 py-3 font-semibold whitespace-nowrap">Payment Terms</th>
+      <th className="px-4 py-3 font-semibold text-center whitespace-nowrap sticky right-0 bg-zinc-100">
+        Actions
+      </th>
+    </tr>
+  </thead>
 
-                        <td className="px-4 py-3 sticky right-0 bg-white shadow-l">
-                          <div className="flex items-center justify-center gap-2">
-                            <button 
-                              onClick={() => handleView(c)} 
-                              className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 transition-colors"
-                              title="View Contract"
-                            >
-                              <ViewIcon className="h-4 w-4" />
-                            </button>
-                            {(user?.role_name === 'Admin' || hasPermission('manage_contracts')) && (
-                              <>
-                                <button 
-                                  onClick={() => handleEdit(c)} 
-                                  className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
-                                  title="Edit Contract"
-                                >
-                                  <EditIcon className="h-4 w-4" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDelete(c.contract_id)} 
-                                  className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
-                                  title="Delete Contract"
-                                >
-                                  <DeleteIcon className="h-4 w-4" />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  {filteredContracts.length === 0 && (
-                    <tr>
-                      <td colSpan={18} className="py-12 text-center text-zinc-500 italic">
-                        No contracts found matching the criteria.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+  <tbody className="divide-y divide-zinc-100">
+    {filteredContracts.map((c) => (
+      <tr key={c.contract_id} className="hover:bg-blue-50/30 transition-colors">
+
+        <td className="px-2 py-3 font-bold text-zinc-900 whitespace-nowrap">
+          {c.contract_no}
+        </td>
+
+        <td className="px-2 py-3 text-zinc-600 whitespace-nowrap">
+          {formatDate(c.contract_date)}
+        </td>
+
+        <td className="px-2 py-3 text-zinc-600 whitespace-nowrap">
+          {c.contract_from_date ? `${formatDate(c.to_date || c.contract_due_date)}` : formatDate(c.to_date || c.contract_due_date)}
+        </td>
+
+        <td className="px-2 py-3 text-zinc-600 truncate max-w-[140px] whitespace-nowrap">
+          {c.party_contract_number || "—"}
+        </td>
+
+        <td className="px-4 py-3">
+          <div
+            className="font-semibold text-zinc-900 truncate max-w-[200px] whitespace-nowrap"
+            title={c.party_name}
+          >
+            {c.party_name}
+          </div>
+        </td>
+
+        <td
+          className="px-4 py-3 text-zinc-700 truncate max-w-[160px] whitespace-nowrap"
+          title={c.item_name}
+        >
+          {c.item_name}
+        </td>
+
+        <td
+          className="px-4 py-3 text-zinc-600 truncate max-w-[160px] whitespace-nowrap"
+          title={c.broker_name}
+        >
+          {c.broker_name || "—"}
+        </td>
+
+        <td className="px-4 py-3 text-right font-mono whitespace-nowrap">
+          ₹{c.contract_rate}
+        </td>
+
+        <td className="px-4 py-3 text-right font-bold text-zinc-900 whitespace-nowrap">
+          {formatQty(c.contract_quantity)}
+        </td>
+
+        <td className="px-4 py-3">
+          {hasPermission("manage_contracts") ? (
+            <input
+              type="number"
+              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+              defaultValue={c.rec_qty}
+              step="0.001"
+              onBlur={(e) =>
+                handleInlineUpdate(c.contract_id, "rec_qty", e.target.value)
+              }
+            />
+          ) : (
+            <span className="font-mono text-xs">
+  {formatQty(c.rec_qty)}
+</span>
+          )}
+        </td>
+
+        <td className="px-4 py-3">
+          {hasPermission("manage_contracts") ? (
+            <input
+              type="number"
+              className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+              step="0.001"
+              defaultValue={c.settal_qty}
+              onBlur={(e) =>
+                handleInlineUpdate(c.contract_id, "settal_qty", e.target.value)
+              }
+            />
+          ) : (
+<span className="font-mono text-xs">
+  {formatQty(c.settal_qty)}
+</span>          )}
+        </td>
+
+        <td className="px-4 py-3">
+          <input
+            type="number"
+            className="w-24 bg-zinc-100 border border-zinc-200 rounded px-2 py-1 text-right text-xs font-semibold text-zinc-600 outline-none cursor-not-allowed"
+            value={formatQty(c.pending_qty)}
+            disabled
+            readOnly
+          />
+        </td>
+
+        <td className="px-4 py-3 text-center">
+          {hasPermission("manage_contracts") ? (
+            <select
+              className={`text-xs border rounded-lg px-2 py-1 font-bold cursor-pointer outline-none transition-all ${
+                c.contract_status === "Complete"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-zinc-100 text-zinc-700 border-zinc-200"
+              }`}
+              value={c.contract_status || "Pending"}
+              onChange={(e) =>
+                handleInlineUpdate(
+                  c.contract_id,
+                  "contract_status",
+                  e.target.value
+                )
+              }
+            >
+              <option value="Pending">Pending</option>
+              <option value="Complete">Complete</option>
+            </select>
+          ) : (
+            <span className="text-xs border rounded-lg px-2 py-1 font-bold bg-zinc-100 text-zinc-700 border-zinc-200">
+              {c.contract_status || "Pending"}
+            </span>
+          )}
+        </td>
+
+        <td className="px-4 py-3 truncate max-w-[130px] whitespace-nowrap text-zinc-600">
+          {c.ex_paint || "—"}
+        </td>
+
+        <td className="px-4 py-3 truncate max-w-[130px] whitespace-nowrap text-zinc-600">
+          {c.for_field || "—"}
+        </td>
+
+        <td
+          className="px-4 py-3 truncate max-w-[160px] whitespace-nowrap text-zinc-600 cursor-pointer hover:text-blue-600 hover:underline"
+          onClick={() => handleViewText("Payment Terms", c.payment_terms)}
+          title={c.payment_terms}
+        >
+          {c.payment_terms || "—"}
+        </td>
+
+        {/* ✅ ACTIONS KEPT EXACTLY SAME */}
+        <td className="px-4 py-3 sticky right-0 bg-white shadow-l">
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => handleView(c)}
+              className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 transition-colors"
+              title="View Contract"
+            >
+              <ViewIcon className="h-4 w-4" />
+            </button>
+
+            {(user?.role_name === "Admin" ||
+              hasPermission("manage_contracts")) && (
+              <>
+                <button
+                  onClick={() => handleEdit(c)}
+                  className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
+                  title="Edit Contract"
+                >
+                  <EditIcon className="h-4 w-4" />
+                </button>
+
+                <button
+                  onClick={() => handleDelete(c.contract_id)}
+                  className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
+                  title="Delete Contract"
+                >
+                  <DeleteIcon className="h-4 w-4" />
+                </button>
+              </>
+            )}
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
             )}
           </div>
 

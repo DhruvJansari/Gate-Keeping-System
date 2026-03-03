@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { STAGES, getStageStatus, getNextStageToConfirm } from '@/lib/stageUtils';
 import { formatWeight } from '@/utils/formatters';
-import { CloseIcon } from '@/components/Icons';
+import { CloseIcon, PrinterIcon } from '@/components/Icons';
+import { useGatePassPrint } from '@/components/GatePassPrint';
+import { useToast } from '@/hooks/useToast';
 
 function formatDateTime(d) {
   return d ? new Date(d).toLocaleString('en-IN') : '—';
@@ -20,21 +22,27 @@ export function AdminStageDetailModal({
   onClose,
   onConfirmSuccess,
   canConfirmStage,
+  isYardRole = false,
 }) {
   const [txn, setTxn] = useState(transaction);
+  const toast = useToast();
   const [confirming, setConfirming] = useState(false);
   const [firstWeight, setFirstWeight] = useState('');
   const [secondWeight, setSecondWeight] = useState('');
   const [remark2, setRemark2] = useState('');
   const [error, setError] = useState('');
   const [selectedStageFilter, setSelectedStageFilter] = useState(null);
+  const [damageReason, setDamageReason] = useState('');
+  const [isMarkingDamaged, setIsMarkingDamaged] = useState(false);
+  const { printEntryPass } = useGatePassPrint();
 
   const txnNo = (t) => t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, '0')}`;
   const status = getStageStatus(txn);
   const isFullView = viewMode === 'full';
   const nextStage = getNextStageToConfirm(txn);
   const isThisStageNext = nextStage === clickedStageKey;
-  const canConfirm = canConfirmStage && isThisStageNext && !isFullView;
+  const isDamaged = Boolean(txn.is_damaged);
+  const canConfirm = canConfirmStage && isThisStageNext && !isFullView && !isDamaged;
   const isGateOut = clickedStageKey === 'gate_out';
   const isFinalStage = status.gate_out;
 
@@ -48,6 +56,22 @@ export function AdminStageDetailModal({
 
   async function handleConfirm() {
     setError('');
+
+    if (clickedStageKey === 'second_weighbridge' && secondWeight !== '') {
+      const sw = Number(secondWeight);
+      const fw = txn.first_weight !== null ? Number(txn.first_weight) : null;
+      if (!isNaN(sw) && fw !== null) {
+        if (txn.transaction_type === "Loading" && fw <= sw) {
+          setError("For Loading transaction, First Weighbridge weight must be greater than Second Weighbridge weight.");
+          return;
+        }
+        if (txn.transaction_type === "Unloading" && sw <= fw) {
+          setError("For Unloading transaction, Second Weighbridge weight must be greater than First Weighbridge weight.");
+          return;
+        }
+      }
+    }
+
     setConfirming(true);
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
@@ -63,8 +87,36 @@ export function AdminStageDetailModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to confirm');
+      toast.success('Stage confirmed successfully!', { id: 'stage-confirm' });
       setTxn(data.transaction);
       onConfirmSuccess?.(data.transaction);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  async function handleMarkDamaged() {
+    if (!damageReason.trim()) {
+      setError('Please provide a reason for marking this transaction as damaged.');
+      return;
+    }
+    setError('');
+    setConfirming(true);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+    try {
+      const res = await fetch(`/api/transactions/${txn.transaction_id}/damaged`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ reason: damageReason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to mark damaged');
+      setTxn(data.transaction);
+      onConfirmSuccess?.(data.transaction);
+      setIsMarkingDamaged(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -169,6 +221,22 @@ export function AdminStageDetailModal({
           {/* 1. COMPACT CONFIRMATION VIEW (Default/Action Mode) */}
           {!isFullView && (
             <div className="space-y-4">
+               {isDamaged && (
+                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm animate-in fade-in">
+                   <h4 className="text-red-800 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                     <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                     Transaction Damaged
+                   </h4>
+                   <div className="bg-white/60 p-3 rounded-lg border border-red-100/50 mt-2">
+                     <p className="text-red-900 font-medium text-sm">"{txn.damaged_reason}"</p>
+                     <div className="flex gap-4 mt-2 text-xs text-red-700/80 font-semibold">
+                       <span>By: {txn.damaged_by_name}</span>
+                       <span>At: {formatDateTime(txn.damaged_at)}</span>
+                     </div>
+                   </div>
+                 </div>
+               )}
+
                {/* Context Card: Key Details - HIGH CONTRAST */}
                <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm">
                   <div className="grid grid-cols-2 gap-4">
@@ -184,27 +252,31 @@ export function AdminStageDetailModal({
                        <p className="text-sm font-bold text-zinc-800 truncate max-w-[120px] ml-auto" title={txn.item_name}>{txn.item_name}</p>
                     </div>
 
-                    {/* Row 2: Party Name (Full Width) */}
-                    <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
-                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Party Name</p>
-                       <p className="text-sm font-semibold text-zinc-800 truncate" title={txn.party_name}>{txn.party_name}</p>
-                    </div>
+                    {!isYardRole && (
+                      <>
+                        {/* Row 2: Party Name (Full Width) */}
+                        <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
+                           <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Party Name</p>
+                           <p className="text-sm font-semibold text-zinc-800 truncate" title={txn.party_name}>{txn.party_name}</p>
+                        </div>
 
-                    {/* Row 3: Transporter Name (Full Width) */}
-                    <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
-                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Transporter</p>
-                       <p className="text-sm font-medium text-zinc-700 truncate" title={txn.transporter_name}>{txn.transporter_name || '—'}</p>
-                    </div>
+                        {/* Row 3: Transporter Name (Full Width) */}
+                        <div className="col-span-2 space-y-1 pt-3 border-t border-zinc-100">
+                           <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Transporter</p>
+                           <p className="text-sm font-medium text-zinc-700 truncate" title={txn.transporter_name}>{txn.transporter_name || '—'}</p>
+                        </div>
 
-                    {/* Row 4: Invoice No & Quantity */}
-                    <div className="space-y-1 pt-3 border-t border-zinc-100">
-                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Invoice No</p>
-                       <p className="text-xs font-bold text-zinc-700 truncate font-mono">{txn.invoice_number || '—'}</p>
-                    </div>
-                    <div className="space-y-1 pt-3 border-t border-zinc-100 text-right">
-                       <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Quantity</p>
-                       <p className="text-xs font-bold text-zinc-700 font-mono">{txn.invoice_quantity || '—'}</p>
-                    </div>
+                        {/* Row 4: Invoice No & Quantity */}
+                        <div className="space-y-1 pt-3 border-t border-zinc-100">
+                           <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Invoice No</p>
+                           <p className="text-xs font-bold text-zinc-700 truncate font-mono">{txn.invoice_number || '—'}</p>
+                        </div>
+                        <div className="space-y-1 pt-3 border-t border-zinc-100 text-right">
+                           <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold opacity-90">Quantity</p>
+                           <p className="text-xs font-bold text-zinc-700 font-mono">{formatWeight(txn.invoice_quantity)}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                </div>
 
@@ -238,13 +310,24 @@ export function AdminStageDetailModal({
                               <span className="font-mono font-bold text-zinc-800">{formatDateTime(stageTimestamp)}</span>
                            </div>
                         )}
-                        {stageConfirmerName && (
+                         {stageConfirmerName && (
                            <div className="flex justify-between">
                               <span className="opacity-70 font-medium text-zinc-600">By:</span>
                               <span className="font-bold text-zinc-800">{stageConfirmerName}</span>
                            </div>
                         )}
                      </div>
+                  )}
+                  {clickedStageKey === 'gate_in' && status.gate_in && (
+                    <div className="mt-4 pt-3 border-t border-emerald-200">
+                      <button
+                        onClick={() => printEntryPass(txn)}
+                        className="w-full py-2.5 px-4 rounded-lg bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100 font-bold shadow-sm transition-all flex items-center justify-center gap-2"
+                      >
+                         <PrinterIcon className="h-4 w-4" />
+                         Print Entry Pass
+                      </button>
+                    </div>
                   )}
                </div>
               
@@ -344,6 +427,48 @@ export function AdminStageDetailModal({
                   </div>
                 </div>
               )}
+
+              {/* Damaged Action Button */}
+              {canConfirmStage && !isFullView && !isDamaged && !isFinalStage && (
+                <div className="pt-2">
+                  {!isMarkingDamaged ? (
+                    <button
+                      onClick={() => setIsMarkingDamaged(true)}
+                      className="w-full py-2.5 px-4 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-bold uppercase tracking-wider text-xs transition-colors"
+                    >
+                      Report Transaction as Damaged
+                    </button>
+                  ) : (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                      <h4 className="text-red-800 font-bold text-sm uppercase tracking-wider mb-2">Confirm Damaged Status</h4>
+                      <p className="text-xs text-red-600/80 mb-3 font-medium">This will permanently close the cycle and prevent further stages from being confirmed.</p>
+                      <textarea
+                        value={damageReason}
+                        onChange={(e) => setDamageReason(e.target.value)}
+                        rows={2}
+                        placeholder="Please provide the reason..."
+                        className="w-full p-3 rounded-lg border border-red-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm mb-3"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { setIsMarkingDamaged(false); setError(''); }}
+                          disabled={confirming}
+                          className="flex-1 py-2 px-4 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 font-bold text-sm transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleMarkDamaged}
+                          disabled={confirming || !damageReason.trim()}
+                          className="flex-1 py-2 px-4 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold text-sm shadow-md shadow-red-500/20 disabled:opacity-50 transition-colors flex justify-center items-center"
+                        >
+                          {confirming ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Confirm Damaged'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -431,7 +556,7 @@ export function AdminStageDetailModal({
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-orange-700 font-medium">Quantity</dt>
-                      <dd className="text-orange-900 font-semibold">{txn.invoice_quantity}</dd>
+                      <dd className="text-orange-900 font-semibold">{formatWeight(txn.invoice_quantity)}</dd>
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-orange-700 font-medium">PO/DO No</dt>
@@ -601,6 +726,34 @@ export function AdminStageDetailModal({
                         </div>
                       );
                     })}
+
+                    {txn.is_damaged && (
+                       <div className="rounded-lg border border-red-200 p-3 bg-red-50 relative overflow-hidden">
+                         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                           <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                         </div>
+                         <div className="flex items-center gap-2 mb-2 relative z-10">
+                           <span className="text-sm font-bold text-red-700">Damaged Stage</span>
+                           <span className="inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200">
+                             ⚠️ Triggered
+                           </span>
+                         </div>
+                         <div className="space-y-1 text-xs text-red-800 relative z-10">
+                            <div className="flex items-start gap-2">
+                               <span className="font-semibold opacity-70 whitespace-nowrap">Reason:</span>
+                               <span className="font-medium italic leading-relaxed">"{txn.damaged_reason}"</span>
+                            </div>
+                            <div className="flex items-center gap-2 pt-1">
+                              <span className="font-semibold opacity-70">Marked by:</span>
+                              <span className="font-medium">{txn.damaged_by_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold opacity-70">Timestamp:</span>
+                              <span className="font-mono">{formatDateTime(txn.damaged_at)}</span>
+                            </div>
+                         </div>
+                       </div>
+                    )}
                   </div>
                 </div>
               )}

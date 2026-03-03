@@ -36,12 +36,12 @@ export async function GET(request) {
     }
     
     if (startDate) {
-      sql += ' AND c.contract_date >= ?';
+      sql += ' AND DATE(c.created_at) >= ?';
       params.push(startDate);
     }
     
     if (endDate) {
-      sql += ' AND c.contract_date <= ?';
+      sql += ' AND DATE(c.created_at) <= ?';
       params.push(endDate);
     }
 
@@ -63,6 +63,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const {
+      contract_date: _contract_date,
       contract_type,
       party_contract_number,
       party_id,
@@ -71,12 +72,18 @@ export async function POST(request) {
       contract_rate,
       contract_quantity,
       ex_paint,
-      for: for_field,
-      contract_due_date,
+      for_field,
+      contract_due_date: _contract_due_date,
+      to_date,
+      from_date,
       payment_terms,
       remark1,
       remark2
     } = body;
+
+    // Support both legacy contract_due_date and new to_date field
+    const contract_due_date = _contract_due_date ?? to_date ?? null;
+    const contract_from_date = from_date ?? null;
 
     // Validation
     if (!contract_type) return NextResponse.json({ error: 'Contract Type is required' }, { status: 400 });
@@ -104,7 +111,16 @@ export async function POST(request) {
     }
     
     const contract_no = `${prefix}${String(nextNum).padStart(4, '0')}`;
-    const contract_date = new Date(); // Current date
+    
+    // Avoid new Date() timezone shift for YYYY-MM-DD strings
+    const cleanDate = (d) => {
+      if (!d) return null;
+      if (typeof d === 'string') return d.split('T')[0];
+      try { return d.toISOString().split('T')[0]; } catch(e) { return null; }
+    };
+
+    const d = new Date();
+    const contract_date = _contract_date ? cleanDate(_contract_date) : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     // Server-side Calculation & Validation for Quantity
     const cQty = parseFloat(contract_quantity || 0);
@@ -120,15 +136,16 @@ export async function POST(request) {
     // Ensure Ex_Plant / For Mutual Exclusion (though UI handles it, nice to have)
     // If both sent, we could error or prioritize. Let's trust the input but ensure they are saved.
 
-    const cleanDate = (d) => (d ? new Date(d) : null);
+    // Ensure Ex_Plant / For Mutual Exclusion (though UI handles it, nice to have)
+    // If both sent, we could error or prioritize. Let's trust the input but ensure they are saved.
 
     const [result] = await db.execute(
       `INSERT INTO contracts (
         contract_type, contract_no, contract_date, party_contract_number, 
         party_id, item_id, broker_id, contract_rate, contract_quantity, 
         rec_qty, settal_qty, pending_qty, contract_status, 
-        ex_paint, for_field, contract_due_date, payment_terms, remark1, remark2, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, 'Active')`,
+        ex_paint, for_field, contract_due_date, contract_from_date, payment_terms, remark1, remark2, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?, 'Active')`,
       [
         contract_type,
         contract_no,
@@ -145,6 +162,7 @@ export async function POST(request) {
         ex_paint || null,
         for_field || null,
         cleanDate(contract_due_date),
+        cleanDate(contract_from_date),
         payment_terms || null,
         remark1 || null,
         remark2 || null

@@ -61,7 +61,21 @@ export async function GET(request) {
     sql += ' ORDER BY r.name';
 
     const [rows] = await db.execute(sql, params);
-    return NextResponse.json(rows);
+
+    // Also fetch items for each role
+    let itemsSql = `SELECT ri.role_id, i.item_id, i.item_name FROM role_items ri JOIN items i ON ri.item_id = i.item_id`;
+    const [itemRows] = await db.execute(itemsSql);
+
+    // Attach items to roles
+    const rolesWithItems = rows.map(role => {
+      const roleItems = itemRows.filter(ir => ir.role_id === role.role_id);
+      return {
+        ...role,
+        items: roleItems.map(ir => ({ item_id: ir.item_id, item_name: ir.item_name }))
+      };
+    });
+
+    return NextResponse.json(rolesWithItems);
   } catch (err) {
     console.error('Roles fetch error:', err);
     return NextResponse.json({ error: 'Failed to fetch roles' }, { status: 500 });
@@ -98,6 +112,16 @@ export async function POST(request) {
       await db.execute(
         `INSERT INTO role_permissions (role_id, permission_id) VALUES ${placeholders}`,
         values
+      );
+    }
+
+    const itemIds = Array.isArray(body.item_ids) ? body.item_ids.filter((id) => id != null && id !== '') : [];
+    if (itemIds.length > 0) {
+      const itemPlaceholders = itemIds.map(() => '(?, ?)').join(', ');
+      const itemValues = itemIds.flatMap((id) => [roleId, parseInt(id, 10)]);
+      await db.execute(
+        `INSERT INTO role_items (role_id, item_id) VALUES ${itemPlaceholders}`,
+        itemValues
       );
     }
 

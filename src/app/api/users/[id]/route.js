@@ -51,7 +51,16 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    const user = rows[0];
+
+    // Fetch user items
+    const [itemRows] = await db.execute(
+      `SELECT item_id FROM user_items WHERE user_id = ?`,
+      [Number(id)]
+    );
+    user.item_ids = itemRows.map(r => r.item_id);
+
+    return NextResponse.json(user);
   } catch (err) {
     console.error("User fetch error:", err);
     return NextResponse.json(
@@ -77,7 +86,7 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    const { username, email, full_name, role_id, is_active } = body;
+    const { username, email, full_name, role_id, is_active, item_ids } = body;
     let { password } = body;
 
     if (!username?.trim() || !email?.trim()) {
@@ -144,6 +153,19 @@ export async function PUT(request, { params }) {
       if (result.affectedRows === 0) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
+    }
+
+    /* ---- Manage Items ---- */
+    await db.execute("DELETE FROM user_items WHERE user_id = ?", [Number(id)]);
+
+    const items = Array.isArray(item_ids) ? item_ids.filter((i) => i !== null && i !== "") : [];
+    if (items.length > 0) {
+      const itemPlaceholders = items.map(() => "(?, ?)").join(", ");
+      const itemValues = items.flatMap((iid) => [Number(id), Number(iid)]);
+      await db.execute(
+        `INSERT INTO user_items (user_id, item_id) VALUES ${itemPlaceholders}`,
+        itemValues
+      );
     }
 
     return NextResponse.json({ success: true });

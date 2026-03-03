@@ -53,9 +53,14 @@ function FilterDropdown({ label, value, onChange, options, disabled }) {
                 disabled={disabled}
             >
                 <option value="">All</option>
-                {options.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                ))}
+                {options.map((opt, i) => {
+                    const isObj = typeof opt === 'object' && opt !== null;
+                    const val = isObj ? (opt.driver_id || opt.value || opt.id) : opt;
+                    const text = isObj ? (opt.driver_name || opt.label || opt.name) : opt;
+                    return (
+                        <option key={val || i} value={val}>{text}</option>
+                    );
+                })}
             </select>
         </div>
     )
@@ -81,6 +86,7 @@ export default function LogisticDashboard() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
   
   // Create / Edit / View Modals
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -93,9 +99,18 @@ export default function LogisticDashboard() {
   const [confirmState, setConfirmState] = useState({ open: false, title: "", message: "", action: null, isDestructive: false });
 
   // Filters & Search
-  const [filters, setFilters] = useState({ consignor: "", consignee: "", truck_no: "", product: "" });
+  const [filters, setFilters] = useState({ consignor: "", consignee: "", truck_no: "", product: "", driver: "" });
   const [dateFilters, setDateFilters] = useState({ from: "", to: "" });
-  const [filterOptions, setFilterOptions] = useState({ consignors: [], consignees: [], trucks: [], products: [] });
+  const [filterOptions, setFilterOptions] = useState({ consignors: [], consignees: [], trucks: [], products: [], drivers: [] });
+
+  // Admin: default to today's date on first mount
+  useEffect(() => {
+    if (!user) return;
+    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin') {
+      const today = new Date().toISOString().split('T')[0];
+      setDateFilters({ from: today, to: today });
+    }
+  }, [user?.role_name]); // eslint-disable-line react-hooks/exhaustive-deps
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -119,12 +134,13 @@ export default function LogisticDashboard() {
                     consignors: data.consignors || [],
                     consignees: data.consignees || [],
                     trucks: data.trucks || [],
-                    products: data.products || []
+                    products: data.products || [],
+                    drivers: data.drivers || []
                 });
             }
         })
         .catch(err => console.error("Failed to load filters", err));
-  }, []); // Run once on mount
+  }, [sortOrder]); // Re-run when sort order changes
 
   const fetchEntries = useCallback(async (isBackground = false) => {
     try {
@@ -132,13 +148,21 @@ export default function LogisticDashboard() {
       setError("");
       
       const params = new URLSearchParams();
+      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin';
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const fromDate = dateFilters.from || (isAdmin ? today : "");
+      const toDate = dateFilters.to || (isAdmin ? today : "");
+
       if (filters.consignor) params.append("consignor", filters.consignor);
       if (filters.consignee) params.append("consignee", filters.consignee);
       if (filters.truck_no) params.append("truck_no", filters.truck_no);
       if (filters.product) params.append("product", filters.product);
-      if (dateFilters.from) params.append("from", dateFilters.from);
-      if (dateFilters.to) params.append("to", dateFilters.to);
+      if (filters.driver) params.append("driver_id", filters.driver);
+      if (fromDate) params.append("from", fromDate);
+      if (toDate) params.append("to", toDate);
       if (debouncedSearch) params.append("search", debouncedSearch);
+      params.append("order", sortOrder);
 
       const res = await fetch(`/api/logistic-entries?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to load data");
@@ -376,7 +400,7 @@ export default function LogisticDashboard() {
                  
                  <div className="w-px h-8 bg-zinc-200 hidden xl:block"></div>
 
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-[2]">
+                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 flex-[2]">
                     <FilterDropdown 
                         label="Consignor" 
                         value={filters.consignor} 
@@ -401,6 +425,12 @@ export default function LogisticDashboard() {
                         onChange={v => setFilters(prev => ({ ...prev, product: v }))} 
                         options={filterOptions.products} 
                     />
+                    <FilterDropdown 
+                        label="Driver" 
+                        value={filters.driver} 
+                        onChange={v => setFilters(prev => ({ ...prev, driver: v }))} 
+                        options={filterOptions.drivers} 
+                    />
                  </div>
             </div>
         </div>
@@ -412,7 +442,13 @@ export default function LogisticDashboard() {
             <table className="w-full text-left text-sm text-zinc-600">
               <thead className="bg-zinc-50 text-xs uppercase text-zinc-500 border-b border-zinc-200">
                 <tr>
-                  <th className="px-4 py-4 font-bold border-r border-zinc-200">S/N</th>
+                  <th 
+                      className="px-4 py-4 font-bold border-r border-zinc-200 cursor-pointer hover:bg-zinc-200 transition-colors"
+                      onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                      title="Sort Oldest/Latest"
+                  >
+                      S/N {sortOrder === 'desc' ? '↓' : '↑'}
+                  </th>
                   {/* <th className="px-4 py-4 font-bold border-r border-zinc-200">Item</th> */}
                   <th className="px-4 py-4 font-bold border-r border-zinc-200">Vehicle No</th>
                   <th className="px-4 py-4 font-bold border-r border-zinc-200">Date</th>
@@ -434,7 +470,7 @@ export default function LogisticDashboard() {
                         key={entry.logistic_id} 
                         className="hover:bg-blue-50/50 transition-colors"
                     >
-                      <td className="px-4 py-3 border-r border-zinc-100 font-mono text-xs text-zinc-500">{i + 1}</td>
+                      <td className="px-4 py-3 border-r border-zinc-100 font-mono text-xs text-zinc-500">{entry.logistic_id}</td>
                       {/* <td className="px-4 py-3 border-r border-zinc-100 font-bold text-zinc-900">{entry.product}</td> */}
                       <td className="px-4 py-3 border-r border-zinc-100 font-mono font-bold text-zinc-800">{entry.truck_no}</td>
                       <td className="px-4 py-3 border-r border-zinc-100 whitespace-nowrap">{fmtDate(entry.entry_date)}</td>

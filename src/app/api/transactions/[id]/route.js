@@ -56,6 +56,10 @@ export async function GET(request, { params }) {
          t.gate_pass_no,
          t.closed_at,
          t.created_at,
+         t.is_damaged,
+         t.damaged_at,
+         t.damaged_by,
+         t.damaged_reason,
          tr.truck_no,
          p.party_name,
          i.item_name,
@@ -67,7 +71,8 @@ export async function GET(request, { params }) {
          u_campus_in.full_name AS campus_in_confirmed_by_name,
          u_campus_out.full_name AS campus_out_confirmed_by_name,
          u_gate_pass.full_name AS gate_pass_confirmed_by_name,
-         u_gate_out.full_name AS gate_out_confirmed_by_name
+         u_gate_out.full_name AS gate_out_confirmed_by_name,
+         u_damage.full_name AS damaged_by_name
        FROM transactions t
        JOIN trucks tr ON t.truck_id = tr.truck_id
        JOIN parties p ON t.party_id = p.party_id
@@ -81,6 +86,7 @@ export async function GET(request, { params }) {
        LEFT JOIN users u_campus_out ON t.campus_out_confirmed_by = u_campus_out.user_id
        LEFT JOIN users u_gate_pass ON t.gate_pass_confirmed_by = u_gate_pass.user_id
        LEFT JOIN users u_gate_out ON t.gate_out_confirmed_by = u_gate_out.user_id
+       LEFT JOIN users u_damage ON t.damaged_by = u_damage.user_id
        WHERE t.transaction_id = ?`,
       [Number(id)]
     );

@@ -68,7 +68,23 @@ export async function GET(request) {
     sql += ' ORDER BY u.username';
 
     const [rows] = await db.execute(sql, params);
-    return NextResponse.json(rows);
+
+    // Fetch user_items
+    const [itemRows] = await db.execute(
+      `SELECT ui.user_id, i.item_id, i.item_name 
+       FROM user_items ui 
+       JOIN items i ON ui.item_id = i.item_id`
+    );
+
+    const usersWithItems = rows.map(user => {
+      const uItems = itemRows.filter(ir => ir.user_id === user.user_id);
+      return {
+        ...user,
+        items: uItems.map(ir => ({ item_id: ir.item_id, item_name: ir.item_name }))
+      };
+    });
+
+    return NextResponse.json(usersWithItems);
   } catch (err) {
     console.error('Users fetch error:', err);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
@@ -123,8 +139,20 @@ export async function POST(request) {
       ]
     );
 
-    const [rows] = await db.execute('SELECT LAST_INSERT_ID() AS id');
-    return NextResponse.json({ success: true, user_id: rows[0]?.id ?? null });
+    const [resId] = await db.execute('SELECT LAST_INSERT_ID() AS id');
+    const newUserId = resId[0]?.id;
+
+    const itemIds = Array.isArray(body.item_ids) ? body.item_ids.filter((id) => id != null && id !== '') : [];
+    if (itemIds.length > 0 && newUserId) {
+      const itemPlaceholders = itemIds.map(() => '(?, ?)').join(', ');
+      const itemValues = itemIds.flatMap((id) => [newUserId, parseInt(id, 10)]);
+      await db.execute(
+        `INSERT INTO user_items (user_id, item_id) VALUES ${itemPlaceholders}`,
+        itemValues
+      );
+    }
+
+    return NextResponse.json({ success: true, user_id: newUserId ?? null });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       return NextResponse.json(

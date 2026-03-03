@@ -27,21 +27,22 @@ export async function GET(request) {
     let to = searchParams.get('to');
     const type = searchParams.get('type');
     const item = searchParams.get('item');
+    const statusType = searchParams.get('statusType'); // 'pending' or 'damaged'
 
     // Role-based filtering logic
-    // Use roleName directly from token to avoid extra DB calls and potential errors if roleId is missing
     const { roleId, userId, roleName } = user;
     
-    // 2. Determine if restricted
+    // Determine specific roles
+    const isGatekeeper = roleName === 'Gatekeeper';
     const isWeighbridge = roleName === 'Weighbridge';
-    const isYard = roleName === 'Yard'; 
-    
-    const isRestricted = isWeighbridge || isYard;
+    const isYard = roleName?.toUpperCase().includes('YARD'); 
+    const isRestricted = isWeighbridge || isYard || isGatekeeper;
 
     let sql = `SELECT t.transaction_id, t.transaction_type, t.invoice_number, t.invoice_date, t.invoice_quantity,
       t.po_do_number, t.lr_number, t.mobile_number, t.remark1, t.remark2, t.first_weight, t.second_weight, t.net_weight,
       t.parking_confirmed_at, t.current_status, t.gate_in_at, t.first_weigh_at, t.second_weigh_at, t.campus_in_at, t.campus_out_at,
       t.gate_pass_finalized_at, t.gate_out_at, t.gate_pass_no, t.closed_at, t.created_at,
+      t.is_damaged, t.damaged_at, t.damaged_by, t.damaged_reason,
       tr.truck_no, p.party_name, i.item_name, trs.name AS transporter_name,
       u_park.username AS parking_confirmed_by_name,
       u_gate_in.username AS gate_in_confirmed_by_name,
@@ -50,7 +51,8 @@ export async function GET(request) {
       u_weigh2.username AS second_weigh_confirmed_by_name,
       u_campus_in.username AS campus_in_confirmed_by_name,
       u_campus_out.username AS campus_out_confirmed_by_name,
-      u_gate_pass.username AS gate_pass_confirmed_by_name
+      u_gate_pass.username AS gate_pass_confirmed_by_name,
+      u_damage.username AS damaged_by_name
       FROM transactions t
       JOIN trucks tr ON t.truck_id = tr.truck_id
       JOIN parties p ON t.party_id = p.party_id
@@ -64,23 +66,65 @@ export async function GET(request) {
       LEFT JOIN users u_campus_in ON t.campus_in_confirmed_by = u_campus_in.user_id
       LEFT JOIN users u_campus_out ON t.campus_out_confirmed_by = u_campus_out.user_id
       LEFT JOIN users u_gate_pass ON t.gate_pass_confirmed_by = u_gate_pass.user_id
+      LEFT JOIN users u_damage ON t.damaged_by = u_damage.user_id
       WHERE 1=1`;
     const params = [];
 
-    if (isRestricted) {
-      // FORCE TODAY AND ACTIVE ONLY
-      sql += ' AND DATE(t.created_at) = CURDATE() AND t.closed_at IS NULL';
-    } else {
-      // Normal filtering for others
-      if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
-      if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    if (isYard) {
+      // YARD ROLES: Item-Based Access Walls
+      sql += ` AND t.is_damaged = 0 AND t.closed_at IS NULL`;
+      sql += ` AND (
+        t.item_id IN (SELECT item_id FROM user_items WHERE user_id = ?)
+        OR t.item_id IN (SELECT item_id FROM role_items WHERE role_id = ?)
+      )`;
+      params.push(userId, roleId);
+      
+    } else if (!isGatekeeper && !isWeighbridge) {
+      // Normal filtering for Admin/View Only Admin
+      if (statusType !== 'pending' && statusType !== 'damaged') {
+         if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
+         if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+      }
     }
 
     // Common filters
     if (type && type !== 'all') { sql += ' AND t.transaction_type = ?'; params.push(type); }
     if (item) { sql += ' AND i.item_name = ?'; params.push(item); }
 
-    sql += ' ORDER BY t.transaction_id DESC';
+    // Status type filters & Role Specific Pending Scopes
+    if (statusType === 'damaged') {
+      sql += ' AND t.is_damaged = 1';
+    } else if (statusType === 'pending' || statusType === 'all' || !statusType) {
+      // If we are Gatekeeper, always strictly filter to their pending stages
+      if (isGatekeeper) {
+        // Gatekeeper exact stages: Parking, Gate In, Gate Out
+        sql += ` AND t.is_damaged = 0 AND t.closed_at IS NULL`;
+        sql += ` AND (
+          (t.parking_confirmed_at IS NULL) OR 
+          (t.parking_confirmed_at IS NOT NULL AND t.gate_in_at IS NULL) OR
+          (t.gate_pass_finalized_at IS NOT NULL AND t.gate_out_at IS NULL)
+        )`;
+      } else if (isWeighbridge) {
+        // Weighbridge stages: Gate In, First WeighBridge, Second WeighBridge, Gate Pass
+        sql += ` AND t.is_damaged = 0 AND t.closed_at IS NULL`;
+        sql += ` AND (
+          (t.gate_in_at IS NULL) OR
+          (t.gate_in_at IS NOT NULL AND t.first_weigh_at IS NULL) OR
+          (t.campus_out_at IS NOT NULL AND t.second_weigh_at IS NULL) OR
+          (t.second_weigh_at IS NOT NULL AND t.gate_pass_finalized_at IS NULL)
+        )`;
+      } else if (isYard) {
+        // Yard explicit pending stages: After First Weighbridge, before Campus Out
+        sql += ` AND t.first_weigh_at IS NOT NULL AND t.campus_out_at IS NULL`;
+      } else if (statusType === 'pending') {
+        // Default pending for admin
+        sql += ' AND t.gate_out_at IS NULL AND t.is_damaged = 0 AND t.closed_at IS NULL';
+      }
+    }
+
+    const orderParam = searchParams.get('order');
+    const sortDir = orderParam === 'asc' ? 'ASC' : 'DESC';
+    sql += ` ORDER BY t.transaction_id ${sortDir}`;
 
     const [rows] = await db.execute(sql, params);
     return NextResponse.json(rows);
@@ -160,10 +204,8 @@ export async function POST(request) {
       `INSERT INTO transactions (
         transaction_type, truck_id, party_id, item_id, transporter_id,
         po_do_number, invoice_number, invoice_date, invoice_quantity,
-        lr_number, mobile_number, remark1, remark2, created_by,
-        parking_confirmed_at, parking_confirmed_by, step1_status, current_status,
-        gate_pass_created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        lr_number, mobile_number, remark1, remark2, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         transaction_type === 'Unloading' ? 'Unloading' : 'Loading',
         truckId,
@@ -178,12 +220,7 @@ export async function POST(request) {
         mobile_number,
         remark1 || null,
         remark2 || null,
-        userId,
-        currentTimestamp,
-        userId,
-        'Parking Confirmed',
-        'Parking Confirmed',
-        currentTimestamp,
+        userId
       ]
     );
 

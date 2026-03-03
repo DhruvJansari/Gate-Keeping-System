@@ -12,7 +12,7 @@ export const STAGES = [
 
 export function getStageStatus(txn) {
   return {
-    parking: !!(txn.parking_confirmed_at ?? txn.created_at),
+    parking: !!txn.parking_confirmed_at,
     gate_in: !!txn.gate_in_at,
     first_weighbridge: !!txn.first_weigh_at,
     campus_in: !!txn.campus_in_at,
@@ -24,6 +24,7 @@ export function getStageStatus(txn) {
 }
 
 export function getNextStageToConfirm(txn) {
+  if (txn?.is_damaged) return null;
   const status = getStageStatus(txn);
   const next = STAGES.find((s) => !status[s.key]);
   return next?.key ?? null;

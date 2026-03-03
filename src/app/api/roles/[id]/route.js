@@ -62,6 +62,15 @@ export async function GET(request, { params }) {
 
     role.permission_ids = permRows.map((r) => r.permission_id);
 
+    const [itemRows] = await db.execute(
+      `SELECT item_id
+       FROM role_items
+       WHERE role_id = ?`,
+      [Number(id)]
+    );
+
+    role.item_ids = itemRows.map((r) => r.item_id);
+
     return NextResponse.json(role);
   } catch (err) {
     console.error("Role fetch error:", err);
@@ -87,7 +96,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { name, description, permission_ids } = body;
+    const { name, description, permission_ids, item_ids } = body;
 
     if (!name?.trim()) {
       return NextResponse.json(
@@ -126,6 +135,26 @@ export async function PUT(request, { params }) {
         `INSERT INTO role_permissions (role_id, permission_id)
          VALUES ${placeholders}`,
         values
+      );
+    }
+
+    /* ---- Reset items ---- */
+    await db.execute("DELETE FROM role_items WHERE role_id = ?", [
+      Number(id),
+    ]);
+
+    const items = Array.isArray(item_ids)
+      ? item_ids.filter((i) => i !== null && i !== "")
+      : [];
+
+    if (items.length > 0) {
+      const itemPlaceholders = items.map(() => "(?, ?)").join(", ");
+      const itemValues = items.flatMap((iid) => [Number(id), Number(iid)]);
+
+      await db.execute(
+        `INSERT INTO role_items (role_id, item_id)
+         VALUES ${itemPlaceholders}`,
+        itemValues
       );
     }
 

@@ -8,18 +8,11 @@ export async function GET(request) {
     const from = searchParams.get('from');
     const to = searchParams.get('to');
 
-    let where = 'WHERE 1=1';
-    const params = [];
-    if (from) { where += ' AND DATE(created_at) >= ?'; params.push(from); }
-    if (to) { where += ' AND DATE(created_at) <= ?'; params.push(to); }
-
     const [loading] = await db.execute(
-      `SELECT COUNT(*) AS cnt FROM transactions ${where} AND transaction_type = 'Loading'`,
-      params
+      `SELECT COUNT(*) AS cnt FROM transactions WHERE transaction_type = 'Loading'`
     );
     const [unloading] = await db.execute(
-      `SELECT COUNT(*) AS cnt FROM transactions ${where} AND transaction_type = 'Unloading'`,
-      params
+      `SELECT COUNT(*) AS cnt FROM transactions WHERE transaction_type = 'Unloading'`
     );
 
     const [items] = await db.execute('SELECT COUNT(*) AS cnt FROM items');

@@ -115,8 +115,6 @@ export const ROLE_NAV = {
   Gatekeeper: [
     { path: '/gatekeeper', label: 'Dashboard', IconComponent: DashboardIcon },
     { path: '/gatekeeper/gate', label: 'Gate', IconComponent: GateIcon, requiredPermissions: ['create_transactions'] },
-    { path: '/gatekeeper/items', label: 'Items', IconComponent: ClipboardIcon, requiredPermissions: ['view_masters'] },
-    { path: '/gatekeeper/parties', label: 'Parties', IconComponent: UsersIcon, requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/transporters', label: 'Transporters', IconComponent: TruckIcon, requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/vehicles', label: 'Vehicles', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: ['view_masters'] },
     { path: '/gatekeeper/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: ['view_reports'] },

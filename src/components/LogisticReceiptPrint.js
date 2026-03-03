@@ -13,8 +13,16 @@ export function LogisticReceiptPrint({ entry, onClose }) {
   if (!entry) return null;
 
   const [vehicleData, setVehicleData] = useState(null);
-  const [drivers, setDrivers] = useState([]);
-  const [selectedDriver, setSelectedDriver] = useState(null);
+
+  // Derive driver from joined fields on the entry (populated by the API)
+  // Supports both flat fields (driver_name, driver_mobile…) and a nested driver object
+  const driver = entry.driver || {
+    driver_name: entry.driver_name || "",
+    adhar_number: entry.driver_adhar_number || entry.adhar_number || "",
+    mobile: entry.driver_mobile || entry.mobile_number || "",
+    licence: entry.driver_licence || entry.licence || "",
+    licence_expiry: entry.driver_licence_expiry || entry.licence_expiry || "",
+  };
 
   // Format date as DD/MM/YYYY
   const fmtDate = (iso) => {
@@ -48,13 +56,6 @@ export function LogisticReceiptPrint({ entry, onClose }) {
       .catch(() => {});
   }, [entry?.truck_no]);
 
-  // Fetch active drivers for dropdown
-  useEffect(() => {
-    fetch("/api/drivers?status=Active")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((rows) => setDrivers(Array.isArray(rows) ? rows : []))
-      .catch(() => {});
-  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -65,22 +66,11 @@ export function LogisticReceiptPrint({ entry, onClose }) {
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const handleDriverSelect = (e) => {
-    const driverIdStr = e.target.value;
-    if (!driverIdStr) {
-      setSelectedDriver(null);
-      return;
-    }
-    const driver = drivers.find(
-      (d) => String(d.driver_id) === driverIdStr
-    );
-    setSelectedDriver(driver || null);
-  };
 
   // Build the self-contained HTML for printing
   const buildPrintHtml = () => {
     const v = vehicleData || {};
-    const d = selectedDriver || {};
+    const d = driver;
 
     const entryDate = fmtDate(entry.entry_date) || fmtDate(new Date().toISOString());
 
@@ -357,24 +347,6 @@ export function LogisticReceiptPrint({ entry, onClose }) {
           ← Back
         </button>
 
-        {/* Driver selector */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-semibold text-zinc-600 whitespace-nowrap">
-            Select Driver:
-          </label>
-          <select
-            onChange={handleDriverSelect}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none shadow-sm min-w-[200px]"
-          >
-            <option value="">— None —</option>
-            {drivers.map((dr) => (
-              <option key={dr.driver_id} value={dr.driver_id}>
-                {dr.driver_name} {dr.mobile ? `(${dr.mobile})` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <button
           onClick={handlePrint}
           className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition-all active:scale-95"
@@ -560,17 +532,17 @@ export function LogisticReceiptPrint({ entry, onClose }) {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderBottom: "1px solid #000", minHeight: "22px" }}>
               <span style={{ fontWeight: "bold", fontSize: "9px", whiteSpace: "nowrap" }}>Driver Name :</span>
-              <span style={{ flex: 1, borderBottom: "1px solid #000", minHeight: "14px" }}>{fmt(selectedDriver?.driver_name)}</span>
+              <span style={{ flex: 1, borderBottom: "1px solid #000", minHeight: "14px" }}>{fmt(driver.driver_name)}</span>
               <span style={{ fontWeight: "bold", fontSize: "9px", whiteSpace: "nowrap" }}>Aadhaar No :</span>
-              <span style={{ flex: 1, borderBottom: "1px solid #000", minHeight: "14px" }}>{fmt(selectedDriver?.adhar_number)}</span>
+              <span style={{ flex: 1, borderBottom: "1px solid #000", minHeight: "14px" }}>{fmt(driver.adhar_number)}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", padding: "3px 8px", fontSize: "9px", minHeight: "22px" }}>
               <span style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Mobile No :</span>
-              <span style={{ borderBottom: "1px solid #000", minWidth: "70px", minHeight: "14px" }}>{fmt(selectedDriver?.mobile)}</span>
+              <span style={{ borderBottom: "1px solid #000", minWidth: "70px", minHeight: "14px" }}>{fmt(driver.mobile)}</span>
               <span style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>License No :</span>
-              <span style={{ borderBottom: "1px solid #000", minWidth: "80px", minHeight: "14px" }}>{fmt(selectedDriver?.licence)}</span>
+              <span style={{ borderBottom: "1px solid #000", minWidth: "80px", minHeight: "14px" }}>{fmt(driver.licence)}</span>
               <span style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>License Expiry :</span>
-              <span style={{ borderBottom: "1px solid #000", minWidth: "60px", minHeight: "14px" }}>{fmtDate(selectedDriver?.licence_expiry)}</span>
+              <span style={{ borderBottom: "1px solid #000", minWidth: "60px", minHeight: "14px" }}>{fmtDate(driver.licence_expiry)}</span>
             </div>
             <div style={{ fontSize: "9px", padding: "1px 8px" }}>(1)</div>
           </div>

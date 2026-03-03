@@ -106,8 +106,14 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 <DataRow label="Party Name" value={transaction.party_name} />
                 <DataRow label="Invoice No" value={transaction.invoice_number} />
                 <DataRow label="Invoice Date" value={formatDate(transaction.invoice_date)} />
-                <DataRow label="Invoice Qty" value={`${transaction.invoice_quantity} units`} />
-                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
+<DataRow 
+  label="Invoice Qty" 
+  value={
+    transaction.invoice_quantity != null
+      ? `${formatWeight(transaction.invoice_quantity)} units`
+      : '—'
+  } 
+/>                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
                 <DataRow label="Transporter" value={transaction.transporter_name} />
                 <DataRow label="Mobile No" value={transaction.mobile_number} />
                 <DataRow label="Remark - 1" value={remark1} />
@@ -161,9 +167,9 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 <DataRow label="Transaction Number" value={txnNo} />
                 <DataRow label="Truck Number" value={transaction.truck_no} />
                 <DataRow label="Party Name" value={transaction.party_name} />
-                <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
-                <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
-                <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
+                <DataRow label="First Weight" value={formatWeight(transaction.first_weight)} />
+                <DataRow label="Second Weight" value={formatWeight(transaction.second_weight)} />
+                <DataRow label="Net Weight" value={formatWeight(transaction.net_weight)} />
                 <DataRow label="Remark - 1" value={remark1} />
                 <DataRow label="Remark - 2" value={remark2} />
               </div>
@@ -218,17 +224,23 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
                 <DataRow label="Party Name" value={transaction.party_name} />
                 <DataRow label="Invoice No" value={transaction.invoice_number} />
                 <DataRow label="Invoice Date" value={formatDate(transaction.invoice_date)} />
-                <DataRow label="Invoice Qty" value={`${transaction.invoice_quantity} units`} />
-                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
+<DataRow 
+  label="Invoice Qty" 
+  value={
+    transaction.invoice_quantity != null
+      ? `${formatWeight(transaction.invoice_quantity)} units`
+      : '—'
+  } 
+/>                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
                 <DataRow label="Transporter" value={transaction.transporter_name} />
                 <DataRow label="Mobile No" value={transaction.mobile_number} />
                 <DataRow label="Remark - 1" value={remark1} />
                 <DataRow label="Remark - 2" value={remark2} />
                 <div className="border-t border-blue-200 my-2 pt-2">
-                  <DataRow label="First Weight" value={transaction.first_weight ?? '—'} />
-                  <DataRow label="Second Weight" value={transaction.second_weight ?? '—'} />
-                  <DataRow label="Net Weight" value={transaction.net_weight ?? '—'} />
-                </div>
+  <DataRow label="First Weight" value={formatWeight(transaction.first_weight)} />
+  <DataRow label="Second Weight" value={formatWeight(transaction.second_weight)} />
+  <DataRow label="Net Weight" value={formatWeight(transaction.net_weight)} />
+</div>
               </div>
             </div>
 

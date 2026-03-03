@@ -172,10 +172,10 @@ export async function POST(request, { params }) {
     // db is already initialized above
 
     const [rows] = await db.execute(
-      `SELECT transaction_id, first_weight, second_weight,
+      `SELECT transaction_id, transaction_type, first_weight, second_weight,
               parking_confirmed_at, gate_in_at, gate_out_at,
               first_weigh_at, second_weigh_at, gate_pass_finalized_at,
-              campus_in_at, campus_out_at
+              campus_in_at, campus_out_at, is_damaged
        FROM transactions
        WHERE transaction_id = ?`,
       [txnId]
@@ -189,6 +189,13 @@ export async function POST(request, { params }) {
     }
 
     const txn = rows[0];
+
+    if (txn.is_damaged) {
+      return NextResponse.json(
+        { error: "This transaction is marked as Damaged and cannot proceed." },
+        { status: 400 }
+      );
+    }
     const def = STAGE_COLUMNS[stage];
     const colVal = new Date().toISOString().slice(0, 19).replace("T", " ");
     const statusText = def.statusText;
@@ -225,6 +232,21 @@ export async function POST(request, { params }) {
           : null;
 
       const fw = txn.first_weight !== null ? Number(txn.first_weight) : null;
+
+      if (sw !== null && fw !== null) {
+        if (txn.transaction_type === "Loading" && fw <= sw) {
+          return NextResponse.json(
+            { error: "For Loading transaction, First Weighbridge weight must be greater than Second Weighbridge weight." },
+            { status: 400 }
+          );
+        }
+        if (txn.transaction_type === "Unloading" && sw <= fw) {
+           return NextResponse.json(
+            { error: "For Unloading transaction, Second Weighbridge weight must be greater than First Weighbridge weight." },
+            { status: 400 }
+          );
+        }
+      }
 
       const net = fw !== null && sw !== null ? Math.abs(sw - fw) : null;
 

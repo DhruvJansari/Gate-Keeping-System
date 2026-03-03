@@ -242,8 +242,8 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                 </h2>
                 <p className="text-sm font-medium text-zinc-500">
                   {type === "Loading"
-                    ? "Loading Goods (Inward)"
-                    : "Unloading Goods (Outward)"}
+                    ? "Loading Goods (Outward)"
+                    : "Unloading Goods (Inward)"}
                 </p>
               </div>
             </div>
@@ -288,7 +288,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                       d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
                     />
                   </svg>
-                  Loading (Inward)
+                  Loading (Outward)[Sales]
                 </button>
                 <button
                   type="button"
@@ -312,7 +312,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                       d="M17 8V20m0 0l4-4m-4 4l-4-4M7 4v16m0 0l4-4m-4 4l-4-4"
                     />
                   </svg>
-                  Unloading (Outward)
+                  Unloading (Inward)[Purchase]
                 </button>
               </div>
             </div>

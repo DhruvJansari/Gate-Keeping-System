@@ -9,14 +9,29 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    async function fetchItems() {
+      try {
+        const res = await fetch('/api/items', { headers: getHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.filter(i => i.status === 'Active') || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch items', err);
+      }
+    }
     if (open) {
+      fetchItems();
       setName(role?.name || '');
       setDescription(role?.description || '');
       setSelectedIds(role?.permission_ids ?? []);
+      setSelectedItemIds(role?.item_ids ?? (role?.items?.map(i => i.item_id) ?? []));
       setError('');
     }
   }, [open, role]);
@@ -35,6 +50,16 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
   function toggleAll(checked) {
     if (!Array.isArray(permissions)) return;
     setSelectedIds(checked ? permissions.map((p) => p.permission_id) : []);
+  }
+
+  function toggleItem(id) {
+    setSelectedItemIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleAllItems(checked) {
+    setSelectedItemIds(checked ? items.map((i) => i.item_id) : []);
   }
 
   async function handleSubmit(e) {
@@ -58,6 +83,7 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
           name: name.trim(),
           description: description.trim(),
           permission_ids: selectedIds,
+          item_ids: selectedItemIds,
         }),
       });
       const data = await res.json();
@@ -77,6 +103,7 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
 
   const permList = Array.isArray(permissions) ? permissions : [];
   const allSelected = permList.length > 0 && selectedIds.length === permList.length;
+  const allItemsSelected = items.length > 0 && selectedItemIds.length === items.length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -156,6 +183,47 @@ export function RoleModal({ open, onClose, onSuccess, role, permissions }) {
                 </div>
                 {permList.length === 0 && (
                   <p className="py-4 text-center text-sm text-zinc-500">No permissions defined. Create permissions first.</p>
+                )}
+              </div>
+            </div>
+
+            {/* ITEMS SELECTION */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium text-zinc-700">Restricted Items (Yard Roles)</label>
+                <label className="flex items-center gap-2 text-xs text-zinc-500">
+                  <input
+                    type="checkbox"
+                    checked={allItemsSelected}
+                    onChange={(e) => toggleAllItems(e.target.checked)}
+                    className="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  Select all
+                </label>
+              </div>
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 bg-white p-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {items.map((i) => (
+                    <label
+                      key={i.item_id}
+                      className={`flex cursor-pointer items-center gap-2 rounded border px-3 py-2 transition-colors ${
+                        selectedItemIds.includes(i.item_id)
+                          ? 'border-indigo-200 bg-indigo-50 text-indigo-900'
+                          : 'border-zinc-100 hover:bg-zinc-50 text-zinc-900'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedItemIds.includes(i.item_id)}
+                        onChange={() => toggleItem(i.item_id)}
+                        className="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm font-medium">{i.item_name}</span>
+                    </label>
+                  ))}
+                </div>
+                {items.length === 0 && (
+                  <p className="py-4 text-center text-sm text-zinc-500">No active items available.</p>
                 )}
               </div>
             </div>

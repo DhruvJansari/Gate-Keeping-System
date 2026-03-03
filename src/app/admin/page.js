@@ -23,6 +23,7 @@ import {
   EditIcon,
   DeleteIcon,
 } from "@/components/Icons";
+import { FaTruck } from "react-icons/fa";
 // import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/useToast";
 import { useFormValidation } from "@/hooks/useFormValidation";
@@ -204,7 +205,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                 />
                 {errors.invoice_quantity && touched.invoice_quantity && (
                   <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_quantity}</p>
-                )}
+                )}  
               </div>
 
               <div className="space-y-1">
@@ -320,13 +321,13 @@ function StageStatusIcon({ stageKey, status, transaction }) {
     <span
       className={`inline-flex h-7 w-7 items-center justify-center rounded transition-all ${
         isCompleted
-          ? "text-emerald-500 shadow-md"
+          ? "text-emerald-500"
           : isActive
-          ? "bg-blue-500 text-white shadow-md animate-pulse"
+          ? "text-blue-500 animate-pulse"
           : "bg-zinc-200 text-zinc-400"
       } ${isPending ? "opacity-40" : "opacity-100"}`}
     >
-      <TruckIcon className="h-6 w-6" />
+      <FaTruck className="h-6 w-6" />
     </span>
   );
 }
@@ -349,6 +350,7 @@ function AdminDashboard() {
   const [dateTo, setDateTo] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterItem, setFilterItem] = useState("");
+  const [statusType, setStatusType] = useState("all"); // 'all', 'pending', 'damaged'
   const [selectedStage, setSelectedStage] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -365,8 +367,11 @@ function AdminDashboard() {
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const fetchData = useCallback(async () => {
-    const from = dateFrom || undefined;
-    const to = dateTo || undefined;
+    const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin';
+    const d = new Date();
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const from = dateFrom || (isAdmin ? today : undefined);
+    const to = dateTo || (isAdmin ? today : undefined);
     const type = filterType !== "all" ? filterType : undefined;
     const item = filterItem || undefined;
 
@@ -376,6 +381,7 @@ function AdminDashboard() {
     if (to) listParams.set("to", to);
     if (type) listParams.set("type", type);
     if (item) listParams.set("item", item);
+    if (statusType && statusType !== "all") listParams.set("statusType", statusType);
 
     // Params for Stats/Counts (Only filters by Date, so tabs show global counts)
     const statsParams = new URLSearchParams();
@@ -388,7 +394,7 @@ function AdminDashboard() {
 
     const [txnRes, countRes, itemCountRes] = await Promise.all([
       fetch(`/api/transactions?${listParams}`, { headers }),
-      fetch(`/api/transactions/counts?${statsParams}`, { headers }),
+      fetch(`/api/transactions/counts`, { headers }),
       fetch(`/api/transactions/item-counts?${statsParams}`, { headers }),
     ]);
     const txnData = await txnRes.json();
@@ -400,7 +406,7 @@ function AdminDashboard() {
     setItemCounts(itemCountData);
     setLoading(false);
     setCurrentPage(1);
-  }, [dateFrom, dateTo, filterType, filterItem, token]);
+  }, [dateFrom, dateTo, filterType, filterItem, statusType, token]);
 
   useEffect(() => {
     setTimeout(() => fetchData(), 0);
@@ -412,6 +418,7 @@ function AdminDashboard() {
     if (dateTo) params.set("to", dateTo);
     if (filterType !== "all") params.set("type", filterType);
     if (filterItem) params.set("item", filterItem);
+    if (statusType && statusType !== "all") params.set("statusType", statusType);
     window.open(`/api/export/transactions?${params}`, "_blank");
   }
 
@@ -489,6 +496,13 @@ function AdminDashboard() {
       );
       if (!matchesSearch) return false;
     }
+
+    // Status fallback (in case API doesn't filter perfectly)
+    if (statusType === 'pending') {
+      if (t.gate_out_at || t.is_damaged || t.closed_at) return false;
+    } else if (statusType === 'damaged') {
+      if (!t.is_damaged) return false;
+    }
     
     // Stage filter
     if (selectedStage) {
@@ -548,7 +562,7 @@ function AdminDashboard() {
             </div>
             <div className="flex items-center gap-2">
                 <button
-                onClick={() => window.location.href = '/admin'}
+                onClick={() => fetchData()}
                 className="flex-1 sm:flex-none rounded-lg bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-wider text-center"
                 >
                 GO
@@ -586,85 +600,95 @@ function AdminDashboard() {
         </div>
 
         {/* Category Filter Sections */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-          {/* Unloading Section */}
-          <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
-            <button
-              onClick={() => handleFilterClick("Unloading", "")}
-              className={`w-full flex items-center justify-between p-4 border-b border-rose-100 transition-all ${
-                filterType === "Unloading" && !filterItem
-                  ? "bg-rose-100/50 shadow-inner"
-                  : "hover:bg-rose-100/30"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-rose-500 p-2 shadow-sm text-white">
-                  <UnloadingGoodsIcon className="h-5 w-5" />
-                </div>
-                <span className="font-semibold text-rose-900">
-                  Unloading Goods [Inward] - {totalUnloading}
-                </span>
-              </div>
-            </button>
-            <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-              {itemCounts.unloading.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleFilterClick("Unloading", item.item_name)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                    filterType === "Unloading" && filterItem === item.item_name
-                      ? "bg-rose-100 text-rose-900 font-medium shadow-sm"
-                      : "text-rose-700 hover:bg-rose-100/50"
-                  }`}
-                >
-                   <div className="flex justify-between items-center">
-                     <span>{item.item_name}</span>
-                     <span className="bg-rose-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
-                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Loading Section */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
-            <button
-              onClick={() => handleFilterClick("Loading", "")}
-              className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
-                filterType === "Loading" && !filterItem
-                  ? "bg-blue-100/50 shadow-inner"
-                  : "hover:bg-blue-100/30"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
-                  <LoadingGoodsIcon className="h-5 w-5" />
-                </div>
-                <span className="font-semibold text-blue-900">
-                  Loading Goods [Outward] - {totalLoading}
-                </span>
-              </div>
-            </button>
-            <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-              {itemCounts.loading.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleFilterClick("Loading", item.item_name)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                    filterType === "Loading" && filterItem === item.item_name
-                      ? "bg-blue-100 text-blue-900 font-medium shadow-sm"
-                      : "text-blue-700 hover:bg-blue-100/50"
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span>{item.item_name}</span>
-                    <span className="bg-blue-200/50 px-2 py-0.5 rounded text-xs">{item.count}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+<div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+  {/* Unloading Section */}
+  <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
+    <button
+      onClick={() => handleFilterClick("Unloading", "")}
+      className={`w-full flex items-center justify-between p-4 border-b border-rose-100 transition-all ${
+        filterType === "Unloading" && !filterItem
+          ? "bg-rose-100/50 shadow-inner"
+          : "hover:bg-rose-100/30"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="rounded-lg bg-rose-500 p-2 shadow-sm text-white">
+          <UnloadingGoodsIcon className="h-5 w-5" />
         </div>
+        <span className="font-semibold text-rose-900">
+          Unloading Goods [Inward] - {totalUnloading}
+        </span>
+      </div>
+    </button>
+
+    <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
+      {itemCounts.unloading.map((item, idx) => (
+        <button
+          key={idx}
+          onClick={() => handleFilterClick("Unloading", item.item_name)}
+          className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+            filterType === "Unloading" && filterItem === item.item_name
+              ? "bg-rose-100 text-rose-900 shadow-sm"
+              : "text-rose-700 hover:bg-rose-100/50"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-base">
+              {item.item_name}
+            </span>
+            <span className="bg-rose-200/60 px-2 py-0.5 rounded text-xs font-medium">
+              ({item.count})
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  {/* Loading Section */}
+  <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
+    <button
+      onClick={() => handleFilterClick("Loading", "")}
+      className={`w-full flex items-center justify-between p-4 border-b border-blue-100 transition-all ${
+        filterType === "Loading" && !filterItem
+          ? "bg-blue-100/50 shadow-inner"
+          : "hover:bg-blue-100/30"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
+          <LoadingGoodsIcon className="h-5 w-5" />
+        </div>
+        <span className="font-semibold text-blue-900">
+          Loading Goods [Outward] - {totalLoading}
+        </span>
+      </div>
+    </button>
+
+    <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
+      {itemCounts.loading.map((item, idx) => (
+        <button
+          key={idx}
+          onClick={() => handleFilterClick("Loading", item.item_name)}
+          className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+            filterType === "Loading" && filterItem === item.item_name
+              ? "bg-blue-100 text-blue-900 shadow-sm"
+              : "text-blue-700 hover:bg-blue-100/50"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-base">
+              {item.item_name}
+            </span>
+            <span className="bg-blue-200/60 px-2 py-0.5 rounded text-xs font-medium">
+              ({item.count})
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
 
         {/* Stage Filter Buttons */}
         <div className="rounded-xl border border-zinc-200 bg-white shadow-sm p-4">
@@ -676,16 +700,16 @@ function AdminDashboard() {
             <div className="flex gap-2 min-w-max pb-2">
               {/* All Stages */}
               <button
-                onClick={() => setSelectedStage(null)}
+                onClick={() => { setSelectedStage(null); setStatusType("all"); }}
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  selectedStage === null
+                  selectedStage === null && statusType === "all"
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
                 }`}
               >
                 All Stages
                 <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
-                  selectedStage === null ? 'bg-white/20 text-white' : 'bg-zinc-300 text-zinc-700'
+                  selectedStage === null && statusType === "all" ? 'bg-white/20 text-white' : 'bg-zinc-300 text-zinc-700'
                 }`}>
                   {transactions.length}
                 </span>
@@ -695,9 +719,9 @@ function AdminDashboard() {
               {STAGES.map((stage) => (
                 <button
                   key={stage.key}
-                  onClick={() => setSelectedStage(stage.key)}
+                  onClick={() => { setSelectedStage(stage.key); setStatusType("all"); }}
                   className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    selectedStage === stage.key
+                    selectedStage === stage.key && statusType === "all"
                       ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
                   }`}
@@ -717,9 +741,9 @@ function AdminDashboard() {
 
               {/* Closed */}
               <button
-                onClick={() => setSelectedStage('closed')}
+                onClick={() => { setSelectedStage('closed'); setStatusType("all"); }}
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  selectedStage === 'closed'
+                  selectedStage === 'closed' && statusType === "all"
                     ? 'bg-zinc-800 text-white shadow-md'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-800 hover:text-white'
                 }`}
@@ -740,7 +764,7 @@ function AdminDashboard() {
         </div>
 
         {/* Transaction Table */}
-        <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden">
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden mb-15">
           {/* Table Header with Search and Create Button */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-zinc-200 bg-zinc-50/50">
             <div className="flex-1 w-full sm:w-auto">
@@ -789,7 +813,38 @@ function AdminDashboard() {
                   </button>
                 </div>
               )}
-              <div className="text-sm text-zinc-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-zinc-200">
+              
+              {/* Status Filter Toggle Group */}
+              <div className="flex border border-zinc-300 rounded-lg overflow-hidden bg-white/80 backdrop-blur shadow-sm hidden md:flex">
+                <button
+                  onClick={() => { setStatusType('all'); setSelectedStage(null); }}
+                  className={`px-4 py-2 text-sm font-bold transition-colors ${
+                    statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => { setStatusType('pending'); setSelectedStage(null); }}
+                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                    statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${statusType === 'pending' ? 'bg-amber-500' : 'bg-transparent'}`}></span>
+                  Pending
+                </button>
+                <button
+                  onClick={() => { setStatusType('damaged'); setSelectedStage(null); }}
+                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                    statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
+                  Damaged
+                </button>
+              </div>
+
+              <div className="text-sm text-zinc-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-zinc-200 hidden sm:block">
                 {filteredTransactions.length} results
               </div>
               {hasPermission("create_transactions") && (
@@ -806,220 +861,182 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="flex items-center justify-center p-12">
-                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+<div className="overflow-x-auto bg-white rounded-xl border border-zinc-200 shadow-sm">
+  {loading ? (
+    <div className="flex items-center justify-center p-12">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+    </div>
+  ) : (
+    <table className="w-full min-w-[1200px] text-sm table-fixed">
+      <thead>
+        <tr className="bg-zinc-100/80 text-left text-sm text-zinc-600 border-b border-zinc-200">
+
+          <th 
+            className="w-[70px] px-4 py-3 font-semibold whitespace-nowrap cursor-pointer hover:bg-zinc-200 transition-colors"
+            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            title="Sort Oldest/Latest"
+          >
+            S/N {sortOrder === 'desc' ? '↓' : '↑'}
+          </th>
+
+          <th className="w-[200px] px-4 py-3 font-semibold whitespace-nowrap">
+            Product Name
+          </th>
+
+          <th className="w-[170px] px-4 py-3 font-semibold whitespace-nowrap">
+            Vehicle Number
+          </th>
+
+          <th className="w-[220px] px-4 py-3 font-semibold whitespace-nowrap">
+            Vendor Name
+          </th>
+
+          {STAGES.map((s) => (
+            <th
+              key={s.key}
+              className="w-[85px] px-2 py-3 text-center text-xs font-semibold text-zinc-600 whitespace-nowrap"
+            >
+              <div className="truncate" title={s.label}>
+                {s.shortLabel || s.label}
               </div>
-            ) : (
-              <table className="w-full min-w-[1200px]">
-                <thead>
-                  <tr className="bg-zinc-100/80 text-left text-sm text-zinc-600 border-b border-zinc-200">
-                    <th 
-                      className="px-4 py-3 font-semibold cursor-pointer hover:bg-zinc-200 transition-colors group select-none"
-                      onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
-                      title="Click to toggle sort order (Newest/Oldest)"
-                    >
-                      <div className="flex items-center gap-1">
-                        S/N
-                        <div className="flex flex-col">
-                          <svg className={`w-2 h-2 ${sortOrder === 'asc' ? 'text-zinc-800' : 'text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-8 8h16l-8-8z"/></svg>
-                          <svg className={`w-2 h-2 ${sortOrder === 'desc' ? 'text-zinc-800' : 'text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 20l-8-8h16l-8 8z"/></svg>
-                        </div>
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 font-semibold">Product Name</th>
-                    <th className="px-4 py-3 font-semibold">Vehicle Number</th>
-                    <th className="px-4 py-3 font-semibold">Vendor Name</th>
-                    {STAGES.map((s) => (
-                      <th
-                        key={s.key}
-                        className="px-2 py-3 text-center text-xs font-semibold"
-                      >
-                        {s.shortLabel || s.label}
-                      </th>
-                    ))}
-                    <th className="px-3 py-3 text-center font-semibold">View</th>
-                    <th className="px-3 py-3 text-center font-semibold">Print</th>
-                    {hasPermission("edit_transactions") && (
-                      <>
-                        <th className="px-3 py-3 text-center font-semibold">Edit</th>
-                        <th className="px-3 py-3 text-center font-semibold">Delete</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedTransactions.map((t, idx) => {
-                    const status = getStageStatus(t);
-                    const serialNumber = (currentPage - 1) * itemsPerPage + idx + 1;
-                    return (
-                      <tr
-                        key={t.transaction_id}
-                        className={`border-b border-zinc-100 transition-colors hover:bg-blue-50/40 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
-                      >
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-700">
-                          {serialNumber}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
-                          {t.item_name || "N/A"}
-                        </td>
-                <td className="px-4 py-3">
-  <span className="inline-block whitespace-nowrap rounded-md px-6 py-1 text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-    {t.truck_no}
-  </span>
+            </th>
+          ))}
+
+          <th className="w-[70px] px-3 py-3 text-center font-semibold whitespace-nowrap">
+            View
+          </th>
+
+          <th className="w-[70px] px-3 py-3 text-center font-semibold whitespace-nowrap">
+            Print
+          </th>
+
+          {hasPermission("edit_transactions") && (
+            <>
+              <th className="w-[70px] px-3 py-3 text-center font-semibold whitespace-nowrap">
+                Edit
+              </th>
+              <th className="w-[70px] px-3 py-3 text-center font-semibold whitespace-nowrap">
+                Delete
+              </th>
+            </>
+          )}
+        </tr>
+      </thead>
+
+      <tbody>
+        {paginatedTransactions.map((t, idx) => {
+          const status = getStageStatus(t);
+          const serialNumber = t.transaction_id;
+
+          return (
+            <tr
+              key={t.transaction_id}
+              className={`border-b border-zinc-100 transition-colors hover:bg-blue-50/40 ${
+                idx % 2 === 0 ? "bg-white" : "bg-slate-50"
+              }`}
+            >
+              <td className="px-4 py-3 align-middle font-medium text-zinc-700 whitespace-nowrap">
+                {serialNumber}
+              </td>
+
+              <td
+                className="px-4 py-3 align-middle truncate whitespace-nowrap font-semibold text-zinc-900"
+                title={t.item_name}
+              >
+                {t.item_name || "N/A"}
+              </td>
+
+              <td className="px-4 py-3 align-middle whitespace-nowrap">
+                <div className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 font-medium text-sm shadow-sm">
+                  {t.truck_no}
+                </div>
+              </td>
+
+              <td
+                className="px-4 py-3 align-middle truncate whitespace-nowrap text-zinc-700"
+                title={t.party_name}
+              >
+                {t.party_name}
+              </td>
+
+              {STAGES.map((s) => (
+                <td
+                  key={s.key}
+                  className="px-2 py-3 align-middle text-center whitespace-nowrap hover:bg-zinc-100 transition-colors cursor-pointer"
+                  onClick={() =>
+                    setStageModal({
+                      transaction: t,
+                      clickedStageKey: s.key,
+                    })
+                  }
+                >
+                  <div className="flex items-center justify-center">
+                    <StageStatusIcon
+                      stageKey={s.key}
+                      status={status}
+                      transaction={t}
+                    />
+                  </div>
+                </td>
+              ))}
+
+
+
+<td className="px-3 py-3 text-center whitespace-nowrap">
+  <button
+    onClick={() =>
+      setStageModal({
+        transaction: t,
+        viewMode: "full",
+      })
+    }
+    className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 shadow-sm transition-all"
+    title="View"
+  >
+    <ViewIcon className="h-4 w-4" />
+  </button>
 </td>
 
-                        <td className="px-4 py-3 text-sm text-zinc-700">
-                          {t.party_name}
-                        </td>
-                        {STAGES.map((s) => (
-                          <td
-                            key={s.key}
-                            className="cursor-pointer px-2 py-3 text-center hover:bg-zinc-100 transition-colors"
-                            onClick={() =>
-                              setStageModal({
-                                transaction: t,
-                                clickedStageKey: s.key,
-                              })
-                            }
-                            title={`View ${s.label} stage`}
-                          >
-                            <StageStatusIcon stageKey={s.key} status={status} transaction={t} />
-                          </td>
-                        ))}
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() =>
-                              setStageModal({
-                                transaction: t,
-                                viewMode: "full",
-                              })
-                            }
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 shadow-sm transition-all"
-                            title="View Full Transaction"
-                          >
-                            <ViewIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            onClick={() => setPrintModal(t)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 shadow-sm transition-all"
-                            title="Print"
-                          >
-                            <PrinterIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                        {hasPermission("edit_transactions") && (
-                          <>
-                            <td className="px-3 py-3 text-center">
-                              <button
-                                onClick={() => setEditModal(t)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-orange-600 shadow-sm transition-all"
-                                title="Edit"
-                              >
-                                <EditIcon className="h-4 w-4" />
-                              </button>
-                            </td>
-                            <td className="px-3 py-3 text-center">
-                              <button
-                                onClick={() => setDeleteConfirm(t)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-red-600 shadow-sm transition-all"
-                                title="Delete"
-                              >
-                                <DeleteIcon className="h-4 w-4" />
-                              </button>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
+<td className="px-3 py-3 text-center whitespace-nowrap">
+  <button
+    onClick={() => setPrintModal(t)}
+    className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 shadow-sm transition-all"
+    title="Print"
+  >
+    <PrinterIcon className="h-4 w-4" />
+  </button>
+</td>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 bg-zinc-50 border-t border-zinc-200">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-zinc-300 text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-zinc-300 text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                    Next
-                  </button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-zinc-700">
-                      Showing <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, filteredTransactions.length)}</span> of{' '}
-                      <span className="font-bold text-zinc-900">{filteredTransactions.length}</span> results
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-zinc-300 bg-white text-sm font-medium text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      >
-                        <span className="sr-only">Previous</span>
-                        <ChevronLeftIcon className="h-5 w-5" />
-                      </button>
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter(page => {
-                          if (totalPages <= 7) return true;
-                          return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
-                        })
-                        .map((page, index, array) => (
-                          <div key={page} className="flex">
-                            {index > 0 && array[index - 1] !== page - 1 && (
-                              <span className="relative inline-flex items-center px-4 py-2 border border-zinc-300 bg-white text-sm font-medium text-zinc-700">...</span>
-                            )}
-                            <button
-                              onClick={() => setCurrentPage(page)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-bold transition-all ${
-                                currentPage === page
-                                  ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
-                                  : 'bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50'
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          </div>
-                        ))}
+{hasPermission("edit_transactions") && (
+  <>
+    <td className="px-3 py-3 text-center whitespace-nowrap">
+      <button
+        onClick={() => setEditModal(t)}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-orange-600 shadow-sm transition-all"
+        title="Edit"
+      >
+        <EditIcon className="h-4 w-4" />
+      </button>
+    </td>
 
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-zinc-300 bg-white text-sm font-medium text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      >
-                        <span className="sr-only">Next</span>
-                        <ChevronRightIcon className="h-5 w-5" />
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {!loading && filteredTransactions.length === 0 && (
-              <p className="py-12 text-center text-sm text-zinc-600">
-                {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No transactions found'}
-              </p>
-            )}
-          </div>
+    <td className="px-3 py-3 text-center whitespace-nowrap">
+      <button
+        onClick={() => setDeleteConfirm(t)}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-red-600 shadow-sm transition-all"
+        title="Delete"
+      >
+        <DeleteIcon className="h-4 w-4" />
+      </button>
+    </td>
+  </>
+)}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  )}
+</div>
         </div>
       </div>
 
