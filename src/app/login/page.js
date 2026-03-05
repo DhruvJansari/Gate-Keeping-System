@@ -56,18 +56,10 @@ export default function LoginPage() {
         className="fixed inset-0 z-0 bg-center bg-cover bg-no-repeat saturate-50"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80')",
+            "url('/login-bg.jpg')",
         }}
       />
 
-      {/* ── Vignette ── */}
-      {/* <div
-        className="fixed inset-0 z-[1] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.70) 100%)",
-        }}
-      /> */}
 
       {/* ── PWA Button ── */}
       <div className="fixed top-5 right-5 z-20">
@@ -109,7 +101,7 @@ export default function LoginPage() {
         </div>
 
         {/* ── Divider ── */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-8">  
           <div className="flex-1 h-px bg-[#b8935a]/25" />
           <span className="text-[0.65rem] font-medium tracking-[0.2em] uppercase text-[#b8935a]">
             Sign In

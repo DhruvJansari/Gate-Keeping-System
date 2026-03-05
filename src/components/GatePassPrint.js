@@ -343,8 +343,7 @@ export function getEntryPassHtml(transaction, options = {}) {
 </head>
 <body>
   <div class="ticket">
-
-    <img src="/logo.png" alt="VARPL" class="logo">
+        <span class="lable">Vaishnodevi Agro Resources Private Limited</span>
 
     <div class="divider"></div>
     <div class="timing-block">
