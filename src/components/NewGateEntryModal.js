@@ -198,6 +198,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({
           transaction_type: type,
+          rate: form.invoice_rate || null, // Map frontend UI field to expected DB payload field
           ...form,
         }),
       });

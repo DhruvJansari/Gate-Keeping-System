@@ -2,18 +2,22 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { getDb } from "@/lib/db";
 
-function getUserId(request) {
+function getUser(request) {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
   const secret = process.env.JWT_SECRET;
   if (!secret && process.env.NODE_ENV === 'production') return null;
   try {
-    const decoded = jwt.verify(token, secret || 'dev-only-fallback-secret');
-    return decoded.userId;
+    return jwt.verify(token, secret || 'dev-only-fallback-secret');
   } catch {
     return null;
   }
+}
+
+function getUserId(request) {
+  const user = getUser(request);
+  return user ? user.userId : null;
 }
 
 export async function GET(request, { params }) {
@@ -33,6 +37,7 @@ export async function GET(request, { params }) {
          t.mobile_number,
          t.remark1,
          t.remark2,
+         t.rate,
          t.first_weight,
          t.second_weight,
          t.net_weight,
@@ -185,6 +190,7 @@ export async function PATCH(request, { params }) {
       mobile_number,
       remark1,
       remark2,
+      rate,
     } = body;
 
     // Build update query dynamically based on provided fields
@@ -258,6 +264,10 @@ export async function PATCH(request, { params }) {
       updates.push('remark2 = ?');
       values.push(remark2 || null);
     }
+    if (rate !== undefined) {
+      updates.push('rate = ?');
+      values.push(parseFloat(rate) || null);
+    }
 
     if (updates.length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
@@ -279,8 +289,14 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const userId = getUserId(request);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = getUser(request);
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (['Manager', 'Logistics Manager', 'Contract Manager', 'View Only Admin', 'Viewer'].includes(user.roleName)) {
+        return NextResponse.json({ error: "Forbidden: You do not have permission to delete" }, { status: 403 });
+    }
+
+    const userId = user.userId;
 
     const { id } = await params;
     const db = await getDb();

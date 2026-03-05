@@ -48,6 +48,11 @@ export async function PATCH(request) {
         return NextResponse.json({ error: "Invalid stage key" }, { status: 400 });
     }
 
+    // Block overwriting an already confirmed stage
+    if (entry[stage_key]) {
+        return NextResponse.json({ error: "Stage is already confirmed" }, { status: 400 });
+    }
+
     // Check if previous stage is done
     const currentIndex = STAGES.indexOf(stage_key);
     if (currentIndex > 0) {

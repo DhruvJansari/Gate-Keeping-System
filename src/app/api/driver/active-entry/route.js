@@ -38,6 +38,12 @@ export async function GET(request) {
         { field: "unloading_point_out_at", label: "Unloading Point Out" },
     ];
 
+    const stagesData = STAGES.map(stage => ({
+        ...stage,
+        completed: !!entry[stage.field],
+        timestamp: entry[stage.field] || null
+    }));
+
     let nextStage = null;
     let completed = false;
 
@@ -58,6 +64,7 @@ export async function GET(request) {
         product: entry.product,
         truck_no: entry.truck_no,
         current_stage: nextStage, // null if all done
+        stages: stagesData, // full timeline data
         is_completed: completed
     });
 

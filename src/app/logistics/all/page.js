@@ -76,7 +76,7 @@ function LogisticCard({ entry, stages }) {
             {/* ROW 3: Weights & Rate */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-1">
                 <div>
-                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Gross / Tare / Net</div>
+                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">First / Second / Net</div>
                     <div className="text-sm font-medium text-zinc-700 mt-0.5">
                         {formatCurrency(entry.gross_weight)} / {formatCurrency(entry.tare_weight)} / <span className="font-bold text-zinc-900">{formatCurrency(entry.net_weight)}</span>
                     </div>

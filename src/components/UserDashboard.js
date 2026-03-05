@@ -32,7 +32,7 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 // Edit Transaction Modal Component - Premium styling
 function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const toast = useToast();
-  const { values, errors, touched, handleChange, handleBlur, validateAll } = useFormValidation(
+  const { values, errors, touched, handleChange, handleBlur, validateAll, setValues } = useFormValidation(
     {
       invoice_number: transaction.invoice_number || "",
       invoice_date: transaction.invoice_date?.split('T')[0] || "",
@@ -41,6 +41,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
       lr_number: transaction.lr_number || "",
       mobile_number: transaction.mobile_number || "",
       remark1: transaction.remark1 || "",
+      rate: transaction.rate || "",
     },
     {
       invoice_number: { required: true },
@@ -50,6 +51,40 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
     }
   );
   const [saving, setSaving] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLiveTransaction() {
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`/api/transactions/${transaction.transaction_id}`, { headers });
+        if (!res.ok) throw new Error("Failed to fetch transaction details");
+        const data = await res.json();
+        if (isMounted) {
+          setValues({
+            invoice_number: data.invoice_number || "",
+            invoice_date: data.invoice_date?.split('T')[0] || "",
+            invoice_quantity: data.invoice_quantity || "",
+            po_do_number: data.po_do_number || "",
+            lr_number: data.lr_number || "",
+            mobile_number: data.mobile_number || "",
+            remark1: data.remark1 || "",
+            rate: data.rate || "",
+          });
+          setLoadingData(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          toast.error("Could not load fresh transaction details.");
+          setLoadingData(false);
+        }
+      }
+    }
+    fetchLiveTransaction();
+    return () => { isMounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transaction.transaction_id, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,6 +128,17 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   };
 
   const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
+
+  if (loadingData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/50 backdrop-blur-sm p-4 transition-all">
+        <div className="bg-white rounded-xl p-8 flex flex-col items-center justify-center gap-4 shadow-2xl animate-pulse">
+           <div className="w-8 h-8 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+           <p className="text-zinc-600 font-medium">Loading live data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/50 backdrop-blur-sm p-4 transition-all" onClick={onClose}>
@@ -264,6 +310,22 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                   placeholder="Optional"
                 />
               </div>
+
+              {transaction.transaction_type === 'Loading' && (
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-700 ml-1">
+                    Rate
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={values.rate}
+                    onChange={(e) => handleChange('rate', e.target.value)}
+                    className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
 
               <div className="col-span-1 md:col-span-2 space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
@@ -489,6 +551,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     if (dateTo) params.set("to", dateTo);
     if (filterType !== "all") params.set("type", filterType);
     if (filterItem) params.set("item", filterItem);
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedStage) params.set("stage", selectedStage);
     window.open(`/api/export/transactions?${params}`, "_blank");
   }
 
@@ -552,12 +616,16 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     const counts = { closed: 0 };
     STAGES.forEach(s => { counts[s.key] = 0; });
     transactions.forEach(t => {
-      const next = getNextStageToConfirm(t);
-      if (next === null) {
+      if (t.closed_at) {
         counts.closed++;
-      } else {
-        counts[next] = (counts[next] || 0) + 1;
       }
+      
+      const statuses = getStageStatus(t);
+      STAGES.forEach(s => {
+        if (statuses[s.key]) {
+          counts[s.key]++;
+        }
+      });
     });
     return counts;
   })();
@@ -588,11 +656,11 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
 
     // Stage filter
     if (selectedStage) {
-      const currentStage = getNextStageToConfirm(t);
       if (selectedStage === 'closed') {
-        if (currentStage !== null) return false;
+        if (!t.closed_at) return false;
       } else {
-        if (currentStage !== selectedStage) return false;
+        const statuses = getStageStatus(t);
+        if (!statuses[selectedStage]) return false;
       }
     }
     
@@ -615,10 +683,12 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     const counts = {};
     STAGES.forEach(s => { counts[s.key] = 0; });
     filteredTransactions.forEach(t => {
-      const next = getNextStageToConfirm(t);
-      if (next && counts[next] !== undefined) {
-        counts[next]++;
-      }
+      const statuses = getStageStatus(t);
+      STAGES.forEach(s => {
+        if (statuses[s.key]) {
+          counts[s.key]++;
+        }
+      });
     });
     return counts;
   })();
@@ -1110,7 +1180,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                   {paginatedTransactions.map((t, idx) => {
                     const status = getStageStatus(t);
                     const isEven = idx % 2 === 0;
-                    const serialNumber = (currentPage - 1) * itemsPerPage + idx + 1;
+                    const serialNumber = t.transaction_id;
                     return (
                       <tr
                         key={t.transaction_id}
@@ -1390,13 +1460,13 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                         {!isYardRole && (userSteps.includes(STEPS.WEIGHBRIDGE) || isViewer) && (
                           <>
                             <div>
-                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Gross Wt</p>
+                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">First Wt</p>
                                <p className="text-xs font-mono font-medium text-zinc-700">
                                  {t.first_weight ? `${t.first_weight} kg` : '—'}
                                </p>
                             </div>
                             <div>
-                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Tare Wt</p>
+                               <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-bold">Second Wt</p>
                                <p className="text-xs font-mono font-medium text-zinc-700">
                                  {t.second_weight ? `${t.second_weight} kg` : '—'}
                                </p>

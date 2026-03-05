@@ -39,7 +39,7 @@ export async function GET(request) {
     const isRestricted = isWeighbridge || isYard || isGatekeeper;
 
     let sql = `SELECT t.transaction_id, t.transaction_type, t.invoice_number, t.invoice_date, t.invoice_quantity,
-      t.po_do_number, t.lr_number, t.mobile_number, t.remark1, t.remark2, t.first_weight, t.second_weight, t.net_weight,
+      t.po_do_number, t.lr_number, t.mobile_number, t.remark1, t.remark2, t.rate, t.first_weight, t.second_weight, t.net_weight,
       t.parking_confirmed_at, t.current_status, t.gate_in_at, t.first_weigh_at, t.second_weigh_at, t.campus_in_at, t.campus_out_at,
       t.gate_pass_finalized_at, t.gate_out_at, t.gate_pass_no, t.closed_at, t.created_at,
       t.is_damaged, t.damaged_at, t.damaged_by, t.damaged_reason,
@@ -177,6 +177,7 @@ export async function POST(request) {
       mobile_number,
       remark1,
       remark2,
+      rate,
     } = body;
 
     if (!transaction_type || !truck_no || !party_id || !item_id || !transporter_id || !invoice_number || !invoice_date || !invoice_quantity || !mobile_number) {
@@ -204,8 +205,8 @@ export async function POST(request) {
       `INSERT INTO transactions (
         transaction_type, truck_id, party_id, item_id, transporter_id,
         po_do_number, invoice_number, invoice_date, invoice_quantity,
-        lr_number, mobile_number, remark1, remark2, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        lr_number, mobile_number, remark1, remark2, rate, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         transaction_type === 'Unloading' ? 'Unloading' : 'Loading',
         truckId,
@@ -220,6 +221,7 @@ export async function POST(request) {
         mobile_number,
         remark1 || null,
         remark2 || null,
+        rate ? parseFloat(rate) : null,
         userId
       ]
     );

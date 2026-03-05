@@ -234,15 +234,15 @@ export async function POST(request, { params }) {
       const fw = txn.first_weight !== null ? Number(txn.first_weight) : null;
 
       if (sw !== null && fw !== null) {
-        if (txn.transaction_type === "Loading" && fw <= sw) {
+        if (txn.transaction_type === "Loading" && fw >= sw) {
           return NextResponse.json(
-            { error: "For Loading transaction, First Weighbridge weight must be greater than Second Weighbridge weight." },
+            { error: "For Loading transaction, First Weighbridge weight must be LESS THAN Second Weighbridge weight." },
             { status: 400 }
           );
         }
-        if (txn.transaction_type === "Unloading" && sw <= fw) {
+        if (txn.transaction_type === "Unloading" && sw >= fw) {
            return NextResponse.json(
-            { error: "For Unloading transaction, Second Weighbridge weight must be greater than First Weighbridge weight." },
+            { error: "For Unloading transaction, Second Weighbridge weight must be LESS THAN First Weighbridge weight." },
             { status: 400 }
           );
         }

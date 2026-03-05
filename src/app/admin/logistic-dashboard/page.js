@@ -101,12 +101,13 @@ export default function LogisticDashboard() {
   // Filters & Search
   const [filters, setFilters] = useState({ consignor: "", consignee: "", truck_no: "", product: "", driver: "" });
   const [dateFilters, setDateFilters] = useState({ from: "", to: "" });
+  const [statusFilter, setStatusFilter] = useState("Pending");
   const [filterOptions, setFilterOptions] = useState({ consignors: [], consignees: [], trucks: [], products: [], drivers: [] });
 
-  // Admin: default to today's date on first mount
+  // Admin/Manager: default to today's date on first mount
   useEffect(() => {
     if (!user) return;
-    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin') {
+    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin' || user.role_name === 'Manager') {
       const today = new Date().toISOString().split('T')[0];
       setDateFilters({ from: today, to: today });
     }
@@ -148,7 +149,7 @@ export default function LogisticDashboard() {
       setError("");
       
       const params = new URLSearchParams();
-      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin';
+      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin' || user?.role_name === 'Manager';
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const fromDate = dateFilters.from || (isAdmin ? today : "");
@@ -161,6 +162,7 @@ export default function LogisticDashboard() {
       if (filters.driver) params.append("driver_id", filters.driver);
       if (fromDate) params.append("from", fromDate);
       if (toDate) params.append("to", toDate);
+      if (statusFilter !== "All") params.append("status_filter", statusFilter);
       if (debouncedSearch) params.append("search", debouncedSearch);
       params.append("order", sortOrder);
 
@@ -175,7 +177,7 @@ export default function LogisticDashboard() {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [filters, dateFilters, debouncedSearch]);
+  }, [filters, dateFilters, statusFilter, debouncedSearch]);
 
   useEffect(() => {
     fetchEntries();
@@ -200,6 +202,7 @@ export default function LogisticDashboard() {
           if (filters.product) params.append("product", filters.product);
           if (dateFilters.from) params.append("from", dateFilters.from);
           if (dateFilters.to) params.append("to", dateFilters.to);
+          if (statusFilter !== "All") params.append("status_filter", statusFilter);
           if (debouncedSearch) params.append("search", debouncedSearch);
 
           // Show specific toast if no date selected (exporting today's data)
@@ -298,7 +301,7 @@ export default function LogisticDashboard() {
   const StageCell = ({ entry, field, index }) => {
       const isDone = !!entry[field];
       const isPreviousDone = index === 0 || !!entry[STAGES[index - 1].field];
-      const hasPerm = user?.role_name === 'Admin' || hasPermission('edit_transactions');
+      const hasPerm = user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('edit_transactions') || hasPermission('manage_logistics');
       const isActive = !isDone && isPreviousDone && entry.status !== "Closed" && hasPerm;
 
       return (
@@ -358,6 +361,21 @@ export default function LogisticDashboard() {
                       <div className="w-px h-8 bg-zinc-200 shrink-0"></div>
                       <DateFilter label="To" value={dateFilters.to} onChange={v => setDateFilters(prev => ({ ...prev, to: v }))} />
                     </div>
+                    
+                    <div className="flex items-center bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+                        <button 
+                            onClick={() => setStatusFilter("Pending")}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Pending" ? "bg-white text-blue-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
+                        >
+                            Pending
+                        </button>
+                        <button 
+                            onClick={() => setStatusFilter("Completed")}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Completed" ? "bg-white text-emerald-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
+                        >
+                            Completed
+                        </button>
+                    </div>
                     <div className="flex items-center gap-2 overflow-x-auto">
                         <button 
                              onClick={handleExport}
@@ -373,7 +391,7 @@ export default function LogisticDashboard() {
                             <ListIcon className="h-4 w-4" />
                             View All
                         </button>
-                        {(user?.role_name === 'Admin' || hasPermission('edit_transactions')) && (
+                        {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('edit_transactions') || hasPermission('manage_logistics')) && (
                           <button 
                               onClick={() => setIsComposeOpen(true)}
                               className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-blue-500/20 shadow-lg text-sm transition-all active:scale-95 h-[42px] whitespace-nowrap"
@@ -494,7 +512,7 @@ export default function LogisticDashboard() {
                               >
                                   <ViewIcon className="h-4 w-4" />
                               </button>
-                              {(user?.role_name === 'Admin' || hasPermission('edit_transactions')) && (
+                              {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('edit_transactions') || hasPermission('manage_logistics')) && (
                                 <button 
                                   onClick={() => setDetailModal({ open: true, id: entry.logistic_id, readOnly: false })}
                                   className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
@@ -513,7 +531,7 @@ export default function LogisticDashboard() {
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                               </button>
-                              {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && (
+                              {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && user?.role_name !== 'Logistics Manager' && user?.role_name !== 'Manager' && (
                                 <button 
                                   onClick={() => handleDeleteClick(entry.logistic_id)}
                                   className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -565,7 +583,7 @@ export default function LogisticDashboard() {
                                 >
                                     <ViewIcon className="h-4 w-4" />
                                 </button>
-                                {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && (
+                                {(user?.role_name === 'Admin' || hasPermission('delete_transactions')) && user?.role_name !== 'Logistics Manager' && user?.role_name !== 'Manager' && (
                                   <button 
                                       onClick={() => handleDeleteClick(entry.logistic_id)}
                                       className="p-2 bg-red-50 text-red-600 rounded-lg"

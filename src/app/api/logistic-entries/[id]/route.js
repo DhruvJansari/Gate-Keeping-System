@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import jwt from "jsonwebtoken";
 
-// GET: Fetch single entry
+// Reusing same minimal auth from other routes
+function getUser(request) {
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) return null;
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') return null;
+  try {
+    return jwt.verify(token, secret || 'dev-only-fallback-secret');
+  } catch {
+    return null;
+  }
+}
 export async function GET(request, context) {
   try {
     const { id } = await context.params;   // ✅ FIX
@@ -35,6 +48,9 @@ export async function GET(request, context) {
 // PATCH: Update entry
 export async function PATCH(request, context) {
   try {
+    const user = getUser(request);
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { id } = await context.params;   // ✅ MUST await
 
     if (!id) {
@@ -109,6 +125,14 @@ export async function PATCH(request, context) {
 // DELETE: Delete entry
 export async function DELETE(request, context) {
   try {
+    const user = getUser(request);
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // Explicit block for Manager roles
+    if (['Manager', 'Logistics Manager', 'Contract Manager', 'View Only Admin', 'Viewer'].includes(user.roleName)) {
+        return NextResponse.json({ error: "Forbidden: You do not have permission to delete" }, { status: 403 });
+    }
+
     const { id } = await context.params;
 
     if (!id) {

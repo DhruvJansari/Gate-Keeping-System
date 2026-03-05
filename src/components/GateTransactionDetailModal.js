@@ -110,7 +110,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
   label="Invoice Qty" 
   value={
     transaction.invoice_quantity != null
-      ? `${formatWeight(transaction.invoice_quantity)} units`
+      ? `${formatWeight(transaction.invoice_quantity)}`
       : '—'
   } 
 />                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />
@@ -228,7 +228,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
   label="Invoice Qty" 
   value={
     transaction.invoice_quantity != null
-      ? `${formatWeight(transaction.invoice_quantity)} units`
+      ? `${formatWeight(transaction.invoice_quantity)}`
       : '—'
   } 
 />                <DataRow label="PO / Do No" value={transaction.po_do_number || '—'} />

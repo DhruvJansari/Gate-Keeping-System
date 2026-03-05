@@ -17,14 +17,20 @@ export function InstallPWAButton() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Already running as installed PWA → hide completely
-    if (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true
-    ) {
+    const checkInstallation = () => {
+      if (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+      ) {
+        setIsInstalled(true);
+      }
+    };
+
+    checkInstallation();
+
+    window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
-      return;
-    }
+    });
 
     // iOS does not support beforeinstallprompt — hide button entirely
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;

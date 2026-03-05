@@ -146,10 +146,14 @@ export function LogisticEntryDetail({ entryId, onClose, onUpdate, readOnly = fal
                             </div>
                         </div>
                         
-                        <div className="p-4 bg-white rounded-lg border border-zinc-200 grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2 shadow-sm">
+                        <div className="p-4 bg-white rounded-lg border border-zinc-200 grid grid-cols-2 sm:grid-cols-5 gap-4 mt-2 shadow-sm">
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Truck No</label>
                                 <div className="font-mono font-bold text-zinc-900 bg-zinc-50 inline-block px-1.5 rounded">{entry.truck_no}</div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-zinc-500 block mb-1">Amount</label>
+                                <div className="font-mono font-bold text-zinc-900 bg-zinc-50 inline-block px-1.5 rounded">{entry.amounts}</div>
                             </div>
                              <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Product</label>

@@ -61,12 +61,12 @@ export function AdminStageDetailModal({
       const sw = Number(secondWeight);
       const fw = txn.first_weight !== null ? Number(txn.first_weight) : null;
       if (!isNaN(sw) && fw !== null) {
-        if (txn.transaction_type === "Loading" && fw <= sw) {
-          setError("For Loading transaction, First Weighbridge weight must be greater than Second Weighbridge weight.");
+        if (txn.transaction_type === "Loading" && fw >= sw) {
+          setError("For Loading transaction, First Weighbridge weight must be LESS THAN Second Weighbridge weight.");
           return;
         }
-        if (txn.transaction_type === "Unloading" && sw <= fw) {
-          setError("For Unloading transaction, Second Weighbridge weight must be greater than First Weighbridge weight.");
+        if (txn.transaction_type === "Unloading" && sw >= fw) {
+          setError("For Unloading transaction, Second Weighbridge weight must be LESS THAN First Weighbridge weight.");
           return;
         }
       }
@@ -228,7 +228,7 @@ export function AdminStageDetailModal({
                      Transaction Damaged
                    </h4>
                    <div className="bg-white/60 p-3 rounded-lg border border-red-100/50 mt-2">
-                     <p className="text-red-900 font-medium text-sm">"{txn.damaged_reason}"</p>
+                     <p className="text-red-900 font-medium text-sm">&quot;{txn.damaged_reason}&quot;</p>
                      <div className="flex gap-4 mt-2 text-xs text-red-700/80 font-semibold">
                        <span>By: {txn.damaged_by_name}</span>
                        <span>At: {formatDateTime(txn.damaged_at)}</span>
@@ -336,11 +336,11 @@ export function AdminStageDetailModal({
                  <div className="bg-zinc-900 rounded-xl p-4 text-zinc-100 shadow-md border border-zinc-800">
                     <div className="grid grid-cols-3 gap-2 text-center divide-x divide-zinc-700">
                        <div>
-                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Gross</p>
+                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">First</p>
                           <p className="text-base font-mono font-bold text-white">{formatWeight(txn.first_weight)} kg</p>
                        </div>
                        <div>
-                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Tare</p>
+                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Second</p>
                           <p className="text-base font-mono font-bold text-white">{formatWeight(txn.second_weight)} kg</p>
                        </div>
                        <div>
@@ -562,6 +562,10 @@ export function AdminStageDetailModal({
                       <dt className="text-orange-700 font-medium">PO/DO No</dt>
                       <dd className="text-orange-900">{txn.po_do_number || '—'}</dd>
                     </div>
+                     <div className="flex justify-between">
+                      <dt className="text-orange-700 font-medium">Rate</dt>
+                      <dd className="text-orange-900">{txn.rate || '—'}</dd>
+                    </div>
                   </dl>
                 </div>
               </div>
@@ -741,7 +745,7 @@ export function AdminStageDetailModal({
                          <div className="space-y-1 text-xs text-red-800 relative z-10">
                             <div className="flex items-start gap-2">
                                <span className="font-semibold opacity-70 whitespace-nowrap">Reason:</span>
-                               <span className="font-medium italic leading-relaxed">"{txn.damaged_reason}"</span>
+                               <span className="font-medium italic leading-relaxed">&quot;{txn.damaged_reason}&quot;</span>
                             </div>
                             <div className="flex items-center gap-2 pt-1">
                               <span className="font-semibold opacity-70">Marked by:</span>

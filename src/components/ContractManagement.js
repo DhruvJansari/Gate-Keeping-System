@@ -37,10 +37,12 @@ export function ContractManagement() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // Admin: default to today's date on first mount
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'Pending', 'Complete'
+
+  // Admin/Manager: default to today's date on first mount
   useEffect(() => {
     if (!user) return;
-    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin') {
+    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin' || user.role_name === 'Contract Manager' || user.role_name === 'Manager') {
       // Generate 'YYYY-MM-DD' in local timezone to prevent UTC shift
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -55,11 +57,11 @@ export function ContractManagement() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin';
+      const isAutoDateRole = ['Admin', 'View Only Admin', 'Contract Manager', 'Manager'].includes(user?.role_name);
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      if (dateFrom || (isAdmin && !dateFrom)) params.set("start_date", dateFrom || today);
-      if (dateTo || (isAdmin && !dateTo)) params.set("end_date", dateTo || today);
+      if (dateFrom || (isAutoDateRole && !dateFrom)) params.set("start_date", dateFrom || today);
+      if (dateTo || (isAutoDateRole && !dateTo)) params.set("end_date", dateTo || today);
       
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -114,6 +116,8 @@ export function ContractManagement() {
       if (contractType !== "all" && c.contract_type !== contractType) return false;
       // Item filter
       if (selectedItem && c.item_name !== selectedItem) return false;
+      // Status filter
+      if (statusFilter !== "all" && c.contract_status !== statusFilter) return false;
       // Search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -126,7 +130,7 @@ export function ContractManagement() {
       }
       return true;
     });
-  }, [contracts, contractType, selectedItem, searchQuery]);
+  }, [contracts, contractType, selectedItem, searchQuery, statusFilter]);
 
   // Handlers
   function handleAdd() {
@@ -242,7 +246,7 @@ export function ContractManagement() {
     setContractType("all");
     setSelectedItem("");
   };
-function formatQty(value) {
+ function formatQty(value) {
   const num = parseFloat(value);
   if (isNaN(num)) return "0.000";
   return num.toFixed(3);
@@ -291,6 +295,22 @@ function formatQty(value) {
                 className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all"
                 />
             </div>
+            
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                <button 
+                  onClick={() => setStatusFilter("all")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "all" ? "bg-white text-slate-700 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >All</button>
+                <button 
+                  onClick={() => setStatusFilter("Pending")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Pending" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >Pending</button>
+                <button 
+                  onClick={() => setStatusFilter("Complete")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Complete" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >Completed</button>
+            </div>
+
             <div className="flex items-center gap-2">
                 <button
                 onClick={fetchContracts}
@@ -600,7 +620,7 @@ function formatQty(value) {
         </td>
 
         <td className="px-4 py-3 text-right font-mono whitespace-nowrap">
-          ₹{c.contract_rate}
+          ₹{formatQty(c.contract_rate)}
         </td>
 
         <td className="px-4 py-3 text-right font-bold text-zinc-900 whitespace-nowrap">
@@ -612,7 +632,7 @@ function formatQty(value) {
             <input
               type="number"
               className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
-              defaultValue={c.rec_qty}
+              defaultValue={formatQty(c.rec_qty)}
               step="0.001"
               onBlur={(e) =>
                 handleInlineUpdate(c.contract_id, "rec_qty", e.target.value)
@@ -631,7 +651,7 @@ function formatQty(value) {
               type="number"
               className="w-24 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-right text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
               step="0.001"
-              defaultValue={c.settal_qty}
+              defaultValue={formatQty(c.settal_qty)}
               onBlur={(e) =>
                 handleInlineUpdate(c.contract_id, "settal_qty", e.target.value)
               }
@@ -717,13 +737,15 @@ function formatQty(value) {
                   <EditIcon className="h-4 w-4" />
                 </button>
 
-                <button
-                  onClick={() => handleDelete(c.contract_id)}
-                  className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
-                  title="Delete Contract"
-                >
-                  <DeleteIcon className="h-4 w-4" />
-                </button>
+                {!['Manager', 'Logistics Manager', 'Contract Manager', 'View Only Admin', 'Viewer'].includes(user?.role_name) && (
+                  <button
+                    onClick={() => handleDelete(c.contract_id)}
+                    className="p-1.5 rounded-lg text-red-600 hover:bg-red-100 transition-colors"
+                    title="Delete Contract"
+                  >
+                    <DeleteIcon className="h-4 w-4" />
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -793,7 +815,7 @@ function formatQty(value) {
                                 </div>
                                 <div>
                                     <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mb-0.5">Rate</div>
-                                    <div className="font-mono font-medium text-zinc-900 text-sm">₹{c.contract_rate}</div>
+                                    <div className="font-mono font-medium text-zinc-900 text-sm">₹{formatQty(c.contract_rate)}</div>
                                 </div>
                             </div>
 

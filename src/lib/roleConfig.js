@@ -23,11 +23,12 @@ export const ROLE_PANEL_MAP = {
   Driver: '/driver',
   'Logistics Manager': '/logistics',
   'Contract Manager': '/contracts',
+  'Manager': '/admin',
 };
 
 export function getPanelPathForRole(roleName) {
   // Admin and SuperAdmin go to admin dashboard
-  if (roleName === 'Admin' || roleName === 'SuperAdmin' || roleName === 'View Only Admin') {
+  if (roleName === 'Admin' || roleName === 'SuperAdmin' || roleName === 'View Only Admin' || roleName === 'Manager') {
     return '/admin';
   }
   if (roleName === 'Gatekeeper') {
@@ -92,25 +93,6 @@ export const ROLE_NAV = {
         { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: [] },
       ]
     },
-    { path: '/admin/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: [] },
-    { 
-      label: 'Masters', 
-      path: '/admin/items', // Default to Items
-      IconComponent: ClipboardIcon,
-      requiredPermissions: [],
-      children: [
-        { path: '/admin/items', label: 'Items', IconComponent: ClipboardIcon, countKey: 'items', requiredPermissions: [] },
-        { path: '/admin/parties', label: 'Party Master', IconComponent: UsersIcon, countKey: 'parties', requiredPermissions: [] },
-        { path: '/admin/transporters', label: 'Transporter Master', IconComponent: TruckIcon, countKey: 'transporters', requiredPermissions: [] },
-        { path: '/admin/vehicles', label: 'Vehicle Master', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: [] },
-        { path: '/admin/drivers', label: 'Driver Master', IconComponent: UserIcon, countKey: 'drivers', requiredPermissions: [] },
-        { path: '/admin/brokers', label: 'Broker Master', IconComponent: UsersIcon, countKey: 'brokers', requiredPermissions: [] },
-      ]
-    },
-    // { path: '/admin/users', label: 'User', IconComponent: UserIcon, countKey: 'users', requiredPermissions: [] },
-    // { path: '/admin/roles', label: 'Role', IconComponent: ShieldIcon, requiredPermissions: [] },
-    // { path: '/admin/permissions', label: 'Permission', IconComponent: KeyIcon, requiredPermissions: [] },
-    { path: '/admin/gate', label: 'Gate', IconComponent: GateIcon, requiredPermissions: [] },
   ],
   Gatekeeper: [
     { path: '/gatekeeper', label: 'Dashboard', IconComponent: DashboardIcon },
@@ -133,14 +115,37 @@ export const ROLE_NAV = {
   ],
   'Logistics Manager': [
     { path: '/logistics', label: 'Logistic Dashboard', IconComponent: TruckIcon },
-    { path: '/logistics/items', label: 'Items', IconComponent: ClipboardIcon },
-    { path: '/logistics/vehicles', label: 'Vehicles', IconComponent: TruckIcon },
   ],
   'Contract Manager': [
     { path: '/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon },
-    { path: '/contracts/parties', label: 'Party Master', IconComponent: UsersIcon },
-    { path: '/contracts/brokers', label: 'Broker Master', IconComponent: UsersIcon },
-    { path: '/contracts/items', label: 'Items', IconComponent: ClipboardIcon },
+  ],
+  Manager: [
+    { 
+      label: 'Dashboard', 
+      path: '/admin',
+      IconComponent: DashboardIcon,
+      children: [
+        { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: ['view_reports', '*'] },
+      ]
+    },
+    { path: '/admin/reports', label: 'Reports', IconComponent: ChartIcon, requiredPermissions: ['view_reports', '*'] },
+    { 
+      label: 'Masters', 
+      path: '/admin/items',
+      IconComponent: ClipboardIcon,
+      requiredPermissions: ['manage_masters', '*'],
+      children: [
+        { path: '/admin/items', label: 'Items', IconComponent: ClipboardIcon, countKey: 'items', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/parties', label: 'Party Master', IconComponent: UsersIcon, countKey: 'parties', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/transporters', label: 'Transporter Master', IconComponent: TruckIcon, countKey: 'transporters', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/vehicles', label: 'Vehicle Master', IconComponent: TruckIcon, countKey: 'vehicles', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/drivers', label: 'Driver Master', IconComponent: UserIcon, countKey: 'drivers', requiredPermissions: ['manage_masters', '*'] },
+        { path: '/admin/brokers', label: 'Broker Master', IconComponent: UsersIcon, countKey: 'brokers', requiredPermissions: ['manage_masters', '*'] },
+      ]
+    },
+    { path: '/admin/gate', label: 'Gate', IconComponent: GateIcon, requiredPermissions: ['create_transactions', 'confirm_stages', '*'] },
   ],
 };
 

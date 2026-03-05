@@ -139,16 +139,18 @@ export function ReportsPanel() {
       // Dynamically import xlsx library
       const XLSX = await import('xlsx');
 
-      // Labels in Column A
       const LABELS = [
-        'Item:',
-        'Truck No:',
-        'Party Name:',
+        'S/N',
+        'Transaction No',
+        'Type',
+        'Party Name',
+        'Item Name',
+        'Transporter',
+        'Truck Number',
         'Invoice No',
         'Invoice Date',
         'Invoice Qty',
         'PO / Do No:',
-        'Transporter:',
         'Lr Number',
         'Mobile No',
         'Remark - 1',
@@ -156,22 +158,27 @@ export function ReportsPanel() {
         'First Weight',
         'Second Weight',
         'Net Weight',
+        'Status'
       ];
 
-      // Build array-of-arrays: each row = [label, txn1Value, txn2Value, ...]
-      const aoa = LABELS.map((label) => [label]);
+      // Build array-of-arrays: each row is a transaction
+      const aoa = [LABELS];
 
-      transactions.forEach((t) => {
+      transactions.forEach((t, idx) => {
         const invoiceDate = formatDate(t.invoice_date);
+        
         const values = [
-          t.item_name || '',
-          t.truck_no || '',
+          idx + 1,
+          txnNo(t),
+          t.transaction_type || '',
           t.party_name || '',
+          t.item_name || '',
+          t.transporter_name || '',
+          t.truck_no || '',
           t.invoice_number || '',
           invoiceDate,
           t.invoice_quantity != null ? Number(t.invoice_quantity) : '',
           t.po_do_number || '',
-          t.transporter_name || '',
           t.lr_number || '',
           t.mobile_number || '',
           t.remark1 || '',
@@ -179,10 +186,10 @@ export function ReportsPanel() {
           t.first_weight != null ? Math.round(parseFloat(t.first_weight)) : '',
           t.second_weight != null ? Math.round(parseFloat(t.second_weight)) : '',
           t.net_weight != null ? Math.round(parseFloat(t.net_weight)) : '',
+          t.current_status || 'In Progress'
         ];
-        values.forEach((val, rowIdx) => {
-          aoa[rowIdx].push(val);
-        });
+        
+        aoa.push(values);
       });
 
       // Create workbook and worksheet

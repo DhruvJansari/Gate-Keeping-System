@@ -346,10 +346,10 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
 
             {/* Weights & amounts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InputField label="Gross Wt" type="number" value={form.gross_weight} onChange={(v) => handleFieldChange("gross_weight", v)} />
-              <InputField label="Tare Wt"  type="number" value={form.tare_weight}  onChange={(v) => handleFieldChange("tare_weight", v)} />
+              <InputField label="First Wt" type="number" value={form.gross_weight} onChange={(v) => handleFieldChange("gross_weight", v)} />
+              <InputField label="Second Wt"  type="number" value={form.tare_weight}  onChange={(v) => handleFieldChange("tare_weight", v)} />
               <InputField label="Net Wt"   value={form.net_weight} readOnly className="bg-blue-50 text-blue-700 font-bold border-blue-200" />
-              <InputField label="Rate"     type="number" value={form.rate} onChange={(v) => handleFieldChange("rate", v)} />
+              <InputField label="Freight Rate"     type="number" value={form.rate} onChange={(v) => handleFieldChange("rate", v)} />
             </div>
 
             {/* Driver */}

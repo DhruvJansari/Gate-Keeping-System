@@ -101,6 +101,27 @@ export async function GET(request) {
         params.push(to);
     }
 
+    const status_filter = searchParams.get("status_filter");
+    if (status_filter === "Pending") {
+        query += ` AND (
+            le.loading_site_at IS NULL OR 
+            le.loading_point_in_at IS NULL OR 
+            le.loading_point_out_at IS NULL OR 
+            le.unloading_site_at IS NULL OR 
+            le.unloading_point_in_at IS NULL OR 
+            le.unloading_point_out_at IS NULL
+        )`;
+    } else if (status_filter === "Completed") {
+        query += ` AND (
+            le.loading_site_at IS NOT NULL AND 
+            le.loading_point_in_at IS NOT NULL AND 
+            le.loading_point_out_at IS NOT NULL AND 
+            le.unloading_site_at IS NOT NULL AND 
+            le.unloading_point_in_at IS NOT NULL AND 
+            le.unloading_point_out_at IS NOT NULL
+        )`;
+    }
+
     const orderParam = searchParams.get("order");
     const sortDir = orderParam === 'asc' ? 'ASC' : 'DESC';
     query += ` ORDER BY le.logistic_id ${sortDir}`;

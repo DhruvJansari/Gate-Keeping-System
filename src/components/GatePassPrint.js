@@ -174,7 +174,7 @@ export function getGatePassHtml(transaction, options = {}) {
         </tr>
         <tr>
           <td class="label">Invoice Qty</td>
-          <td class="value hl">${transaction.invoice_quantity} units</td>
+          <td class="value hl">${transaction.invoice_quantity}</td>
           <td class="label">PO/DO No</td>
           <td class="value">${transaction.po_do_number || '—'}</td>
         </tr>
@@ -186,7 +186,7 @@ export function getGatePassHtml(transaction, options = {}) {
       <div class="section-title">WEIGHBRIDGE INFORMATION</div>
       <div class="weights-row">
         <div class="weight-box"><div>First Weight</div><div class="val">${formatWeight(transaction.first_weight)} kg</div></div>
-        <div class="weight-box"><div>Tare Weight</div><div class="val">${formatWeight(transaction.second_weight)} kg</div></div>
+        <div class="weight-box"><div>Second Weight</div><div class="val">${formatWeight(transaction.second_weight)} kg</div></div>
         <div class="weight-box"><div>Net Weight</div><div class="val">${formatWeight(transaction.net_weight)} kg</div></div>
       </div>
     </div>

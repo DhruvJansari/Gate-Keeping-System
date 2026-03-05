@@ -226,7 +226,11 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
       setLoading(false);
     }
   }
-
+ function formatQty(value) {
+  const num = parseFloat(value);
+  if (isNaN(num)) return "0.000";
+  return num.toFixed(3);
+}
   if (!open) return null;
 
   return (
@@ -527,7 +531,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                       type="number"
                       disabled={viewMode}
                       step="0.01"
-                      value={form.contract_rate}
+                      value={formatQty(form.contract_rate)}
                       onChange={(e) => handleFieldChange("contract_rate", e.target.value)}
                       placeholder="0.00"
                       className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
@@ -551,7 +555,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                       type="number"
                       disabled={viewMode}
                       step="0.0001"
-                      value={form.contract_quantity}
+                      value={formatQty(form.contract_quantity)}
                       onChange={(e) => handleFieldChange("contract_quantity", e.target.value)}
                       placeholder="0.000"
                       className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
@@ -647,7 +651,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                     <input
                       type="number"
                       step="0.0001"
-                      value={form.rec_qty}
+                      value={formatQty(form.rec_qty)}
                       onChange={(e) => handleFieldChange("rec_qty", e.target.value)}
                       disabled={viewMode}
                       placeholder="0.000"
@@ -661,7 +665,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                     <input
                       type="number"
                       step="0.001"
-                      value={form.settal_qty}
+                      value={formatQty(form.settal_qty)}
                       onChange={(e) => handleFieldChange("settal_qty", e.target.value)}
                       disabled={viewMode}
                       placeholder="0.000"
@@ -675,7 +679,7 @@ export function ContractModal({ open, onClose, onSuccess, contract, viewMode = f
                     <input
                       type="number"
                       step="0.01"
-                      value={form.pending_qty}
+                      value={formatQty(form.pending_qty)}
                       disabled
                       readOnly
                       placeholder="0.00"

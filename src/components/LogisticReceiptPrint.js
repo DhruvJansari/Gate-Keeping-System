@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 /**
  * LogisticReceiptPrint
@@ -10,18 +10,18 @@ import { useEffect, useState } from "react";
  *   onClose — callback to close/dismiss the modal
  */
 export function LogisticReceiptPrint({ entry, onClose }) {
-  if (!entry) return null;
+  const componentRef = useRef();
 
   const [vehicleData, setVehicleData] = useState(null);
 
   // Derive driver from joined fields on the entry (populated by the API)
   // Supports both flat fields (driver_name, driver_mobile…) and a nested driver object
-  const driver = entry.driver || {
-    driver_name: entry.driver_name || "",
-    adhar_number: entry.driver_adhar_number || entry.adhar_number || "",
-    mobile: entry.driver_mobile || entry.mobile_number || "",
-    licence: entry.driver_licence || entry.licence || "",
-    licence_expiry: entry.driver_licence_expiry || entry.licence_expiry || "",
+  const driver = entry?.driver || {
+    driver_name: entry?.driver_name || "",
+    adhar_number: entry?.driver_adhar_number || entry?.adhar_number || "",
+    mobile: entry?.driver_mobile || entry?.mobile_number || "",
+    licence: entry?.driver_licence || entry?.licence || "",
+    licence_expiry: entry?.driver_licence_expiry || entry?.licence_expiry || "",
   };
 
   // Format date as DD/MM/YYYY
@@ -217,8 +217,8 @@ export function LogisticReceiptPrint({ entry, onClose }) {
       <td style="width:50%; border-right:1px solid #000; padding:0; vertical-align:top;">
         <table style="width:100%; border:none;">
           <tr>
-            <th style="border:none; border-right:1px solid #ccc; border-bottom:1px solid #000; text-align:center; width:33%;">Gross WT.</th>
-            <th style="border:none; border-right:1px solid #ccc; border-bottom:1px solid #000; text-align:center; width:33%;">Tare WT.</th>
+            <th style="border:none; border-right:1px solid #ccc; border-bottom:1px solid #000; text-align:center; width:33%;">First WT.</th>
+            <th style="border:none; border-right:1px solid #ccc; border-bottom:1px solid #000; text-align:center; width:33%;">Second WT.</th>
             <th style="border:none; border-bottom:1px solid #000; text-align:center; width:34%;">Net WT.</th>
           </tr>
           <tr>
@@ -477,7 +477,7 @@ export function LogisticReceiptPrint({ entry, onClose }) {
         <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
           <div style={{ flex: 1, borderRight: "1px solid #000" }}>
             <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
-              {["Gross WT.", "Tare WT.", "Net WT."].map((h) => (
+              {["First WT.", "Second WT.", "Net WT."].map((h) => (
                 <div key={h} style={{ flex: 1, textAlign: "center", fontWeight: "bold", padding: "2px", borderRight: "1px solid #ccc", fontSize: "9.5px" }}>{h}</div>
               ))}
             </div>
