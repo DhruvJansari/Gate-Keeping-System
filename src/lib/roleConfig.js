@@ -115,6 +115,15 @@ export const ROLE_NAV = {
   ],
   'Logistics Manager': [
     { path: '/logistics', label: 'Logistic Dashboard', IconComponent: TruckIcon },
+    { 
+      label: 'Masters', 
+      path: '/admin/vehicles',
+      IconComponent: ClipboardIcon,
+      children: [
+        { path: '/admin/vehicles', label: 'Vehicle Master', IconComponent: TruckIcon, countKey: 'vehicles' },
+        { path: '/admin/drivers', label: 'Driver Master', IconComponent: UserIcon, countKey: 'drivers' },
+      ]
+    },
   ],
   'Contract Manager': [
     { path: '/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon },

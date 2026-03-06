@@ -170,13 +170,19 @@ export function getGatePassHtml(transaction, options = {}) {
           <td class="label">Invoice No</td>
           <td class="value hl">${transaction.invoice_number}</td>
           <td class="label">Invoice Date</td>
-          <td class="value">${formatDate(transaction.invoice_date)}</td>
+          <td class="value hl">${formatDate(transaction.invoice_date)}</td>
         </tr>
         <tr>
           <td class="label">Invoice Qty</td>
           <td class="value hl">${transaction.invoice_quantity}</td>
           <td class="label">PO/DO No</td>
-          <td class="value">${transaction.po_do_number || '—'}</td>
+          <td class="value hl">${transaction.po_do_number || '—'}</td>
+        </tr>
+        <tr>
+          <td class="label">Rate</td>
+          <td class="value hl">${transaction.rate !== null && transaction.rate !== undefined ? '₹' + transaction.rate : '—'}</td>
+          <td class="label"></td>
+          <td class="value"></td>
         </tr>
       </table>
     </div>

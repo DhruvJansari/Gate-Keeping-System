@@ -182,7 +182,7 @@ export function VehicleManagement() {
               className="w-full rounded-lg border border-zinc-300 pl-9 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
-          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+          {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -224,7 +224,7 @@ export function VehicleManagement() {
                       {/* <td className="px-6 py-3">{v.mobile || '—'}</td> */}
                        <td className="px-6 py-3 text-center">
                           {/* Status Toggle Switch */}
-                          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+                          {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
                             <div className="flex flex-col items-center gap-1">
                               <button
                                 onClick={() => handleToggleStatus(v)}
@@ -254,7 +254,7 @@ export function VehicleManagement() {
                           >
                               <EyeIcon className="h-4 w-4" />
                           </button>
-                          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+                          {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
                             <button
                               onClick={() => handleEdit(v)}
                               className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"

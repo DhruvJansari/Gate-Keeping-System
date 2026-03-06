@@ -171,7 +171,7 @@ export function DriverManagement() {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+          {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
             <button
               onClick={handleAdd}
               className="w-fit rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700"
@@ -220,7 +220,7 @@ export function DriverManagement() {
                       <td className="px-6 py-3 text-zinc-600">{d.mobile}</td>
                       <td className="px-6 py-3 text-zinc-600">{d.licence || "—"}</td>
                       <td className="px-6 py-3 text-center">
-                        {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+                        {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
                           <div className="flex flex-col items-center gap-1">
                             <button
                               onClick={() => handleToggleStatus(d)}
@@ -250,7 +250,7 @@ export function DriverManagement() {
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
-                          {(user?.role_name === 'Admin' || hasPermission('manage_masters')) && (
+                          {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('manage_masters')) && (
                             <button
                               onClick={() => handleEdit(d)}
                               className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-blue-600"

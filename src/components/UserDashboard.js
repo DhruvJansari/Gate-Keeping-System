@@ -139,7 +139,11 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
       </div>
     );
   }
-
+ function formatQty(value) {
+  const num = parseFloat(value);
+  if (isNaN(num)) return "0";
+  return num.toFixed(0);
+}
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/50 backdrop-blur-sm p-4 transition-all" onClick={onClose}>
       <div
@@ -239,7 +243,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                 </label>
                 <input
                   type="number"
-                  value={values.invoice_quantity}
+                  value={formatQty(values.invoice_quantity)}
                   onChange={(e) => handleChange('invoice_quantity', e.target.value)}
                   onBlur={() => handleBlur('invoice_quantity')}
                   className={`w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all ${
@@ -1156,7 +1160,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
             </div>
           </div>
 
-          {/* Desktop Table View - Tally Prime Style */}
+          {/* Desktop Table View - Tally Prime Style */}                                                      
           <div className="hidden md:block overflow-x-auto custom-scrollbar">
             {loading ? (
               <div className="flex flex-col items-center justify-center p-20 gap-3">

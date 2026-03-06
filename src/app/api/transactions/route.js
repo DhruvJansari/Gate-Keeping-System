@@ -205,8 +205,9 @@ export async function POST(request) {
       `INSERT INTO transactions (
         transaction_type, truck_id, party_id, item_id, transporter_id,
         po_do_number, invoice_number, invoice_date, invoice_quantity,
-        lr_number, mobile_number, remark1, remark2, rate, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        lr_number, mobile_number, remark1, remark2, rate, created_by,
+        parking_confirmed_at, parking_confirmed_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         transaction_type === 'Unloading' ? 'Unloading' : 'Loading',
         truckId,
@@ -222,6 +223,8 @@ export async function POST(request) {
         remark1 || null,
         remark2 || null,
         rate ? parseFloat(rate) : null,
+        userId,
+        currentTimestamp,
         userId
       ]
     );

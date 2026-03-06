@@ -40,16 +40,18 @@ export function middleware(request) {
   // Role Access Rules for Pages
   if (pathname.startsWith('/admin')) {
     if (!role || (role !== 'Admin' && role !== 'SuperAdmin' && role !== 'View Only Admin' && role !== 'Manager')) {
-       if (role === 'Gatekeeper') {
+       // Allow Logistics Manager to access Vehicles and Drivers Masters explicitly
+       if (role === 'Logistics Manager' && (pathname.startsWith('/admin/vehicles') || pathname.startsWith('/admin/drivers'))) {
+          // Allow pass-through
+       } else if (role === 'Gatekeeper') {
          return NextResponse.redirect(new URL('/gatekeeper', request.url));
-       }
-       if (role === 'Logistics Manager') {
+       } else if (role === 'Logistics Manager') {
          return NextResponse.redirect(new URL('/logistics', request.url));
-       }
-       if (role === 'Contract Manager') {
+       } else if (role === 'Contract Manager') {
          return NextResponse.redirect(new URL('/contracts', request.url));
+       } else {
+         return NextResponse.redirect(new URL('/login', request.url));
        }
-       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
