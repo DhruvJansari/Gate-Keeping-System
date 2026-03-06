@@ -42,3 +42,23 @@ export function getStageTimestamps(txn) {
     { key: 'gate_out', label: 'GATE OUT', at: txn.gate_out_at },
   ];
 }
+
+export function getPreviousStageOfActive(txn) {
+  if (txn?.is_damaged) return null;
+  const status = getStageStatus(txn);
+  const activeIndex = STAGES.findIndex((s) => !status[s.key]);
+  
+  if (activeIndex === -1) {
+    // All stages completed. The active stage is "Closed", so previous is the very last stage.
+    return STAGES[STAGES.length - 1].key;
+  }
+  
+  if (activeIndex === 0) {
+    // Active stage is Parking. There is no previous stage.
+    return null;
+  }
+  
+  // Previous stage of the active stage
+  return STAGES[activeIndex - 1].key;
+}
+

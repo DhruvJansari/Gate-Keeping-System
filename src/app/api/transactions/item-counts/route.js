@@ -27,20 +27,66 @@ export async function GET(request) {
     const from = searchParams.get('from');
     const to = searchParams.get('to');
 
+    const statusType = searchParams.get('statusType'); // 'pending', 'damaged' or null
+
     let where = 'WHERE 1=1';
     const params = [];
     
-    // Role-based logic for Gatekeeper
+    // Role-based logic
+    let isGatekeeper = false;
+    let isWeighbridge = false;
+    let isYard = false;
+
     if (user) {
-       const isGatekeeper = user.roleName === 'Gatekeeper' || user.role_name === 'Gatekeeper';
-       if (isGatekeeper) {
-          // Gatekeeper sees ONLY items that have at least one ACTIVE transaction
-          where += ' AND t.closed_at IS NULL';
+       isGatekeeper = user.roleName === 'Gatekeeper' || user.role_name === 'Gatekeeper';
+       isWeighbridge = user.roleName === 'Weighbridge' || user.role_name === 'Weighbridge';
+       isYard = user.roleName?.toUpperCase().includes('YARD') || user.role_name?.toUpperCase().includes('YARD');
+
+       if (isYard) {
+         where += ' AND t.is_damaged = 0 AND t.closed_at IS NULL';
+         where += ` AND (
+           t.item_id IN (SELECT item_id FROM user_items WHERE user_id = ?)
+           OR t.item_id IN (SELECT item_id FROM role_items WHERE role_id = ?)
+         )`;
+         params.push(user.userId || user.user_id, user.roleId || user.role_id);
+       } else if (!isGatekeeper && !isWeighbridge) {
+         if (statusType !== 'pending' && statusType !== 'damaged') {
+           if (from) { where += ' AND DATE(t.created_at) >= ?'; params.push(from); }
+           if (to) { where += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+         }
+       }
+    } else {
+       if (statusType !== 'pending' && statusType !== 'damaged') {
+         if (from) { where += ' AND DATE(t.created_at) >= ?'; params.push(from); }
+         if (to) { where += ' AND DATE(t.created_at) <= ?'; params.push(to); }
        }
     }
 
-    if (from) { where += ' AND DATE(t.created_at) >= ?'; params.push(from); }
-    if (to) { where += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    // Status type filters & Role Specific Pending Scopes
+    if (statusType === 'damaged') {
+      where += ' AND t.is_damaged = 1';
+    } else if (statusType === 'pending' || statusType === 'all' || !statusType) {
+      if (isGatekeeper) {
+        where += ` AND t.is_damaged = 0 AND t.closed_at IS NULL`;
+        where += ` AND (
+          (t.parking_confirmed_at IS NULL) OR 
+          (t.parking_confirmed_at IS NOT NULL AND t.gate_in_at IS NULL) OR
+          (t.gate_pass_finalized_at IS NOT NULL AND t.gate_out_at IS NULL)
+        )`;
+      } else if (isWeighbridge) {
+        where += ` AND t.is_damaged = 0 AND t.closed_at IS NULL`;
+        where += ` AND (
+          (t.gate_in_at IS NULL) OR
+          (t.gate_in_at IS NOT NULL AND t.first_weigh_at IS NULL) OR
+          (t.campus_out_at IS NOT NULL AND t.second_weigh_at IS NULL) OR
+          (t.second_weigh_at IS NOT NULL AND t.gate_pass_finalized_at IS NULL)
+        )`;
+      } else if (isYard) {
+        where += ` AND t.first_weigh_at IS NOT NULL AND t.campus_out_at IS NULL`;
+      } else if (statusType === 'pending') {
+        where += ' AND t.gate_out_at IS NULL AND t.is_damaged = 0 AND t.closed_at IS NULL';
+      }
+    }
 
     // Get item-wise counts for loading transactions
     const [loadingItems] = await db.execute(

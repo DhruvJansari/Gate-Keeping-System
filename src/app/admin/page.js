@@ -7,7 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { NewGateEntryModal } from "@/components/NewGateEntryModal";
 import { AdminStageDetailModal } from "@/components/AdminStageDetailModal";
 import { useGatePassPrint } from "@/components/GatePassPrint";
-import { STAGES, getStageStatus, getNextStageToConfirm } from "@/lib/stageUtils";
+import { STAGES, getStageStatus, getNextStageToConfirm, getPreviousStageOfActive } from "@/lib/stageUtils";
 import {
   PrinterIcon,
   TruckIcon,
@@ -434,38 +434,40 @@ function AdminDashboard() {
     const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const from = dateFrom || (isAdmin ? today : undefined);
     const to = dateTo || (isAdmin ? today : undefined);
-    const type = filterType !== "all" ? filterType : undefined;
-    const item = filterItem || undefined;
-
-    // Params for Transaction List (Includes all filters)
+    // Params for Transaction List (Fetch ALL items for the current date and status)
     const listParams = new URLSearchParams();
     if (from) listParams.set("from", from);
     if (to) listParams.set("to", to);
-    if (type) listParams.set("type", type);
-    if (item) listParams.set("item", item);
     if (statusType && statusType !== "all") listParams.set("statusType", statusType);
-
-    // Params for Stats/Counts (Only filters by Date, so tabs show global counts)
-    const statsParams = new URLSearchParams();
-    if (from) statsParams.set("from", from);
-    if (to) statsParams.set("to", to);
 
     const headers = {
       Authorization: `Bearer ${token}`,
     };
 
-    const [txnRes, countRes, itemCountRes] = await Promise.all([
+    const [txnRes, countRes] = await Promise.all([
       fetch(`/api/transactions?${listParams}`, { headers }),
       fetch(`/api/transactions/counts`, { headers }),
-      fetch(`/api/transactions/item-counts?${statsParams}`, { headers }),
     ]);
     const txnData = await txnRes.json();
     const countData = await countRes.json();
-    const itemCountData = await itemCountRes.json();
 
-    setTransactions(Array.isArray(txnData) ? txnData : []);
+    const transactionsList = Array.isArray(txnData) ? txnData : [];
+    setTransactions(transactionsList);
     setCounts(countData);
-    setItemCounts(itemCountData);
+
+    // Dynamic Item Counts calculation based on fetched backend list
+    const derivedCounts = { loading: {}, unloading: {} };
+    transactionsList.forEach(t => {
+      if (!t.item_name) return;
+      const tType = t.transaction_type === "Loading" ? "loading" : "unloading";
+      derivedCounts[tType][t.item_name] = (derivedCounts[tType][t.item_name] || 0) + 1;
+    });
+
+    setItemCounts({
+      loading: Object.entries(derivedCounts.loading).map(([n, c]) => ({ item_name: n, count: c })).sort((a,b)=>a.item_name.localeCompare(b.item_name)),
+      unloading: Object.entries(derivedCounts.unloading).map(([n, c]) => ({ item_name: n, count: c })).sort((a,b)=>a.item_name.localeCompare(b.item_name))
+    });
+
     setLoading(false);
     setCurrentPage(1);
   }, [dateFrom, dateTo, filterType, filterItem, statusType, token]);
@@ -527,28 +529,12 @@ function AdminDashboard() {
   const totalLoading = itemCounts.loading.reduce((sum, item) => sum + item.count, 0);
   const totalUnloading = itemCounts.unloading.reduce((sum, item) => sum + item.count, 0);
 
-  // Compute per-stage counts from the current transaction list
-  const stageCounts = (() => {
-    const counts = { closed: 0 };
-    STAGES.forEach(s => { counts[s.key] = 0; });
-    transactions.forEach(t => {
-      if (t.closed_at) {
-        counts.closed++;
-      }
-      
-      // Inclusive status counts: a transaction counts for every stage it has completed
-      const statuses = getStageStatus(t);
-      STAGES.forEach(s => {
-        if (statuses[s.key]) {
-          counts[s.key]++;
-        }
-      });
-    });
-    return counts;
-  })();
+  // Filter transactions based on search query, item/type filters and selected stage
+  const baseFilteredTransactions = transactions.filter((t) => {
+    // Type and Item frontend filters
+    if (filterType !== "all" && t.transaction_type !== filterType) return false;
+    if (filterItem && t.item_name !== filterItem) return false;
 
-  // Filter transactions based on search query and selected stage
-  const filteredTransactions = transactions.filter((t) => {
     // Search query filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -570,17 +556,39 @@ function AdminDashboard() {
     } else if (statusType === 'damaged') {
       if (!t.is_damaged) return false;
     }
-    
-    // Stage filter
+
+    // Stage filter is intentionally excluded here so that stageCounts uses the correct subset
+    // We will apply the stage filter in a subsequent step
+    return true;
+  });
+
+  // Now compute per-stage counts from the filtered transaction list (before stage filter)
+  const stageCounts = (() => {
+    const counts = { closed: 0 };
+    STAGES.forEach(s => { counts[s.key] = 0; });
+    baseFilteredTransactions.forEach(t => {
+      if (t.closed_at) {
+        counts.closed++;
+      }
+      // Calculate the previous stage of the active stage
+      const prevStage = getPreviousStageOfActive(t);
+      if (prevStage) {
+        counts[prevStage]++;
+      }
+    });
+    return counts;
+  })();
+
+  // Finally, apply the specific selected stage filter for the visual table
+  const finalFilteredTransactions = baseFilteredTransactions.filter(t => {
     if (selectedStage) {
       if (selectedStage === 'closed') {
         if (!t.closed_at) return false;
       } else {
-        const statuses = getStageStatus(t);
-        if (!statuses[selectedStage]) return false;
+        const prevStage = getPreviousStageOfActive(t);
+        if (prevStage !== selectedStage) return false;
       }
     }
-    
     return true;
   }).sort((a, b) => {
     return sortOrder === 'asc' 
@@ -588,8 +596,8 @@ function AdminDashboard() {
       : Number(b.transaction_id) - Number(a.transaction_id);
   });
 
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const paginatedTransactions = filteredTransactions.slice(
+  const totalPages = Math.ceil(finalFilteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = finalFilteredTransactions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -778,7 +786,7 @@ function AdminDashboard() {
                 <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
                   selectedStage === null && statusType === "all" ? 'bg-white/20 text-white' : 'bg-zinc-300 text-zinc-700'
                 }`}>
-                  {transactions.length}
+                  {baseFilteredTransactions.length}
                 </span>
               </button>
 
@@ -912,7 +920,7 @@ function AdminDashboard() {
               </div>
 
               <div className="text-sm text-zinc-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-zinc-200 hidden sm:block">
-                {filteredTransactions.length} results
+                {finalFilteredTransactions.length} results
               </div>
               {hasPermission("create_transactions") && (
                 <button

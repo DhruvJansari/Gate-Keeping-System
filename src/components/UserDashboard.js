@@ -6,7 +6,7 @@ import { PanelLayout } from "@/components/PanelLayout";
 import { NewGateEntryModal } from "@/components/NewGateEntryModal";
 import { AdminStageDetailModal } from "@/components/AdminStageDetailModal";
 import { useGatePassPrint } from "@/components/GatePassPrint";
-import { STAGES, getStageStatus, getNextStageToConfirm } from "@/lib/stageUtils";
+import { STAGES, getStageStatus, getNextStageToConfirm, getPreviousStageOfActive } from "@/lib/stageUtils";
 import { determineUserSteps, STEPS, PERMISSIONS } from "@/lib/permissionUtils";
 import {
   DownloadIcon,
@@ -499,39 +499,46 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     if (!token) return;
     const from = dateFrom || undefined;
     const to = dateTo || undefined;
-    const type = filterType !== "all" ? filterType : undefined;
-    const item = filterItem || undefined;
-
-    // Params for Transaction List (Includes all filters)
+    // Params for Transaction List (Fetch ALL items for the current date and status)
     const listParams = new URLSearchParams();
     if (from) listParams.set("from", from);
     if (to) listParams.set("to", to);
-    if (type) listParams.set("type", type);
-    if (item) listParams.set("item", item);
     if (statusType && statusType !== "all") listParams.set("statusType", statusType);
 
     // Params for Stats/Counts (Only filters by Date, so tabs show global counts)
     const statsParams = new URLSearchParams();
     if (from) statsParams.set("from", from);
     if (to) statsParams.set("to", to);
+    if (statusType && statusType !== "all") statsParams.set("statusType", statusType);
 
     try {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
 
-      const [txnRes, countRes, itemCountRes] = await Promise.all([
+      const [txnRes, countRes] = await Promise.all([
         fetch(`/api/transactions?${listParams}`, { headers }),
         fetch(`/api/transactions/counts?${statsParams}`, { headers }),
-        fetch(`/api/transactions/item-counts?${statsParams}`, { headers }),
       ]);
       const txnData = await txnRes.json();
       const countData = await countRes.json();
-      const itemCountData = await itemCountRes.json();
 
-      setTransactions(Array.isArray(txnData) ? txnData : []);
+      const transactionsList = Array.isArray(txnData) ? txnData : [];
+      setTransactions(transactionsList);
       setCounts(countData);
-      setItemCounts(itemCountData);
+
+      // Dynamic Item Counts calculation based on fetched backend list
+      const derivedCounts = { loading: {}, unloading: {} };
+      transactionsList.forEach(t => {
+        if (!t.item_name) return;
+        const tType = t.transaction_type === "Loading" ? "loading" : "unloading";
+        derivedCounts[tType][t.item_name] = (derivedCounts[tType][t.item_name] || 0) + 1;
+      });
+
+      setItemCounts({
+        loading: Object.entries(derivedCounts.loading).map(([n, c]) => ({ item_name: n, count: c })).sort((a,b)=>a.item_name.localeCompare(b.item_name)),
+        unloading: Object.entries(derivedCounts.unloading).map(([n, c]) => ({ item_name: n, count: c })).sort((a,b)=>a.item_name.localeCompare(b.item_name))
+      });
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {
@@ -611,27 +618,12 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
   const totalLoading = itemCounts.loading.reduce((sum, item) => sum + item.count, 0);
   const totalUnloading = itemCounts.unloading.reduce((sum, item) => sum + item.count, 0);
 
-  // Compute per-stage counts from current transaction list
-  const stageCounts = (() => {
-    const counts = { closed: 0 };
-    STAGES.forEach(s => { counts[s.key] = 0; });
-    transactions.forEach(t => {
-      if (t.closed_at) {
-        counts.closed++;
-      }
-      
-      const statuses = getStageStatus(t);
-      STAGES.forEach(s => {
-        if (statuses[s.key]) {
-          counts[s.key]++;
-        }
-      });
-    });
-    return counts;
-  })();
+  // Filter transactions based on search query, item/type filters and selected stage
+  const baseFilteredTransactions = transactions.filter((t) => {
+    // Type and Item frontend filters
+    if (filterType !== "all" && t.transaction_type !== filterType) return false;
+    if (filterItem && t.item_name !== filterItem) return false;
 
-  // Filter transactions based on search query and selected stage
-  const filteredTransactions = transactions.filter((t) => {
     // Search query filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -654,13 +646,48 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
       if (!t.is_damaged) return false;
     }
 
+    // Stage filter is intentionally excluded here so that stageCounts uses the correct subset
+    // We will apply the stage filter in a subsequent step
+    return true;
+  });
+
+  // Now compute per-stage counts from the filtered transaction list (before stage filter)
+  const stageCounts = (() => {
+    const counts = { closed: 0 };
+    STAGES.forEach(s => { counts[s.key] = 0; });
+    baseFilteredTransactions.forEach(t => {
+      if (t.closed_at) {
+        counts.closed++;
+      }
+      // Calculate the previous stage of the active stage
+      const prevStage = getPreviousStageOfActive(t);
+      if (prevStage) {
+        counts[prevStage]++;
+      }
+    });
+    return counts;
+  })();
+
+  // Finally, apply the specific selected stage filter for the visual table
+  const finalFilteredTransactions = baseFilteredTransactions.filter(t => {
+    if (selectedStage) {
+      if (selectedStage === 'closed') {
+        if (!t.closed_at) return false;
+      } else {
+        const prevStage = getPreviousStageOfActive(t);
+        if (prevStage !== selectedStage) return false;
+      }
+    }
+    return true;
+  }).sort((a, b) => {
+
     // Stage filter
     if (selectedStage) {
       if (selectedStage === 'closed') {
         if (!t.closed_at) return false;
       } else {
-        const statuses = getStageStatus(t);
-        if (!statuses[selectedStage]) return false;
+        const prevStage = getPreviousStageOfActive(t);
+        if (prevStage !== selectedStage) return false;
       }
     }
     
@@ -672,8 +699,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
       : Number(b.transaction_id) - Number(a.transaction_id);
   });
 
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const paginatedTransactions = filteredTransactions.slice(
+  const totalPages = Math.ceil(finalFilteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = finalFilteredTransactions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -682,7 +709,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
   const filteredStageCounts = (() => {
     const counts = {};
     STAGES.forEach(s => { counts[s.key] = 0; });
-    filteredTransactions.forEach(t => {
+    finalFilteredTransactions.forEach(t => {
       const statuses = getStageStatus(t);
       STAGES.forEach(s => {
         if (statuses[s.key]) {
@@ -731,7 +758,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 />
                 {isRestrictedRole && (
                   <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">
-                    Viewing Today's Active
+                    Viewing Today&apos;s Active
                   </span>
                 )}
                 <button
@@ -959,7 +986,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 Filter by Stage
              </h3>
              <div className="flex items-center gap-3">
-               <span className="text-xs text-zinc-400 font-medium">{transactions.length} total</span>
+               <span className="text-xs text-zinc-400 font-medium">{baseFilteredTransactions.length} total</span>
                {selectedStage && (
                  <button onClick={() => setSelectedStage(null)} className="text-xs text-blue-600 hover:underline font-medium">Clear Filter</button>
                )}
@@ -980,7 +1007,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
                   selectedStage === null ? 'bg-white/20 text-white' : 'bg-zinc-200 text-zinc-600'
                 }`}>
-                  {transactions.length}
+                  {baseFilteredTransactions.length}
                 </span>
               </button>
 
@@ -1113,7 +1140,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               </div>
 
               <div className="text-sm font-medium text-zinc-500 whitespace-nowrap hidden lg:block bg-white px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
-                <span className="text-zinc-900 font-bold">{filteredTransactions.length}</span> results found
+                <span className="text-zinc-900 font-bold">{finalFilteredTransactions.length}</span> results found
               </div>
               {hasPermission(PERMISSIONS.CREATE_TRANSACTIONS) && (
                 <button
@@ -1317,8 +1344,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-zinc-700">
-                      Showing <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, filteredTransactions.length)}</span> of{' '}
-                      <span className="font-bold text-zinc-900">{filteredTransactions.length}</span> results
+                      Showing <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, finalFilteredTransactions.length)}</span> of{' '}
+                      <span className="font-bold text-zinc-900">{finalFilteredTransactions.length}</span> results
                     </p>
                   </div>
                   <div>
@@ -1370,7 +1397,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
               </div>
             )}
 
-            {!loading && filteredTransactions.length === 0 && (
+            {!loading && finalFilteredTransactions.length === 0 && (
               <div className="py-20 text-center bg-zinc-50/50">
                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white mb-4 border border-zinc-200 shadow-sm">
                     <ClipboardIcon className="h-10 w-10 text-zinc-300" />
@@ -1398,7 +1425,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
                 <p className="text-xs text-zinc-400">Loading...</p>
               </div>
-            ) : filteredTransactions.length === 0 ? (
+            ) : finalFilteredTransactions.length === 0 ? (
                <div className="py-20 text-center">
                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white border border-zinc-200 mb-4 shadow-sm">
                     <ClipboardIcon className="h-8 w-8 text-zinc-300" />
