@@ -27,7 +27,11 @@ export function getGatePassHtml(transaction, options = {}) {
 
   const status = getStageStatus(transaction);
   const completedCount = STAGES.filter((s) => status[s.key]).length;
-
+ function formatQty(value) {
+  const num = parseFloat(value);
+  if (isNaN(num)) return "0";
+  return num.toFixed(0);
+}
   // Fields that should appear bigger and bolder throughout
   const highlight = `font-size: 9pt; font-weight: bold;`;
 
@@ -145,19 +149,19 @@ export function getGatePassHtml(transaction, options = {}) {
           <td class="label">Truck No</td>
           <td class="value hl">${transaction.truck_no}</td>
           <td class="label">Party Name</td>
-          <td class="value">${transaction.party_name}</td>
+          <td class="value hl">${transaction.party_name}</td>
         </tr>
         <tr>
           <td class="label">Item</td>
           <td class="value hl">${transaction.item_name || 'N/A'}</td>
           <td class="label">Transporter</td>
-          <td class="value">${transaction.transporter_name}</td>
+          <td class="value hl">${transaction.transporter_name}</td>
         </tr>
         <tr>
           <td class="label">Driver Mobile</td>
           <td class="value hl">${transaction.mobile_number}</td>
           <td class="label">LR No</td>
-          <td class="value">${transaction.lr_number || '—'}</td>
+          <td class="value hl">${transaction.lr_number || '—'}</td>
         </tr>
       </table>
     </div>
@@ -174,13 +178,13 @@ export function getGatePassHtml(transaction, options = {}) {
         </tr>
         <tr>
           <td class="label">Invoice Qty</td>
-          <td class="value hl">${transaction.invoice_quantity}</td>
+          <td class="value hl">${formatQty(transaction.invoice_quantity)}</td>
           <td class="label">PO/DO No</td>
           <td class="value hl">${transaction.po_do_number || '—'}</td>
         </tr>
         <tr>
           <td class="label">Rate</td>
-          <td class="value hl">${transaction.rate !== null && transaction.rate !== undefined ? '₹' + transaction.rate : '—'}</td>
+          <td class="value hl">${formatQty(transaction.rate !== null) && formatQty(transaction.rate !== undefined) ? '₹' + formatQty(transaction.rate) : '—'}</td>
           <td class="label"></td>
           <td class="value"></td>
         </tr>

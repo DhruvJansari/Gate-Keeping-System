@@ -20,6 +20,7 @@ export function ReportsPanel() {
   const [weighbridgeDateFrom, setWeighbridgeDateFrom] = useState('');
   const [weighbridgeDateTo, setWeighbridgeDateTo] = useState('');
   const [selectedStage, setSelectedStage] = useState('');
+  const [rateFilter, setRateFilter] = useState('');
   
   // Master data
   const [parties, setParties] = useState([]);
@@ -105,6 +106,25 @@ export function ReportsPanel() {
         });
       }
 
+      // Rate filter (client-side) - Range based (approximate values)
+      // Allow +/- 5% variance for easier range scanning
+      if (rateFilter !== '') {
+        const queryRate = Number(rateFilter);
+        if (queryRate > 0) {
+          const lowerBound = queryRate * 0.95; // -5%
+          const upperBound = queryRate * 1.05; // +5%
+          
+          filtered = filtered.filter(t => {
+            if (t.rate == null) return false;
+            const truckRate = Number(t.rate);
+            return truckRate >= lowerBound && truckRate <= upperBound;
+          });
+        } else {
+          // Fallback to exact 0 if query is 0
+          filtered = filtered.filter(t => t.rate != null && Number(t.rate) === 0);
+        }
+      }
+
       // Stage filter (client-side) - Logic: Show trucks currently AT this stage
       if (selectedStage) {
         filtered = filtered.filter(t => {
@@ -124,7 +144,7 @@ export function ReportsPanel() {
       setLoading(false);
     }
   }, [loadingChecked, unloadingChecked, selectedParty, selectedItem, selectedTransporter, 
-      composeDateFrom, composeDateTo, weighbridgeDateFrom, weighbridgeDateTo, selectedStage, token]);
+      composeDateFrom, composeDateTo, weighbridgeDateFrom, weighbridgeDateTo, selectedStage, rateFilter, token]);
 
   // Helper functions for formatting
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN') : '—';
@@ -140,52 +160,72 @@ export function ReportsPanel() {
       const XLSX = await import('xlsx');
 
       const LABELS = [
-        'S/N',
-        'Transaction No',
+        'Transaction ID',
         'Type',
+        'Truck Number',
         'Party Name',
         'Item Name',
         'Transporter',
-        'Truck Number',
-        'Invoice No',
+        'PO/DO Number',
+        'LR Number',
+        'Invoice Number',
         'Invoice Date',
-        'Invoice Qty',
-        'PO / Do No:',
-        'Lr Number',
-        'Mobile No',
-        'Remark - 1',
-        'Remark - 2',
+        'Invoice Quantity',
+        'Rate',
+        'Mobile Number',
+        'Remark 1',
+        'Remark 2',
         'First Weight',
         'Second Weight',
         'Net Weight',
+        'Parking Confirmed At',
+        'Gate In At',
+        'First Weigh At',
+        'Second Weigh At',
+        'Campus In At',
+        'Campus Out At',
+        'Gate Pass Finalized At',
+        'Gate Out At',
+        'Created Date',
         'Status'
       ];
 
       // Build array-of-arrays: each row is a transaction
       const aoa = [LABELS];
 
-      transactions.forEach((t, idx) => {
+      transactions.forEach((t) => {
         const invoiceDate = formatDate(t.invoice_date);
-        
+        const formatTime = (iso) => iso ? new Date(iso).toLocaleString('en-IN') : '';
+        const createdDate = t.created_at ? new Date(t.created_at).toLocaleString('en-IN') : '';
+
         const values = [
-          idx + 1,
-          txnNo(t),
+          t.transaction_id || '',
           t.transaction_type || '',
+          t.truck_no || '',
           t.party_name || '',
           t.item_name || '',
           t.transporter_name || '',
-          t.truck_no || '',
+          t.po_do_number || '',
+          t.lr_number || '',
           t.invoice_number || '',
           invoiceDate,
           t.invoice_quantity != null ? Number(t.invoice_quantity) : '',
-          t.po_do_number || '',
-          t.lr_number || '',
+          t.rate != null ? Number(t.rate) : '',
           t.mobile_number || '',
           t.remark1 || '',
           t.remark2 || '',
           t.first_weight != null ? Math.round(parseFloat(t.first_weight)) : '',
           t.second_weight != null ? Math.round(parseFloat(t.second_weight)) : '',
           t.net_weight != null ? Math.round(parseFloat(t.net_weight)) : '',
+          formatTime(t.parking_confirmed_at),
+          formatTime(t.gate_in_at),
+          formatTime(t.first_weigh_at),
+          formatTime(t.second_weigh_at),
+          formatTime(t.campus_in_at),
+          formatTime(t.campus_out_at),
+          formatTime(t.gate_pass_finalized_at),
+          formatTime(t.gate_out_at),
+          createdDate,
           t.current_status || 'In Progress'
         ];
         
@@ -299,6 +339,22 @@ export function ReportsPanel() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Rate Master */}
+            <div>
+              <label className="block text-sm font-semibold text-zinc-700 mb-2">
+                Rate Amount (Approximate)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={rateFilter}
+                onChange={(e) => setRateFilter(e.target.value)}
+                placeholder="Target Rate (±5%)..."
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             {/* New Compose Date */}
@@ -420,6 +476,7 @@ export function ReportsPanel() {
                       <th className="px-4 py-3 font-semibold">Party Name</th>
                       <th className="px-4 py-3 font-semibold">Item Name</th>
                       <th className="px-4 py-3 font-semibold">Transporter</th>
+                      <th className="px-4 py-3 font-semibold">Rate</th>
                       <th className="px-4 py-3 font-semibold">Truck Number</th>
                       <th className="px-4 py-3 font-semibold">Invoice No</th>
                       <th className="px-4 py-3 font-semibold">Invoice Date</th>
@@ -441,6 +498,7 @@ export function ReportsPanel() {
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.party_name}</td>
                         <td className="px-4 py-3 text-sm font-medium text-zinc-900">{t.item_name}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.transporter_name}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.rate != null ? '₹' + t.rate : '—'}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.truck_no}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.invoice_number || '—'}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{formatDate(t.invoice_date)}</td>

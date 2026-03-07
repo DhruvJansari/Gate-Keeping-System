@@ -42,26 +42,51 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
       mobile_number: transaction.mobile_number || "",
       remark1: transaction.remark1 || "",
       rate: transaction.rate || "",
+      truck_no: transaction.truck_no || "",
+      party_id: transaction.party_id || "",
+      item_id: transaction.item_id || "",
+      transporter_id: transaction.transporter_id || "",
     },
     {
       invoice_number: { required: true },
       invoice_date: { required: true },
       invoice_quantity: { required: true },
       mobile_number: { required: true, type: 'mobile' },
+      truck_no: { required: true },
+      party_id: { required: true },
+      item_id: { required: true },
     }
   );
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [parties, setParties] = useState([]);
+  const [items, setItems] = useState([]);
+  const [transporters, setTransporters] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchLiveTransaction() {
+    async function fetchLiveTransactionAndMasters() {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`/api/transactions/${transaction.transaction_id}`, { headers });
+        
+        const [res, pRes, iRes, tRes] = await Promise.all([
+          fetch(`/api/transactions/${transaction.transaction_id}`, { headers }),
+          fetch('/api/parties', { headers }),
+          fetch('/api/items', { headers }),
+          fetch('/api/transporters', { headers })
+        ]);
+        
         if (!res.ok) throw new Error("Failed to fetch transaction details");
+        
         const data = await res.json();
+        const pData = await pRes.json();
+        const iData = await iRes.json();
+        const tData = await tRes.json();
+        
         if (isMounted) {
+          setParties(pData);
+          setItems(iData);
+          setTransporters(tData);
           setValues({
             invoice_number: data.invoice_number || "",
             invoice_date: data.invoice_date?.split('T')[0] || "",
@@ -71,17 +96,21 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
             mobile_number: data.mobile_number || "",
             remark1: data.remark1 || "",
             rate: data.rate || "",
+            truck_no: data.truck_no || "",
+            party_id: data.party_id || "",
+            item_id: data.item_id || "",
+            transporter_id: data.transporter_id || "",
           });
           setLoadingData(false);
         }
       } catch (err) {
         if (isMounted) {
-          toast.error("Could not load fresh transaction details.");
+          toast.error("Could not load fresh transaction details or master data.");
           setLoadingData(false);
         }
       }
     }
-    fetchLiveTransaction();
+    fetchLiveTransactionAndMasters();
     return () => { isMounted = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transaction.transaction_id, token]);
@@ -128,6 +157,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   };
 
   const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
+  const isFirstWeighbridgeCompleted = transaction.first_weigh_at !== null;
 
   if (loadingData) {
     return (
@@ -173,21 +203,66 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Read-only Context */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Truck Number</p>
-              <p className="text-sm font-bold text-zinc-900 font-mono">{transaction.truck_no}</p>
+          {/* Context Layer: Editable pre-Weighbridge, Read-Only post-Weighbridge */}
+          {!isFirstWeighbridgeCompleted ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-zinc-100">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">Truck <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  value={values.truck_no}
+                  onChange={(e) => handleChange('truck_no', e.target.value.toUpperCase())}
+                  onBlur={() => handleBlur('truck_no')}
+                  className={`w-full rounded-xl border-2 px-3 py-2 text-sm font-medium outline-none transition-all font-mono uppercase ${
+                    errors.truck_no && touched.truck_no ? 'border-red-100 bg-red-50 focus:border-red-500' : 'border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white'
+                  }`}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">Party Name <span className="text-red-500">*</span></label>
+                <select
+                  value={values.party_id}
+                  onChange={(e) => handleChange('party_id', e.target.value)}
+                  onBlur={() => handleBlur('party_id')}
+                  className={`w-full rounded-xl border-2 px-3 py-2 text-sm font-medium outline-none transition-all ${
+                    errors.party_id && touched.party_id ? 'border-red-100 bg-red-50 focus:border-red-500' : 'border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white'
+                  }`}
+                >
+                  <option value="">Select Party</option>
+                  {parties.map(p => <option key={p.party_id} value={p.party_id}>{p.party_name}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">Item Name <span className="text-red-500">*</span></label>
+                <select
+                  value={values.item_id}
+                  onChange={(e) => handleChange('item_id', e.target.value)}
+                  onBlur={() => handleBlur('item_id')}
+                  className={`w-full rounded-xl border-2 px-3 py-2 text-sm font-medium outline-none transition-all ${
+                    errors.item_id && touched.item_id ? 'border-red-100 bg-red-50 focus:border-red-500' : 'border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white'
+                  }`}
+                >
+                  <option value="">Select Item</option>
+                  {items.map(i => <option key={i.item_id} value={i.item_id}>{i.item_name}</option>)}
+                </select>
+              </div>
             </div>
-            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Party Name</p>
-              <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.party_name}>{transaction.party_name}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-zinc-100">
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Truck Number</p>
+                <p className="text-sm font-bold text-zinc-900 font-mono">{transaction.truck_no}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Party Name</p>
+                <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.party_name}>{transaction.party_name}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Item Name</p>
+                <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.item_name}>{transaction.item_name}</p>
+              </div>
             </div>
-            <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Item Name</p>
-              <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.item_name}>{transaction.item_name}</p>
-            </div>
-          </div>
+          )}
 
           {/* Invoice Details Section */}
           <div className="space-y-4">
@@ -280,6 +355,19 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
               Transport Details
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Transporter Name
+                </label>
+                <select
+                  value={values.transporter_id}
+                  onChange={(e) => handleChange('transporter_id', e.target.value)}
+                  className="w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                >
+                  <option value="">Select Transporter (Optional)</option>
+                  {transporters.map(t => <option key={t.transporter_id} value={t.transporter_id}>{t.name}</option>)}
+                </select>
+              </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
                   Driver Mobile <span className="text-red-500">*</span>

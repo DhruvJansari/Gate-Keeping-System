@@ -41,6 +41,9 @@ export async function GET(request, { params }) {
          t.first_weight,
          t.second_weight,
          t.net_weight,
+         t.party_id,
+         t.item_id,
+         t.transporter_id,
          t.parking_confirmed_at,
          t.parking_confirmed_by,
          t.current_status,
@@ -176,6 +179,13 @@ export async function PATCH(request, { params }) {
     const body = await request.json();
     const db = await getDb();
 
+    // Check existing transaction stage for enforcing field locks
+    const [existing] = await db.execute('SELECT first_weigh_at FROM transactions WHERE transaction_id = ?', [Number(id)]);
+    if (existing.length === 0) {
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+    }
+    const isFirstWeighbridgeCompleted = existing[0].first_weigh_at !== null;
+
     const {
       transaction_type,
       truck_no,
@@ -198,7 +208,7 @@ export async function PATCH(request, { params }) {
     const values = [];
 
     // Handle truck_no -> truck_id conversion if truck_no is provided
-    if (truck_no !== undefined) {
+    if (truck_no !== undefined && !isFirstWeighbridgeCompleted) {
       let truckId;
       const [truckRows] = await db.execute('SELECT truck_id FROM trucks WHERE truck_no = ?', [truck_no.trim()]);
       if (truckRows.length > 0) {
@@ -220,11 +230,11 @@ export async function PATCH(request, { params }) {
       updates.push('transaction_type = ?');
       values.push(transaction_type === 'Unloading' ? 'Unloading' : 'Loading');
     }
-    if (party_id !== undefined) {
+    if (party_id !== undefined && !isFirstWeighbridgeCompleted) {
       updates.push('party_id = ?');
       values.push(Number(party_id));
     }
-    if (item_id !== undefined) {
+    if (item_id !== undefined && !isFirstWeighbridgeCompleted) {
       updates.push('item_id = ?');
       values.push(Number(item_id));
     }
