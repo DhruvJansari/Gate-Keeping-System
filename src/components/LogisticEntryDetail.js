@@ -64,9 +64,13 @@ export function LogisticEntryDetail({ entryId, onClose, onUpdate, readOnly = fal
   const handleSave = async () => {
     try {
       setSaving(true);
+      const token = localStorage.getItem("token");
       const res = await fetch(`/api/logistic-entries/${entryId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(form)
       });
 

@@ -250,9 +250,13 @@ export default function LogisticDashboard() {
               updateData.status = "Closed";
           }
 
+          const token = localStorage.getItem("token");
           const res = await fetch(`/api/logistic-entries/${id}`, {
               method: "PATCH",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {})
+              },
               body: JSON.stringify(updateData)
           });
           if (!res.ok) throw new Error("Failed to update status");
@@ -276,7 +280,14 @@ export default function LogisticDashboard() {
 
   const processDelete = async (id) => {
       try {
-           const res = await fetch(`/api/logistic-entries/${id}`, { method: "DELETE" });
+           const token = localStorage.getItem("token");
+           const res = await fetch(`/api/logistic-entries/${id}`, { 
+               method: "DELETE",
+               headers: {
+                   "Content-Type": "application/json",
+                   ...(token ? { Authorization: `Bearer ${token}` } : {})
+               }
+           });
            if (res.status === 405 || res.status === 404) {
                 toast.error("Delete not supported for this item type yet");
                 setConfirmState({ ...confirmState, open: false });
