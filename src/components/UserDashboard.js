@@ -1189,19 +1189,19 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 </div>
               )}
               
-              <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide border border-zinc-300 rounded-lg bg-white shadow-sm flex-nowrap shrink-0">
+              <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide gap-2 sm:gap-0 sm:border sm:border-zinc-300 sm:rounded-lg sm:bg-white sm:shadow-sm flex-nowrap shrink-0 pb-2 sm:pb-0 mb-1 sm:mb-0">
                 <button
                   onClick={() => { setStatusType('all'); setSelectedStage(null); }}
-                  className={`px-3 py-2 text-xs font-bold transition-colors whitespace-nowrap flex-1 sm:flex-none ${
-                    statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
+                  className={`px-4 sm:px-3 py-2 text-xs font-bold transition-colors whitespace-nowrap rounded-full sm:rounded-none border sm:border-0 flex-shrink-0 ${
+                    statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-sm sm:shadow-inner border-zinc-300 sm:border-transparent' : 'bg-white sm:bg-transparent text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50 border-zinc-200 sm:border-transparent shadow-sm sm:shadow-none'
                   }`}
                 >
                   ALL
                 </button>
                 <button
                   onClick={() => { setStatusType('pending'); setSelectedStage(null); }}
-                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1 whitespace-nowrap flex-1 sm:flex-none ${
-                    statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
+                  className={`px-4 sm:px-3 py-2 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full sm:rounded-none border sm:border-y-0 sm:border-r-0 sm:border-l sm:border-zinc-200 flex-shrink-0 ${
+                    statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-sm sm:shadow-inner border-amber-300' : 'bg-white sm:bg-transparent text-zinc-500 hover:text-amber-600 hover:bg-amber-50 border-zinc-200 shadow-sm sm:shadow-none'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${statusType === 'pending' ? 'bg-amber-500' : 'bg-transparent'}`}></span>
@@ -1209,8 +1209,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 </button>
                 <button
                   onClick={() => { setStatusType('damaged'); setSelectedStage(null); }}
-                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1 whitespace-nowrap flex-1 sm:flex-none ${
-                    statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+                  className={`px-4 sm:px-3 py-2 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full sm:rounded-none border sm:border-y-0 sm:border-r-0 sm:border-l sm:border-zinc-200 flex-shrink-0 ${
+                    statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-sm sm:shadow-inner border-red-300' : 'bg-white sm:bg-transparent text-zinc-500 hover:text-red-600 hover:bg-red-50 border-zinc-200 shadow-sm sm:shadow-none'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
