@@ -29,8 +29,10 @@ export async function GET(request) {
       WHERE 1=1`;
       
     const params = [];
-    if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
-    if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    if (statusType !== 'pending' && statusType !== 'damaged') {
+      if (from) { sql += ' AND DATE(t.created_at) >= ?'; params.push(from); }
+      if (to) { sql += ' AND DATE(t.created_at) <= ?'; params.push(to); }
+    }
     if (type && type !== 'all') { sql += ' AND t.transaction_type = ?'; params.push(type); }
     if (item) { sql += ' AND i.item_name = ?'; params.push(item); }
     if (statusType === 'damaged') {

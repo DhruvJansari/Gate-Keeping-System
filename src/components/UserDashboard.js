@@ -772,19 +772,6 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
     }
     return true;
   }).sort((a, b) => {
-
-    // Stage filter
-    if (selectedStage) {
-      if (selectedStage === 'closed') {
-        if (!t.closed_at) return false;
-      } else {
-        const prevStage = getPreviousStageOfActive(t);
-        if (prevStage !== selectedStage) return false;
-      }
-    }
-    
-    return true;
-  }).sort((a, b) => {
     // console.log('Sorting:', sortOrder, a.transaction_id, b.transaction_id);
     return sortOrder === 'asc' 
       ? Number(a.transaction_id) - Number(b.transaction_id) 
@@ -1202,18 +1189,18 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                 </div>
               )}
               
-              <div className="flex border border-zinc-300 rounded-lg overflow-hidden bg-white shadow-sm hidden sm:flex">
+              <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide border border-zinc-300 rounded-lg bg-white shadow-sm flex-nowrap shrink-0">
                 <button
-                  onClick={() => setStatusType('all')}
-                  className={`px-3 py-2 text-xs font-bold transition-colors ${
+                  onClick={() => { setStatusType('all'); setSelectedStage(null); }}
+                  className={`px-3 py-2 text-xs font-bold transition-colors whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
                   }`}
                 >
                   ALL
                 </button>
                 <button
-                  onClick={() => setStatusType('pending')}
-                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center gap-1 ${
+                  onClick={() => { setStatusType('pending'); setSelectedStage(null); }}
+                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1 whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
                   }`}
                 >
@@ -1221,8 +1208,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                   PENDING
                 </button>
                 <button
-                  onClick={() => setStatusType('damaged')}
-                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center gap-1 ${
+                  onClick={() => { setStatusType('damaged'); setSelectedStage(null); }}
+                  className={`px-3 py-2 text-xs font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1 whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
                   }`}
                 >

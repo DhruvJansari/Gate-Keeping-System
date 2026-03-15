@@ -868,7 +868,7 @@ function AdminDashboard() {
             <div className="flex gap-2 min-w-max pb-2">
               {/* All Stages */}
               <button
-                onClick={() => { setSelectedStage(null); setStatusType("all"); }}
+                onClick={() => { setSelectedStage(null); }}
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   selectedStage === null && statusType === "all"
                     ? 'bg-blue-600 text-white shadow-md'
@@ -887,7 +887,7 @@ function AdminDashboard() {
               {STAGES.map((stage) => (
                 <button
                   key={stage.key}
-                  onClick={() => { setSelectedStage(stage.key); setStatusType("all"); }}
+                  onClick={() => { setSelectedStage(stage.key); }}
                   className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     selectedStage === stage.key && statusType === "all"
                       ? 'bg-blue-600 text-white shadow-md'
@@ -909,7 +909,7 @@ function AdminDashboard() {
 
               {/* Closed */}
               <button
-                onClick={() => { setSelectedStage('closed'); setStatusType("all"); }}
+                onClick={() => { setSelectedStage('closed'); }}
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   selectedStage === 'closed' && statusType === "all"
                     ? 'bg-zinc-800 text-white shadow-md'
@@ -983,10 +983,10 @@ function AdminDashboard() {
               )}
               
               {/* Status Filter Toggle Group */}
-              <div className="flex border border-zinc-300 rounded-lg overflow-hidden bg-white/80 backdrop-blur shadow-sm hidden md:flex">
+              <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide border border-zinc-300 rounded-lg bg-white/80 backdrop-blur shadow-sm flex-nowrap shrink-0">
                 <button
                   onClick={() => { setStatusType('all'); setSelectedStage(null); }}
-                  className={`px-4 py-2 text-sm font-bold transition-colors ${
+                  className={`px-4 py-2 text-sm font-bold transition-colors whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'all' ? 'bg-zinc-100 text-zinc-900 shadow-inner' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
                   }`}
                 >
@@ -994,7 +994,7 @@ function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => { setStatusType('pending'); setSelectedStage(null); }}
-                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'pending' ? 'bg-amber-100 text-amber-800 shadow-inner' : 'text-zinc-500 hover:text-amber-600 hover:bg-amber-50'
                   }`}
                 >
@@ -1003,7 +1003,7 @@ function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => { setStatusType('damaged'); setSelectedStage(null); }}
-                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center gap-1.5 ${
+                  className={`px-4 py-2 text-sm font-bold border-l border-zinc-200 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap flex-1 sm:flex-none ${
                     statusType === 'damaged' ? 'bg-red-100 text-red-800 shadow-inner' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
                   }`}
                 >
