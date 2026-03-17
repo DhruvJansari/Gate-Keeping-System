@@ -32,8 +32,6 @@ export function AdminStageDetailModal({
   const [remark2, setRemark2] = useState('');
   const [error, setError] = useState('');
   const [selectedStageFilter, setSelectedStageFilter] = useState(null);
-  const [damageReason, setDamageReason] = useState('');
-  const [isMarkingDamaged, setIsMarkingDamaged] = useState(false);
   const { printEntryPass } = useGatePassPrint();
 
   const txnNo = (t) => t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, '0')}`;
@@ -90,33 +88,6 @@ export function AdminStageDetailModal({
       toast.success('Stage confirmed successfully!', { id: 'stage-confirm' });
       setTxn(data.transaction);
       onConfirmSuccess?.(data.transaction);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setConfirming(false);
-    }
-  }
-
-  async function handleMarkDamaged() {
-    if (!damageReason.trim()) {
-      setError('Please provide a reason for marking this transaction as damaged.');
-      return;
-    }
-    setError('');
-    setConfirming(true);
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
-    try {
-      const res = await fetch(`/api/transactions/${txn.transaction_id}/damaged`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ reason: damageReason }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to mark damaged');
-      setTxn(data.transaction);
-      onConfirmSuccess?.(data.transaction);
-      setIsMarkingDamaged(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -225,7 +196,7 @@ export function AdminStageDetailModal({
                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm animate-in fade-in">
                    <h4 className="text-red-800 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
                      <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                     Transaction Damaged
+                     Transaction Rejected
                    </h4>
                    <div className="bg-white/60 p-3 rounded-lg border border-red-100/50 mt-2">
                      <p className="text-red-900 font-medium text-sm">&quot;{txn.damaged_reason}&quot;</p>
@@ -425,48 +396,6 @@ export function AdminStageDetailModal({
                         )}
                      </button>
                   </div>
-                </div>
-              )}
-
-              {/* Damaged Action Button */}
-              {canConfirmStage && !isFullView && !isDamaged && !isFinalStage && (
-                <div className="pt-2">
-                  {!isMarkingDamaged ? (
-                    <button
-                      onClick={() => setIsMarkingDamaged(true)}
-                      className="w-full py-2.5 px-4 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-bold uppercase tracking-wider text-xs transition-colors"
-                    >
-                      Report Transaction as Damaged
-                    </button>
-                  ) : (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2">
-                      <h4 className="text-red-800 font-bold text-sm uppercase tracking-wider mb-2">Confirm Damaged Status</h4>
-                      <p className="text-xs text-red-600/80 mb-3 font-medium">This will permanently close the cycle and prevent further stages from being confirmed.</p>
-                      <textarea
-                        value={damageReason}
-                        onChange={(e) => setDamageReason(e.target.value)}
-                        rows={2}
-                        placeholder="Please provide the reason..."
-                        className="w-full p-3 rounded-lg border border-red-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm mb-3"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { setIsMarkingDamaged(false); setError(''); }}
-                          disabled={confirming}
-                          className="flex-1 py-2 px-4 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 font-bold text-sm transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleMarkDamaged}
-                          disabled={confirming || !damageReason.trim()}
-                          className="flex-1 py-2 px-4 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold text-sm shadow-md shadow-red-500/20 disabled:opacity-50 transition-colors flex justify-center items-center"
-                        >
-                          {confirming ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Confirm Damaged'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -737,7 +666,7 @@ export function AdminStageDetailModal({
                            <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                          </div>
                          <div className="flex items-center gap-2 mb-2 relative z-10">
-                           <span className="text-sm font-bold text-red-700">Damaged Stage</span>
+                           <span className="text-sm font-bold text-red-700">Rejected Stage</span>
                            <span className="inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200">
                              ⚠️ Triggered
                            </span>
@@ -755,15 +684,14 @@ export function AdminStageDetailModal({
                               <span className="font-semibold opacity-70">Timestamp:</span>
                               <span className="font-mono">{formatDateTime(txn.damaged_at)}</span>
                             </div>
-                         </div>
-                       </div>
-                    )}
+                          </div>
+                        </div>
+                     )}
                   </div>
                 </div>
               )}
             </div>
           )}
-
         </div>
         
         {/* Footer (Action buttons if needed, or close) */}

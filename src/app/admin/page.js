@@ -63,6 +63,12 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const [items, setItems] = useState([]);
   const [transporters, setTransporters] = useState([]);
 
+  // Damage reporting state
+  const { user } = useAuth();
+  const [damageReason, setDamageReason] = useState('');
+  const [isMarkingDamaged, setIsMarkingDamaged] = useState(false);
+  const [processingDamage, setProcessingDamage] = useState(false);
+
   useEffect(() => {
     let isMounted = true;
     async function fetchLiveTransactionAndMasters() {
@@ -153,6 +159,43 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
       toast.error('Network error. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleMarkDamaged = async () => {
+    if (!damageReason.trim()) {
+      toast.error('Please provide a reason for marking this transaction as damaged.');
+      return;
+    }
+    
+    setProcessingDamage(true);
+    const loadingToast = toast.loading('Marking as damaged...');
+
+    try {
+      const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      const res = await fetch(`/api/transactions/${transaction.transaction_id}/damaged`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ reason: damageReason }),
+      });
+      const data = await res.json();
+      
+      toast.dismiss(loadingToast);
+      
+      if (!res.ok) {
+        toast.error(data.error || 'Failed to mark transaction as damaged');
+        return;
+      }
+      
+      toast.success('Transaction marked as damaged successfully!');
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      toast.error('Network error. Please try again.');
+    } finally {
+      setProcessingDamage(false);
+      setIsMarkingDamaged(false);
     }
   };
   
@@ -435,6 +478,63 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
             </div>
           </div>
         </form>
+
+        {/* Danger Zone: Report as Damaged (Admin & Manager Only) */}
+        {(user?.role_name === 'Admin' || user?.role_name === 'Manager') && !transaction.is_damaged && !transaction.closed_at && (
+          <div className="mt-8 px-6 pb-6 border-t-2 border-red-100 pt-6">
+            <h4 className="text-sm font-bold text-red-800 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              Reject The Transaction
+            </h4>
+            
+            {!isMarkingDamaged ? (
+              <button
+                type="button"
+                onClick={() => setIsMarkingDamaged(true)}
+                className="w-full py-3 px-4 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-bold uppercase tracking-wider text-xs transition-colors"
+              >
+                Report Transaction as Rejected
+              </button>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-5 shadow-inner">
+                <h4 className="text-red-800 font-bold text-sm uppercase tracking-wider mb-2">Confirm Rejected Status</h4>
+                <p className="text-xs text-red-600/80 mb-4 font-medium leading-relaxed">
+                  This action is irreversible. It will permanently close the cycle, mark the transaction as damaged, and prevent any further stages from being confirmed.
+                </p>
+                <textarea
+                  value={damageReason}
+                  onChange={(e) => setDamageReason(e.target.value)}
+                  rows={3}
+                  placeholder="Please provide a detailed reason..."
+                  className="w-full p-3 rounded-xl border-2 border-red-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm mb-4"
+                />
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsMarkingDamaged(false)}
+                    disabled={processingDamage}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleMarkDamaged}
+                    disabled={processingDamage || !damageReason.trim()}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold text-sm shadow-md shadow-red-500/20 disabled:opacity-50 transition-all flex justify-center items-center gap-2"
+                  >
+                    {processingDamage ? (
+                       <>
+                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                         Processing...
+                       </>
+                    ) : 'Confirm Rejected'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="sticky bottom-0 z-10 border-t border-zinc-100 bg-zinc-50/80 backdrop-blur px-6 py-4 flex items-center justify-end gap-3">
@@ -1008,7 +1108,7 @@ function AdminDashboard() {
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
-                  Damaged
+                  Rejected
                 </button>
               </div>
 

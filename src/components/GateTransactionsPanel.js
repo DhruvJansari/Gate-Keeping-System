@@ -160,7 +160,7 @@ export function GateTransactionsPanel() {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${statusType === 'damaged' ? 'bg-red-500' : 'bg-transparent'}`}></span>
-                Damaged
+                Rejected
               </button>
             </div>
             <button
