@@ -6,39 +6,44 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const db = await getDb();
 
-    // Reconstruct the same query logic as the list API
-    let query = "SELECT * FROM logistic_entries WHERE 1=1";
+    // Reconstruct the same query logic as the list API, joining users for driver name
+    let query = `
+        SELECT e.*, d.driver_name as driver_name 
+        FROM logistic_entries e 
+        LEFT JOIN drivers d ON e.driver_id = d.driver_id 
+        WHERE 1=1
+    `;
     const params = [];
 
     const consignor = searchParams.get("consignor");
     if (consignor) {
-        query += " AND consignor_name = ?";
+        query += " AND e.consignor_name = ?";
         params.push(consignor);
     }
 
     const consignee = searchParams.get("consignee");
     if (consignee) {
-        query += " AND consignee_name = ?";
+        query += " AND e.consignee_name = ?";
         params.push(consignee);
     }
 
     const truck_no = searchParams.get("truck_no");
     if (truck_no) {
-        query += " AND truck_no = ?";
+        query += " AND e.truck_no = ?";
         params.push(truck_no);
     }
 
     const product = searchParams.get("product");
     if (product) {
-        query += " AND product = ?";
+        query += " AND e.product = ?";
         params.push(product);
     }
 
     const search = searchParams.get("search");
     if (search) {
-        query += " AND (consignor_name LIKE ? OR consignee_name LIKE ? OR truck_no LIKE ? OR product LIKE ? OR consignor_address LIKE ? OR consignee_address LIKE ?)";
+        query += " AND (e.consignor_name LIKE ? OR e.consignee_name LIKE ? OR e.truck_no LIKE ? OR e.product LIKE ? OR e.consignor_address LIKE ? OR e.consignee_address LIKE ? OR e.transporter_name LIKE ? OR d.driver_name LIKE ?)";
         const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+        params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
 
     // Date Filtering for Export
@@ -46,32 +51,32 @@ export async function GET(request) {
     const to = searchParams.get("to");
 
     if (from && to) {
-        query += " AND DATE(entry_date) BETWEEN ? AND ?";
+        query += " AND DATE(e.entry_date) BETWEEN ? AND ?";
         params.push(from, to);
     } else if (from) {
-        query += " AND DATE(entry_date) >= ?";
+        query += " AND DATE(e.entry_date) >= ?";
         params.push(from);
     } else if (to) {
-        query += " AND DATE(entry_date) <= ?";
+        query += " AND DATE(e.entry_date) <= ?";
         params.push(to);
     } else {
         // Default to TODAY if no date filter is applied
-        query += " AND DATE(entry_date) = CURDATE()";
+        query += " AND DATE(e.entry_date) = CURDATE()";
     }
 
-    query += " ORDER BY created_at DESC";
+    query += " ORDER BY e.created_at DESC";
 
     const [entries] = await db.execute(query, params);
 
     // Convert to CSV
     const headers = [
-        "Logistic ID", "Date", "Consignor", "Consignee", "Truck No", "Product", 
+        "Logistic ID", "Date", "Consignor", "Consignee", "Transporter", "Driver", "Truck No", "Product", 
         "Gross Wt", "Tare Wt", "Net Wt", "Rate", "Amount", "Status",
         "Loading Site", "Loading In", "Loading Out", 
         "Unloading Site", "Unloading In", "Unloading Out",
-        "Deduction", "Net Amount", "Rec Amount", "Rec Date", 
+        "Deduction", "Company Notes", "Net Amount", "Rec Amount", "Rec Date", 
         "Pay via Bank", "Bank Note", "Pay via Cash", "Cash Note",
-        "Expense", "Advance", "Diesel Ltr", "Diesel Rate", "Unloading Wt", "Deduction 2", "Holtage", "Start KM", "End KM"
+        "Expense", "Advance", "Diesel Ltr", "Diesel Rate", "Unloading Wt", "Loss/Gain", "Final Notes", "Holtage", "Start KM", "End KM", "Total KM"
     ];
 
     const csvRows = [headers.join(",")];
@@ -82,6 +87,8 @@ export async function GET(request) {
            `"${new Date(row.entry_date).toLocaleDateString()}"`,
             `"${row.consignor_name || ''}"`,
             `"${row.consignee_name || ''}"`,
+            `"${row.transporter_name || ''}"`,
+            `"${row.driver_name || ''}"`,
             `"${row.truck_no || ''}"`,
             `"${row.product || ''}"`,
             row.gross_weight || 0,
@@ -98,22 +105,25 @@ export async function GET(request) {
             row.unloading_point_out_at ? `"${new Date(row.unloading_point_out_at).toLocaleString()}"` : "",
             // Financials & Ops
             row.deduction || 0,
+            `"${(row.company_notes || '').replace(/"/g, '""')}"`,
             row.net_amount || 0,
             row.rec_amount || 0,
             row.rec_date ? `"${new Date(row.rec_date).toLocaleDateString()}"` : "",
             row.payment_rec_ac ? "Yes" : "No",
-            `"${row.payment_rec_ac_note || ''}"`,
+            `"${(row.payment_rec_ac_note || '').replace(/"/g, '""')}"`,
             row.payment_cash ? "Yes" : "No",
-            `"${row.payment_cash_note || ''}"`,
+            `"${(row.payment_cash_note || '').replace(/"/g, '""')}"`,
             row.expense || 0,
             row.advance || 0,
             row.diesel_ltr || 0,
             row.diesel_rate || 0,
             row.unloading_wt || 0,
-            row.deduction_2 || 0,
+            row.loss_gain || 0,
+            `"${(row.final_notes || '').replace(/"/g, '""')}"`,
             row.holtage || 0,
             row.start_km || 0,
-            row.end_km || 0
+            row.end_km || 0,
+            row.total_km || 0
         ];
         csvRows.push(values.join(","));
     }

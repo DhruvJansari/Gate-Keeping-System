@@ -118,12 +118,13 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
   const [vehicles, setVehicles] = useState([]);
   const [items, setItems] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const [transporters, setTransporters] = useState([]);
   const [loadingMasters, setLoadingMasters] = useState(false);
 
   const emptyForm = {
     consignor_name: "", consignor_address: "", consignor_place: "", consignor_gst: "",
     consignee_name: "", consignee_address: "", consignee_place: "", consignee_gst: "",
-    truck_no: "", product: "", driver_id: "",
+    truck_no: "", product: "", driver_id: "", name: "",
     gross_weight: "", tare_weight: "", net_weight: "", rate: "", amounts: "",
   };
 
@@ -140,14 +141,16 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
   const fetchMasters = async () => {
     try {
       setLoadingMasters(true);
-      const [resVehicles, resItems, resDrivers] = await Promise.all([
+      const [resVehicles, resItems, resDrivers, resTransporters] = await Promise.all([
         fetch("/api/vehicles?status=Active"),
         fetch("/api/items?status=Active"),
         fetch("/api/drivers?status=Active"),
+        fetch("/api/transporters?status=Active"),
       ]);
       if (resVehicles.ok) { const d = await resVehicles.json(); setVehicles(Array.isArray(d) ? d : []); }
       if (resItems.ok) { const d = await resItems.json(); setItems(Array.isArray(d) ? d : []); }
       if (resDrivers.ok) { const d = await resDrivers.json(); setDrivers(Array.isArray(d) ? d : []); }
+      if (resTransporters.ok) { const d = await resTransporters.json(); setTransporters(Array.isArray(d) ? d : []); }
     } catch {
       toast.error("Failed to load vehicle data");
     } finally {
@@ -161,7 +164,7 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
       if (field === "gross_weight" || field === "tare_weight") {
         const gross = field === "gross_weight" ? parseFloat(value) : parseFloat(prev.gross_weight);
         const tare  = field === "tare_weight"  ? parseFloat(value) : parseFloat(prev.tare_weight);
-        if (!isNaN(gross) && !isNaN(tare)) next.net_weight = (gross - tare).toFixed(2);
+        if (!isNaN(gross) && !isNaN(tare)) next.net_weight = Math.max(0, gross - tare).toFixed(2);
       }
       if (field === "rate" || field === "gross_weight" || field === "tare_weight") {
         const net  = parseFloat(next.net_weight);
@@ -346,35 +349,56 @@ export function ComposeLogisticModal({ open, onClose, onSuccess }) {
 
             {/* Weights & amounts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InputField label="First Wt" type="number" value={form.gross_weight} onChange={(v) => handleFieldChange("gross_weight", v)} />
-              <InputField label="Second Wt"  type="number" value={form.tare_weight}  onChange={(v) => handleFieldChange("tare_weight", v)} />
-              <InputField label="Net Wt"   value={form.net_weight} readOnly className="bg-blue-50 text-blue-700 font-bold border-blue-200" />
+              <InputField label="First Wt" type="number" value={form.tare_weight} onChange={(v) => handleFieldChange("tare_weight", v)} />
+              <InputField label="Second Wt"  type="number" value={form.gross_weight}  onChange={(v) => handleFieldChange("gross_weight", v)} />
+              <InputField label="Weight (Net)"   value={form.net_weight} readOnly className="bg-blue-50 text-blue-700 font-bold border-blue-200" />
               <InputField label="Freight Rate"     type="number" value={form.rate} onChange={(v) => handleFieldChange("rate", v)} />
             </div>
 
-            {/* Driver */}
-            <div className="space-y-1 w-full">
-              <label className="text-sm font-medium text-zinc-700">
-                Driver <span className="text-red-500">*</span>
-              </label>
-              <select
-                className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all ${
-                  fieldErrors.driver_id
-                    ? "border-red-300 bg-red-50 focus:border-red-500"
-                    : "border-zinc-300 bg-white focus:border-blue-500"
-                }`}
-                value={form.driver_id}
-                onChange={(e) => handleFieldChange("driver_id", e.target.value)}
-                disabled={loadingMasters}
-              >
-                <option value="">Select Driver</option>
-                {drivers.map((d) => (
-                  <option key={d.driver_id} value={d.driver_id}>
-                    {d.driver_name}{d.mobile ? ` (${d.mobile})` : ""}
-                  </option>
-                ))}
-              </select>
-              {fieldErrors.driver_id && <p className="text-xs text-red-500 font-medium">{fieldErrors.driver_id}</p>}
+            {/* Transporter & Driver */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1 w-full">
+                <label className="text-sm font-medium text-zinc-700">
+                  Transporter Name
+                </label>
+                <select
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all border-zinc-300 bg-white focus:border-blue-500`}
+                  value={form.transporter_name}
+                  onChange={(e) => handleFieldChange("transporter_name", e.target.value)}
+                  disabled={loadingMasters}
+                >
+                  <option value="">Select Transporter</option>
+                  {transporters.map((t) => (
+                    <option key={t.transporter_id} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1 w-full">
+                <label className="text-sm font-medium text-zinc-700">
+                  Driver <span className="text-red-500">*</span>
+                </label>
+                <select
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all ${
+                    fieldErrors.driver_id
+                      ? "border-red-300 bg-red-50 focus:border-red-500"
+                      : "border-zinc-300 bg-white focus:border-blue-500"
+                  }`}
+                  value={form.driver_id}
+                  onChange={(e) => handleFieldChange("driver_id", e.target.value)}
+                  disabled={loadingMasters}
+                >
+                  <option value="">Select Driver</option>
+                  {drivers.map((d) => (
+                    <option key={d.driver_id} value={d.driver_id}>
+                      {d.driver_name}{d.mobile ? ` (${d.mobile})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {fieldErrors.driver_id && <p className="text-xs text-red-500 font-medium">{fieldErrors.driver_id}</p>}
+              </div>
             </div>
 
             <div className="space-y-1">

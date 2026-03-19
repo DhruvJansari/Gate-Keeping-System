@@ -48,9 +48,6 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
       transporter_id: transaction.transporter_id || "",
     },
     {
-      invoice_number: { required: true },
-      invoice_date: { required: true },
-      invoice_quantity: { required: true },
       mobile_number: { required: true, type: 'mobile' },
       truck_no: { required: true },
       party_id: { required: true },
@@ -220,7 +217,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/50 backdrop-blur-sm p-4 transition-all" onClick={onClose}>
       <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl ring-1 ring-black/5 flex flex-col"
+        className="max-h-[85vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl ring-1 ring-black/5 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -306,17 +303,16 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
               </div>
             </div>
           )}
-
-          {/* Invoice Details Section */}
+          {/* Section 1: Basic Info */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              Invoice Details
+              Basic Info
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  Invoice Number <span className="text-red-500">*</span>
+                  Invoice No
                 </label>
                 <input
                   type="text"
@@ -328,7 +324,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                       ? 'border-red-100 bg-red-50 text-red-900 focus:border-red-500'
                       : 'border-zinc-100 bg-zinc-50 text-zinc-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
                   }`}
-                  placeholder="Enter invoice number"
+                  placeholder="Invoice number"
                 />
                 {errors.invoice_number && touched.invoice_number && (
                   <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_number}</p>
@@ -337,7 +333,20 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  Invoice Date <span className="text-red-500">*</span>
+                  Invoice
+                </label>
+                <input
+                  type="text"
+                  value={values.po_do_number}
+                  onChange={(e) => handleChange('po_do_number', e.target.value)}
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
+                  placeholder="Type / Name"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-700 ml-1">
+                  Date
                 </label>
                 <input
                   type="date"
@@ -354,10 +363,19 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                   <p className="text-xs text-red-600 font-medium ml-1">{errors.invoice_date}</p>
                 )}
               </div>
+            </div>
+          </div>
 
+          {/* Section 2: Quantity & Rate */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              Quantity & Rate
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  Quantity <span className="text-red-500">*</span>
+                  Quantity
                 </label>
                 <input
                   type="number"
@@ -378,26 +396,27 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  PO/DO Number
+                  Rate
                 </label>
                 <input
-                  type="text"
-                  value={values.po_do_number}
-                  onChange={(e) => handleChange('po_do_number', e.target.value)}
+                  type="number"
+                  step="0.01"
+                  value={values.rate}
+                  onChange={(e) => handleChange('rate', e.target.value)}
                   className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
-                  placeholder="Optional"
+                  placeholder="0.00"
                 />
               </div>
             </div>
           </div>
 
-          {/* Transport Details Section */}
+          {/* Section 3: Transaction Info */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Transport Details
+              Transaction Details
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
                   Transporter Name
@@ -407,7 +426,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                   onChange={(e) => handleChange('transporter_id', e.target.value)}
                   className="w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                 >
-                  <option value="">Select Transporter (Optional)</option>
+                  <option value="">Select Transporter</option>
                   {transporters.map(t => <option key={t.transporter_id} value={t.transporter_id}>{t.name}</option>)}
                 </select>
               </div>
@@ -442,27 +461,11 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                   value={values.lr_number}
                   onChange={(e) => handleChange('lr_number', e.target.value)}
                   className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
-                  placeholder="Optional"
+                  placeholder="LR Number"
                 />
               </div>
 
-              {transaction.transaction_type === 'Loading' && (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-zinc-700 ml-1">
-                    Rate
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={values.rate}
-                    onChange={(e) => handleChange('rate', e.target.value)}
-                    className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
-                    placeholder="0.00"
-                  />
-                </div>
-              )}
-
-              <div className="col-span-1 md:col-span-2 space-y-1">
+              <div className="col-span-1 md:col-span-3 space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
                   Remarks / Notes
                 </label>

@@ -41,64 +41,101 @@ function LogisticCard({ entry, stages }) {
     const isStageDone = (field) => !!entry[field];
     
     return (
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-4">
-            {/* ROW 1: High Signal */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-zinc-50 pb-3">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                        <TruckIcon className="h-5 w-5" />
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-5">
+            {/* SECTION 1: BASIC INFO */}
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-zinc-100 pb-4">
+                <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 shrink-0 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                        <TruckIcon className="h-6 w-6" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-zinc-900 leading-tight">{entry.product}</h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-mono font-bold bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700">{entry.truck_no}</span>
-                            <span className="text-xs text-zinc-400">•</span>
-                            <span className="text-xs text-zinc-500">{formatDate(entry.entry_date)}</span>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-bold text-zinc-900 leading-tight tracking-tight">{entry.truck_no}</h3>
+                            <StatusBadge status={entry.status} />
+                        </div>
+                        <p className="text-sm font-medium text-zinc-600 mb-1">{entry.product}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-zinc-500 font-medium">
+                            <span className="flex items-center gap-1"><span className="text-zinc-400">Transporter:</span> <span className="text-zinc-700">{entry.transporter_name || 'N/A'}</span></span>
+                            <span className="hidden sm:block text-zinc-300">•</span>
+                            <span className="flex items-center gap-1"><span className="text-zinc-400">Driver:</span> <span className="text-zinc-700">{entry.driver_name || 'N/A'}</span></span>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 self-start md:self-center">
-                    <div className="text-right hidden md:block">
-                        <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Logistic ID</div>
-                        <div className="text-xs font-mono text-zinc-600">#{entry.logistic_id}</div>
+                <div className="text-left md:text-right shrink-0">
+                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mb-0.5">Entry Date</div>
+                    <div className="text-sm font-medium text-zinc-700">{formatDate(entry.entry_date)}</div>
+                    <div className="text-xs font-mono text-zinc-400 mt-1">#{entry.logistic_id}</div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* SECTION 2: WEIGHT DETAILS */}
+                <div className="space-y-3 bg-zinc-50/50 rounded-lg p-3 border border-zinc-100">
+                    <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Weight Details</div>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <div className="text-zinc-500">First Wt</div>
+                        <div className="font-medium text-zinc-800 text-right">{formatCurrency(entry.tare_weight)}</div>
+                        <div className="text-zinc-500">Second Wt</div>
+                        <div className="font-medium text-zinc-800 text-right">{formatCurrency(entry.gross_weight)}</div>
+                        <div className="text-zinc-500 font-bold border-t border-zinc-200 pt-1 mt-1">Net Wt</div>
+                        <div className="font-black text-blue-700 text-right border-t border-zinc-200 pt-1 mt-1">{formatCurrency(entry.net_weight)}</div>
+                        <div className="text-zinc-500">Unloading Wt</div>
+                        <div className="font-medium text-zinc-800 text-right">{formatCurrency(entry.unloading_wt)}</div>
+                        <div className="text-zinc-500">Loss / Gain</div>
+                        <div className={`font-medium text-right ${entry.loss_gain < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                            {entry.loss_gain > 0 ? '+' : ''}{formatCurrency(entry.loss_gain)}
+                        </div>
                     </div>
-                    <StatusBadge status={entry.status} />
                 </div>
-            </div>
 
-            {/* ROW 2: Parties */}
-            <div className="flex items-center gap-2 text-sm text-zinc-600 bg-zinc-50/50 p-2 rounded-lg border border-zinc-100/50">
-                <span className="font-semibold text-zinc-900">{entry.consignor_name}</span>
-                <span className="text-zinc-300">→</span>
-                <span className="font-semibold text-zinc-900">{entry.consignee_name}</span>
-            </div>
-
-            {/* ROW 3: Weights & Rate */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-1">
-                <div>
-                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">First / Second / Net</div>
-                    <div className="text-sm font-medium text-zinc-700 mt-0.5">
-                        {formatCurrency(entry.gross_weight)} / {formatCurrency(entry.tare_weight)} / <span className="font-bold text-zinc-900">{formatCurrency(entry.net_weight)}</span>
+                {/* SECTION 3: FINANCIAL DETAILS */}
+                <div className="space-y-3 bg-zinc-50/50 rounded-lg p-3 border border-zinc-100">
+                    <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Financial Details</div>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <div className="text-zinc-500">Freight Rate</div>
+                        <div className="font-medium text-zinc-800 text-right">₹{formatCurrency(entry.rate)}</div>
+                        <div className="text-zinc-500">Freight Amt</div>
+                        <div className="font-semibold text-emerald-600 text-right">₹{formatCurrency(entry.amounts)}</div>
+                        <div className="text-zinc-500">Advance</div>
+                        <div className="font-medium text-zinc-800 text-right text-red-500">- ₹{formatCurrency(entry.advance)}</div>
+                        <div className="text-zinc-500 font-bold border-t border-zinc-200 pt-1 mt-1">Net Amount</div>
+                        <div className="font-black text-emerald-700 text-right border-t border-zinc-200 pt-1 mt-1">₹{formatCurrency(entry.net_amount)}</div>
                     </div>
                 </div>
-                <div>
-                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Rate</div>
-                     <div className="text-sm font-medium text-zinc-700 mt-0.5">₹{formatCurrency(entry.rate)}</div>
+
+                {/* SECTION 4: KM DETAILS */}
+                <div className="space-y-3 bg-zinc-50/50 rounded-lg p-3 border border-zinc-100">
+                    <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">KM Details</div>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <div className="text-zinc-500">Start KM</div>
+                        <div className="font-medium text-zinc-800 text-right">{formatCurrency(entry.start_km)}</div>
+                        <div className="text-zinc-500">End KM</div>
+                        <div className="font-medium text-zinc-800 text-right">{formatCurrency(entry.end_km)}</div>
+                        <div className="text-zinc-500 font-bold border-t border-zinc-200 pt-1 mt-1">Total KM</div>
+                        <div className="font-black text-indigo-700 text-right border-t border-zinc-200 pt-1 mt-1">{formatCurrency(entry.total_km)}</div>
+                    </div>
                 </div>
-                <div>
-                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Amount</div>
-                     <div className="text-sm font-bold text-emerald-600 mt-0.5">₹{formatCurrency(entry.amounts)}</div>
-                </div>
-                 <div>
-                    <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Deduction / Expense</div>
-                     <div className="text-sm font-medium text-red-600 mt-0.5">
-                        -{formatCurrency(Number(entry.deduction || 0) + Number(entry.deduction_2 || 0) + Number(entry.expense || 0))}
-                     </div>
+
+                {/* SECTION 5: PAYMENT DETAILS */}
+                <div className="space-y-3 bg-zinc-50/50 rounded-lg p-3 border border-zinc-100 flex flex-col justify-between">
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider mb-2">Payment Details</div>
+                        <div className="space-y-2 text-xs">
+                            <div className="flex flex-col gap-1 p-1.5 rounded bg-white border border-zinc-200">
+                                <span className={`font-bold ${entry.payment_rec_ac ? 'text-blue-600' : 'text-zinc-500'}`}>Bank A/c: {entry.payment_rec_ac ? 'Yes' : 'No'}</span>
+                                {entry.payment_rec_ac_note && <span className="text-zinc-500 italic max-h-12 overflow-y-auto w-full break-words break-all relative inline-block whitespace-normal">{entry.payment_rec_ac_note}</span>}
+                            </div>
+                            <div className="flex flex-col gap-1 p-1.5 rounded bg-white border border-zinc-200">
+                                <span className={`font-bold ${entry.payment_cash ? 'text-emerald-600' : 'text-zinc-500'}`}>Cash: {entry.payment_cash ? 'Yes' : 'No'}</span>
+                                {entry.payment_cash_note && <span className="text-zinc-500 italic max-h-12 overflow-y-auto w-full break-words break-all relative inline-block whitespace-normal">{entry.payment_cash_note}</span>}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* ROW 4: Stages */}
-            <div className="flex flex-wrap items-center gap-1 py-2 border-t border-zinc-100 border-dashed">
+            {/* STAGES Tracker */}
+            <div className="flex flex-wrap items-center gap-1 pt-3 mt-1 border-t border-zinc-100 border-dashed">
                 {stages.map((stage, idx) => {
                     const done = isStageDone(stage.field);
                     return (
@@ -115,26 +152,6 @@ function LogisticCard({ entry, stages }) {
                     );
                 })}
             </div>
-
-             {/* ROW 5 & 6: Financials & Ops Compact */}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-xs text-zinc-500 pt-2 border-t border-zinc-100">
-                <div className="flex justify-between">
-                    <span>Advance:</span>
-                    <span className="font-mono font-medium text-zinc-700">₹{formatCurrency(entry.advance || 0)}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span>Start KM:</span>
-                    <span className="font-mono font-medium text-zinc-700">{formatCurrency(entry.start_km)}</span>
-                </div>
-                 <div className="flex justify-between">
-                    <span>Diesel:</span>
-                    <span className="font-mono font-medium text-zinc-700">{formatCurrency(entry.diesel_ltr)}L @ {formatCurrency(entry.diesel_rate)}</span>
-                </div>
-                 <div className="flex justify-between">
-                    <span>Net Amt:</span>
-                    <span className="font-mono font-bold text-zinc-900">₹{formatCurrency(entry.net_amount)}</span>
-                </div>
-             </div>
         </div>
     );
 }

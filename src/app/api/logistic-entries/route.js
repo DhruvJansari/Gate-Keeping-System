@@ -163,10 +163,11 @@ export async function POST(request) {
         lr_no,
         consignor_name, consignor_address, consignor_place, consignor_gst,
         consignee_name, consignee_address, consignee_place, consignee_gst,
-        truck_no, driver_id, product,
+        truck_no, driver_id, product, transporter_name,
         gross_weight, tare_weight, net_weight, rate, amounts,
+        unloading_wt, loss_gain, total_km, company_notes, final_notes,
         entry_date, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       lr_no,
       body.consignor_name || null,
@@ -180,11 +181,17 @@ export async function POST(request) {
       body.truck_no,
       body.driver_id || null,
       body.product,
+      body.transporter_name || null,
       body.gross_weight || 0,
       body.tare_weight || 0,
       body.net_weight || 0,
       body.rate || 0,
       body.amounts || 0,
+      body.unloading_wt || 0,
+      body.loss_gain || 0,
+      body.total_km || 0,
+      body.company_notes || null,
+      body.final_notes || null,
       body.entry_date || new Date().toISOString().slice(0, 19).replace('T', ' '),
       body.created_by || null
     ]);

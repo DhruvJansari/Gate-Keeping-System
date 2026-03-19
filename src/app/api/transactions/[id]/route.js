@@ -244,15 +244,15 @@ export async function PATCH(request, { params }) {
     }
     if (invoice_number !== undefined) {
       updates.push('invoice_number = ?');
-      values.push(invoice_number);
+      values.push(invoice_number || null);
     }
     if (invoice_date !== undefined) {
       updates.push('invoice_date = ?');
-      values.push(invoice_date);
+      values.push(invoice_date || null);
     }
     if (invoice_quantity !== undefined) {
       updates.push('invoice_quantity = ?');
-      values.push(parseFloat(invoice_quantity) || 0);
+      values.push(invoice_quantity ? parseFloat(invoice_quantity) : null);
     }
     if (po_do_number !== undefined) {
       updates.push('po_do_number = ?');

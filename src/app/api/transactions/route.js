@@ -180,8 +180,8 @@ export async function POST(request) {
       rate,
     } = body;
 
-    if (!transaction_type || !truck_no || !party_id || !item_id || !transporter_id || !invoice_number || !invoice_date || !invoice_quantity || !mobile_number) {
-      return NextResponse.json({ error: 'Missing required fields: truck_no, party_id, item_id, transporter_id, invoice_number, invoice_date, invoice_quantity, mobile_number' }, { status: 400 });
+    if (!transaction_type || !truck_no || !party_id || !item_id || !mobile_number) {
+      return NextResponse.json({ error: 'Missing required fields: truck_no, party_id, item_id, mobile_number' }, { status: 400 });
     }
 
     const remarks = [remark1, remark2].filter(Boolean).join(' | ') || null;
@@ -215,9 +215,9 @@ export async function POST(request) {
         item_id,
         transporter_id,
         po_do_number || null,
-        invoice_number,
-        invoice_date,
-        parseFloat(invoice_quantity) || 0,
+        invoice_number || null,
+        invoice_date || null,
+        invoice_quantity ? parseFloat(invoice_quantity) : null,
         lr_number || null,
         mobile_number,
         remark1 || null,

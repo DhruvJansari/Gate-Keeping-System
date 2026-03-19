@@ -80,7 +80,9 @@ export async function PATCH(request, context) {
       "payment_cash", "payment_cash_note",
       "expense", "advance", "diesel_ltr", "diesel_rate",
       "unloading_wt", "deduction_2", "holtage", "start_km", "end_km",
-      "status"
+      "status", "transporter_name", "company_notes", "final_notes", "loss_gain", "total_km",
+      "gross_weight", "tare_weight", "net_weight", "rate", "amounts", "driver_id",
+      "consignor_name", "consignee_name", "truck_no", "product"
     ];
 
     for (const key of Object.keys(body)) {

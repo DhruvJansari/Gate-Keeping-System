@@ -120,9 +120,9 @@ CREATE TABLE IF NOT EXISTS transactions (
   item_id INT NOT NULL,
   transporter_id INT NOT NULL,
   po_do_number VARCHAR(80),
-  invoice_number VARCHAR(80) NOT NULL,
-  invoice_date DATE NOT NULL,
-  invoice_quantity DECIMAL(18, 4) NOT NULL,
+  invoice_number VARCHAR(80),
+  invoice_date DATE,
+  invoice_quantity DECIMAL(18, 4),
   lr_number VARCHAR(80),
   mobile_number VARCHAR(20) NOT NULL,
   remark1 TEXT,
@@ -290,4 +290,73 @@ CREATE TABLE IF NOT EXISTS contracts (
     FOREIGN KEY (broker_id) REFERENCES brokers(broker_id) ON DELETE SET NULL,
     FOREIGN KEY (party_id) REFERENCES parties(party_id) ON DELETE SET NULL,
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL
+);
+
+-- 5. Create Logistic Entries Table
+CREATE TABLE IF NOT EXISTS logistic_entries (
+    logistic_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+    -- Consignor Details
+    consignor_name TEXT,
+    consignor_address TEXT,
+    consignor_place TEXT,
+    consignor_gst TEXT,
+    
+    -- Consignee Details
+    consignee_name TEXT,
+    consignee_address TEXT,
+    consignee_place TEXT,
+    consignee_gst TEXT,
+    
+    -- Load Details
+    truck_no VARCHAR(255),
+    driver_id INT NULL,
+    transporter_name VARCHAR(255) DEFAULT NULL,
+    product VARCHAR(255),
+    gross_weight DECIMAL(10,2),
+    tare_weight DECIMAL(10,2),
+    net_weight DECIMAL(10,2),
+    rate DECIMAL(10,2),
+    amounts DECIMAL(10,2),
+    
+    -- Timestamps (Stages)
+    loading_site_at DATETIME NULL,
+    loading_point_in_at DATETIME NULL,
+    loading_point_out_at DATETIME NULL,
+    unloading_site_at DATETIME NULL,
+    unloading_point_in_at DATETIME NULL,
+    unloading_point_out_at DATETIME NULL,
+    
+    -- Step 3 Fields (Editable)
+    deduction DECIMAL(10,2) DEFAULT 0,
+    company_notes TEXT DEFAULT NULL,
+    net_amount DECIMAL(10,2) DEFAULT 0,
+    rec_amount DECIMAL(10,2) DEFAULT 0,
+    rec_date DATETIME NULL,
+    payment_rec_ac BOOLEAN DEFAULT 0,
+    payment_rec_ac_note TEXT,
+    payment_cash BOOLEAN DEFAULT 0,
+    payment_cash_note TEXT,
+    expense DECIMAL(10,2) DEFAULT 0,
+    advance DECIMAL(10,2) DEFAULT 0,
+    diesel_ltr DECIMAL(10,2) DEFAULT 0,
+    diesel_rate DECIMAL(10,2) DEFAULT 0,
+    unloading_wt DECIMAL(10,2) DEFAULT 0,
+    loss_gain DECIMAL(10,2) DEFAULT NULL,
+    final_notes TEXT DEFAULT NULL,
+    deduction_2 DECIMAL(10,2) DEFAULT 0,
+    holtage DECIMAL(10,2) DEFAULT 0,
+    start_km DECIMAL(10,2) DEFAULT 0,
+    end_km DECIMAL(10,2) DEFAULT 0,
+    total_km DECIMAL(10,2) DEFAULT NULL,
+    lr_no VARCHAR(80),
+    
+    -- Meta
+    entry_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by INT,
+    FOREIGN KEY (driver_id) REFERENCES drivers(driver_id) ON DELETE SET NULL,
+    INDEX idx_logistic_entries_created_at (created_at)
 );

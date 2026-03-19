@@ -67,18 +67,18 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
   };
 
   const validateInvoiceQuantity = (value) => {
-    if (!value || value === "") return "Invoice quantity is required";
+    if (!value || value === "") return "";
     const num = parseFloat(value);
-    if (isNaN(num) || num <= 0) {
+    if (isNaN(num) || num < 0) {
       return "Quantity must be a positive number";
     }
     return "";
   };
 
   const validateInvoiceRate = (value) => {
-    if (!value || value === "") return "Invoice rate is required";
+    if (!value || value === "") return "";
     const num = parseFloat(value);
-    if (isNaN(num) || num <= 0) {
+    if (isNaN(num) || num < 0) {
       return "Rate must be a positive number";
     }
     return "";
@@ -119,10 +119,10 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
         error = validateRequired(form.party_id, "Party");
         break;
       case "invoice_number":
-         error = validateRequired(form.invoice_number, "Invoice Number");
+         // Optional
          break;
       case "invoice_date":
-         error = validateRequired(form.invoice_date, "Invoice Date");
+         // Optional
          break;
       default:
         break;
@@ -175,8 +175,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
     errors.invoice_rate = validateInvoiceRate(form.invoice_rate);
     errors.item_id = validateRequired(form.item_id, "Product");
     errors.party_id = validateRequired(form.party_id, "Party");
-    errors.invoice_number = validateRequired(form.invoice_number, "Invoice Number");
-    errors.invoice_date = validateRequired(form.invoice_date, "Invoice Date");
+    // Filter out empty errors
 
     // Filter out empty errors
     const validationErrors = Object.fromEntries(
@@ -517,7 +516,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                 <div className="grid gap-4 md:grid-cols-4">
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">
-                      Invoice No <span className="text-red-500">*</span>
+                      Invoice No <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
                     </label>
                     <input
                       type="text"
@@ -530,13 +529,12 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
                           : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
                       }`}
-                      required
                     />
                     {fieldErrors.invoice_number && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_number}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">
-                      Invoice Date <span className="text-red-500">*</span>
+                      Invoice Date <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
                     </label>
                     <input
                       type="date"
@@ -548,13 +546,12 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
                           : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
                       }`}
-                      required
                     />
                     {fieldErrors.invoice_date && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_date}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">
-                      Quantity <span className="text-red-500">*</span>
+                      Quantity <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
                     </label>
                     <input
                       type="number"
@@ -568,7 +565,6 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
                           : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
                       }`}
-                      required
                     />
                     {fieldErrors.invoice_quantity && (
                       <p className="text-xs font-medium text-red-600 mt-1">
@@ -578,7 +574,7 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-zinc-700">
-                      Rate <span className="text-red-500">*</span>
+                      Rate <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
                     </label>
                     <input
                       type="number"
@@ -592,7 +588,6 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
                           : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
                       }`}
-                      required
                     />
                     {fieldErrors.invoice_rate && (
                       <p className="text-xs font-medium text-red-600 mt-1">
