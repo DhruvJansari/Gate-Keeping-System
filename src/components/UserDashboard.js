@@ -333,14 +333,14 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  Invoice
+                  PO/DO Number
                 </label>
                 <input
                   type="text"
                   value={values.po_do_number}
                   onChange={(e) => handleChange('po_do_number', e.target.value)}
                   className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 placeholder:text-zinc-400"
-                  placeholder="Type / Name"
+                  placeholder="PO/DO Number"
                 />
               </div>
 
