@@ -511,92 +511,94 @@ export function NewGateEntryModal({ open, onClose, onSuccess, token }) {
               </div>
 
               {/* Invoice Details Section */}
-              <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100">
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Invoice Details</h3>
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-700">
-                      Invoice No <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.invoice_number}
-                      onChange={(e) => handleFieldChange("invoice_number", e.target.value)}
-                      onBlur={() => handleFieldBlur("invoice_number")}
-                      placeholder="INV-001"
-                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
-                        fieldErrors.invoice_number 
-                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
-                      }`}
-                    />
-                    {fieldErrors.invoice_number && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_number}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-700">
-                      Invoice Date <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={form.invoice_date}
-                      onChange={(e) => handleFieldChange("invoice_date", e.target.value)}
-                      onBlur={() => handleFieldBlur("invoice_date")}
-                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
-                        fieldErrors.invoice_date 
-                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
-                      }`}
-                    />
-                    {fieldErrors.invoice_date && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_date}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-700">
-                      Quantity <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.0001"
-                      value={form.invoice_quantity}
-                      onChange={(e) => handleFieldChange("invoice_quantity", e.target.value)}
-                      onBlur={() => handleFieldBlur("invoice_quantity")}
-                      placeholder="0.000"
-                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
-                        fieldErrors.invoice_quantity 
-                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
-                      }`}
-                    />
-                    {fieldErrors.invoice_quantity && (
-                      <p className="text-xs font-medium text-red-600 mt-1">
-                        {fieldErrors.invoice_quantity}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-700">
-                      Rate <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.invoice_rate}
-                      onChange={(e) => handleFieldChange("invoice_rate", e.target.value)}
-                      onBlur={() => handleFieldBlur("invoice_rate")}
-                      placeholder="0.00"
-                      className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
-                        fieldErrors.invoice_rate 
-                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
-                      }`}
-                    />
-                    {fieldErrors.invoice_rate && (
-                      <p className="text-xs font-medium text-red-600 mt-1">
-                        {fieldErrors.invoice_rate}
-                      </p>
-                    )}
+              {type !== 'Loading' && (
+                <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100 mt-4 md:mt-0">
+                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Invoice Details</h3>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">
+                        Invoice No <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={form.invoice_number}
+                        onChange={(e) => handleFieldChange("invoice_number", e.target.value)}
+                        onBlur={() => handleFieldBlur("invoice_number")}
+                        placeholder="INV-001"
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.invoice_number 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
+                      />
+                      {fieldErrors.invoice_number && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_number}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">
+                        Invoice Date <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={form.invoice_date}
+                        onChange={(e) => handleFieldChange("invoice_date", e.target.value)}
+                        onBlur={() => handleFieldBlur("invoice_date")}
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.invoice_date 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
+                      />
+                      {fieldErrors.invoice_date && <p className="text-xs font-bold text-red-500 mt-1">{fieldErrors.invoice_date}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">
+                        Quantity <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={form.invoice_quantity}
+                        onChange={(e) => handleFieldChange("invoice_quantity", e.target.value)}
+                        onBlur={() => handleFieldBlur("invoice_quantity")}
+                        placeholder="0.000"
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.invoice_quantity 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
+                      />
+                      {fieldErrors.invoice_quantity && (
+                        <p className="text-xs font-medium text-red-600 mt-1">
+                          {fieldErrors.invoice_quantity}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-zinc-700">
+                        Rate <span className="text-zinc-400 font-normal text-xs">(Optional)</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={form.invoice_rate}
+                        onChange={(e) => handleFieldChange("invoice_rate", e.target.value)}
+                        onBlur={() => handleFieldBlur("invoice_rate")}
+                        placeholder="0.00"
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition-all shadow-sm ${
+                          fieldErrors.invoice_rate 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500/20'
+                        }`}
+                      />
+                      {fieldErrors.invoice_rate && (
+                        <p className="text-xs font-medium text-red-600 mt-1">
+                          {fieldErrors.invoice_rate}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Remarks Section */}
               <div className="space-y-1.5">

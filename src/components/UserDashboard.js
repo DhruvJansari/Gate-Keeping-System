@@ -28,8 +28,7 @@ import { useToast } from "@/hooks/useToast";
 import { useFormValidation } from "@/hooks/useFormValidation";
 
 // Edit Transaction Modal Component
-// Edit Transaction Modal Component - Premium Light Theme
-// Edit Transaction Modal Component - Premium styling
+
 function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   const toast = useToast();
   const { values, errors, touched, handleChange, handleBlur, validateAll, setValues } = useFormValidation(
@@ -197,7 +196,8 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
   };
 
   const txnNo = transaction.gate_pass_no || `TRN${String(transaction.transaction_id).padStart(5, '0')}`;
-  const isFirstWeighbridgeCompleted = transaction.first_weigh_at !== null;
+  const isSecondWeighbridgeCompleted = transaction.second_weigh_at !== null;
+  const isGateOutCompleted = transaction.status === 'COMPLETED' || transaction.closed_at !== null;
 
   if (loadingData) {
     return (
@@ -242,10 +242,22 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+          {isGateOutCompleted && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+              <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <h4 className="text-sm font-bold text-amber-900">Transaction Locked</h4>
+                <p className="text-xs font-medium text-amber-700">This transaction has completed the Gate Out stage and can no longer be edited.</p>
+              </div>
+            </div>
+          )}
+          <fieldset disabled={isGateOutCompleted} className="space-y-8">
           {/* Context Layer: Editable pre-Weighbridge, Read-Only post-Weighbridge */}
-          {!isFirstWeighbridgeCompleted ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-zinc-100">
+          {!isSecondWeighbridgeCompleted ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-4 border-b border-zinc-100">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">Truck <span className="text-red-500">*</span></label>
                 <input
@@ -286,9 +298,20 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
                   {items.map(i => <option key={i.item_id} value={i.item_id}>{i.item_name}</option>)}
                 </select>
               </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">Transporter Name</label>
+                <select
+                  value={values.transporter_id}
+                  onChange={(e) => handleChange('transporter_id', e.target.value)}
+                  className="w-full rounded-xl border-2 border-zinc-100 bg-zinc-50 px-3 py-2 text-sm font-medium outline-none transition-all focus:border-blue-500 focus:bg-white"
+                >
+                  <option value="">Select Transporter</option>
+                  {transporters.map(t => <option key={t.transporter_id} value={t.transporter_id}>{t.name}</option>)}
+                </select>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-zinc-100">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-4 border-b border-zinc-100">
               <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Truck Number</p>
                 <p className="text-sm font-bold text-zinc-900 font-mono">{transaction.truck_no}</p>
@@ -300,6 +323,10 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
               <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Item Name</p>
                 <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.item_name}>{transaction.item_name}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Transporter Name</p>
+                <p className="text-sm font-bold text-zinc-900 truncate" title={transaction.transporter_name || 'N/A'}>{transaction.transporter_name || 'N/A'}</p>
               </div>
             </div>
           )}
@@ -419,19 +446,6 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-zinc-700 ml-1">
-                  Transporter Name
-                </label>
-                <select
-                  value={values.transporter_id}
-                  onChange={(e) => handleChange('transporter_id', e.target.value)}
-                  className="w-full rounded-xl border-2 px-4 py-2.5 text-sm font-medium outline-none transition-all border-zinc-100 bg-zinc-50 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                >
-                  <option value="">Select Transporter</option>
-                  {transporters.map(t => <option key={t.transporter_id} value={t.transporter_id}>{t.name}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-700 ml-1">
                   Driver Mobile <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -479,6 +493,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
               </div>
             </div>
           </div>
+          </fieldset>
         </form>
 
         {/* Danger Zone: Report as Damaged (Admin & Manager Only) */}
@@ -549,7 +564,7 @@ function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={saving}
+            disabled={saving || isGateOutCompleted}
             className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {saving ? (
