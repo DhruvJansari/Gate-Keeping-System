@@ -23,15 +23,29 @@ function DateFilter({ label, value, onChange }) {
     )
 }
 
-function StatusBadge({ status }) {
-    const isClosed = status === 'Closed';
+function getDriveStatus(entry) {
+    if (entry.status === 'Completed') return 'Completed';
+    if (entry.status === 'Closed') return 'Pending';
+    const allDone = entry.loading_site_at && entry.loading_point_in_at && entry.loading_point_out_at && 
+                    entry.unloading_site_at && entry.unloading_point_in_at && entry.unloading_point_out_at;
+    if (allDone) return 'Pending';
+    return 'OTW';
+}
+
+function StatusBadge({ entry }) {
+    const displayStatus = getDriveStatus(entry);
+    const isCompleted = displayStatus === 'Completed';
+    const isPending = displayStatus === 'Pending';
+    
     return (
         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border ${
-            isClosed 
-            ? 'bg-zinc-100 text-zinc-500 border-zinc-200' 
-            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+            isCompleted 
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+            : isPending
+                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                : 'bg-purple-50 text-purple-700 border-purple-100'
         }`}>
-            {status}
+            {displayStatus}
         </span>
     );
 }
@@ -51,7 +65,7 @@ function LogisticCard({ entry, stages }) {
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <h3 className="text-lg font-bold text-zinc-900 leading-tight tracking-tight">{entry.truck_no}</h3>
-                            <StatusBadge status={entry.status} />
+                            <StatusBadge entry={entry} />
                         </div>
                         <p className="text-sm font-medium text-zinc-600 mb-1">{entry.product}</p>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-zinc-500 font-medium">

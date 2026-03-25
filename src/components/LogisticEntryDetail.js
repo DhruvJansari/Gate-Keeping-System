@@ -103,10 +103,36 @@ export function LogisticEntryDetail({ entryId, onClose, onUpdate, readOnly = fal
     setForm(prev => {
       const next = { ...prev, [field]: value };
       
+      // 1. Net Weight Calculation (Always Absolute Positive)
+      let netWt = parseFloat(next.net_weight) || 0;
       if (field === 'gross_weight' || field === 'tare_weight') {
         const gross = parseFloat(next.gross_weight) || 0;
         const tare = parseFloat(next.tare_weight) || 0;
-        next.net_weight = Math.max(0, gross - tare).toFixed(2);
+        netWt = Math.abs(gross - tare);
+        next.net_weight = netWt.toFixed(2);
+      }
+      
+      // 2. Freight Amount Calculation
+      let freightAmt = parseFloat(next.amounts) || 0;
+      if (field === 'rate' || field === 'gross_weight' || field === 'tare_weight') {
+         const freightRate = parseFloat(next.rate) || 0;
+         freightAmt = (netWt / 1000) * freightRate;
+         next.amounts = freightAmt.toFixed(2);
+      }
+
+      // 3. Loss / Gain Calculation
+      if (field === 'unloading_wt' || field === 'gross_weight' || field === 'tare_weight') {
+         const unloadWt = parseFloat(next.unloading_wt) || 0;
+         next.loss_gain = (netWt - unloadWt).toFixed(2);
+      }
+
+      // 4. Net Amount Calculation
+      if (field === 'rate' || field === 'gross_weight' || field === 'tare_weight' || 
+          field === 'advance' || field === 'diesel_rate' || field === 'holtage') {
+         const advance = parseFloat(next.advance) || 0;
+         const dieselAmt = parseFloat(next.diesel_rate) || 0;
+         const holtage = parseFloat(next.holtage) || 0;
+         next.net_amount = (freightAmt - advance - dieselAmt + holtage).toFixed(2);
       }
       
       if (field === 'start_km' || field === 'end_km') {
@@ -141,6 +167,30 @@ export function LogisticEntryDetail({ entryId, onClose, onUpdate, readOnly = fal
       setSaving(false);
     }
   };
+  const handleMarkCompleted = async () => {
+    if (!window.confirm("Are you sure you want to mark this transaction as Completed?")) return;
+    try {
+      setSaving(true);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/logistic-entries/${entryId}`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ status: "Completed" })
+      });
+      if (!res.ok) throw new Error("Failed to mark as completed");
+      toast.success("Transaction marked as completed");
+      if (onUpdate) onUpdate();
+      onClose();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
 console.log("transporters",transporters)
   if (!entryId) return null;
 
@@ -224,9 +274,9 @@ console.log("transporters",transporters)
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                             <InputField label="First Wt" type="number" value={form.tare_weight} onChange={v => handleFieldChange("tare_weight", v)} readOnly={readOnly} />
                             <InputField label="Second Wt" type="number" value={form.gross_weight} onChange={v => handleFieldChange("gross_weight", v)} readOnly={readOnly} />
-                            <InputField label="Weight (Net)" value={form.net_weight} readOnly={true} className="bg-blue-50 text-blue-700 font-bold border-blue-200" />
+                            <InputField label="Weight (Net)" value={form.net_weight} readOnly={true} className="bg-blue-50 text-blue-700 font-bold border-blue-200" title="Auto-calculated field (Math.abs difference)" />
                             <InputField label="Freight Rate" type="number" value={form.rate} onChange={v => handleFieldChange("rate", v)} readOnly={readOnly} />
-                            <InputField label="Freight Amount" type="number" value={form.amounts} onChange={v => handleFieldChange("amounts", v)} readOnly={readOnly} />
+                            <InputField label="Freight Amount" type="number" value={form.amounts} readOnly={true} title="Auto-calculated field (cannot be edited)" />
                         </div>
                     </div>
 
@@ -241,7 +291,7 @@ console.log("transporters",transporters)
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-4 border-b border-zinc-100">
                             <InputField label="Holtage" type="number" value={form.holtage} onChange={v => handleFieldChange("holtage", v)} readOnly={readOnly} />
-                            <InputField label="Net Amount" type="number" value={form.net_amount} onChange={v => handleFieldChange("net_amount", v)} readOnly={readOnly} />
+                            <InputField label="Net Amount" type="number" value={form.net_amount} readOnly={true} title="Auto-calculated field (cannot be edited)" />
                             <InputField label="Received Amount" type="number" value={form.rec_amount} onChange={v => handleFieldChange("rec_amount", v)} readOnly={readOnly} />
                             <InputField label="Received Date" type="date" value={form.rec_date} onChange={v => handleFieldChange("rec_date", v)} readOnly={readOnly} />
                         </div>
@@ -285,7 +335,7 @@ console.log("transporters",transporters)
                         <SectionTitle title="5. Final Weight / Loss" />
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <InputField label="Unloading Weight" type="number" value={form.unloading_wt} onChange={v => handleFieldChange("unloading_wt", v)} readOnly={readOnly} />
-                            <InputField label="Loss / Gain" type="number" value={form.loss_gain} onChange={v => handleFieldChange("loss_gain", v)} readOnly={readOnly} />
+                            <InputField label="Loss / Gain" type="number" value={form.loss_gain} readOnly={true} title="Auto-calculated field (cannot be edited)" />
                             <InputField label="Expense" type="number" value={form.expense} onChange={v => handleFieldChange("expense", v)} readOnly={readOnly} />
                             <InputField label="Notes" value={form.final_notes} onChange={v => handleFieldChange("final_notes", v)} readOnly={readOnly} />
                         </div>
@@ -299,14 +349,25 @@ console.log("transporters",transporters)
             {readOnly ? "Close" : "Cancel"}
           </button>
           {!readOnly && (
-              <button 
-                onClick={handleSave} 
-                disabled={saving || loading || error} 
-                className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow active:translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
-              >
-                <SaveIcon className="h-4 w-4" />
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+              <>
+                {entry?.status !== 'Completed' && (
+                    <button 
+                      onClick={handleMarkCompleted} 
+                      disabled={saving || loading || error} 
+                      className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm hover:shadow active:translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                    >
+                      Mark as Completed
+                    </button>
+                )}
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving || loading || error} 
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow active:translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                >
+                  <SaveIcon className="h-4 w-4" />
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </>
           )}
         </div>
       </div>
@@ -322,10 +383,12 @@ function SectionTitle({ title }) {
     );
 }
 
-function InputField({ label, value, onChange, type = "text", className = "", readOnly }) {
+function InputField({ label, value, onChange, type = "text", className = "", readOnly, title }) {
     return (
-        <div className="space-y-1 w-full">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">{label}</label>
+        <div className="space-y-1 w-full" title={title}>
+            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+                {label} {readOnly && title && <span className="ml-1 text-[10px] text-zinc-400 normal-case">(Auto)</span>}
+            </label>
             <input 
                 type={type} 
                 className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all ${
@@ -336,6 +399,7 @@ function InputField({ label, value, onChange, type = "text", className = "", rea
                 value={value ?? ""} 
                 onChange={e => onChange && onChange(e.target.value)} 
                 readOnly={readOnly}
+                title={title}
             />
         </div>
     )

@@ -66,13 +66,13 @@ function FilterDropdown({ label, value, onChange, options, disabled }) {
     )
 }
 
-function DateFilter({ label, value, onChange }) {
+function DateFilter({ label, value, onChange, className = "" }) {
     return (
-        <div className="flex flex-col gap-1">
+        <div className={`flex flex-col gap-1 ${className}`}>
             <label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">{label}</label>
             <input 
                 type="date" 
-                className="rounded-lg border border-zinc-200 bg-zinc-50/50 px-2 py-2 text-sm text-zinc-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer hover:bg-white hover:border-zinc-300"
+                className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 px-2 py-2 text-sm text-zinc-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer hover:bg-white hover:border-zinc-300"
                 value={value}
                 onChange={e => onChange(e.target.value)}
             />
@@ -101,7 +101,7 @@ export default function LogisticDashboard() {
   // Filters & Search
   const [filters, setFilters] = useState({ consignor: "", consignee: "", truck_no: "", product: "", driver: "" });
   const [dateFilters, setDateFilters] = useState({ from: "", to: "" });
-  const [statusFilter, setStatusFilter] = useState("Pending");
+  const [statusFilter, setStatusFilter] = useState("On the Way");
   const [filterOptions, setFilterOptions] = useState({ consignors: [], consignees: [], trucks: [], products: [], drivers: [] });
 
   // Admin/Manager: default to today's date on first mount
@@ -245,10 +245,8 @@ export default function LogisticDashboard() {
   const processStageConfirm = async (id, field, stage) => {
       try {
           const updateData = { [field]: new Date().toISOString() };
-          // If this is the last stage, also close the entry
-          if (field === STAGES[STAGES.length - 1].field) {
-              updateData.status = "Closed";
-          }
+          // Process stage completed, do not close status automatically
+          // Let status transition automatically based on stage checks
 
           const token = localStorage.getItem("token");
           const res = await fetch(`/api/logistic-entries/${id}`, {
@@ -309,11 +307,20 @@ export default function LogisticDashboard() {
       return d.toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' });
   };
   
+  const getDriveStatus = (entry) => {
+      if (entry.status === 'Completed') return 'Completed';
+      if (entry.status === 'Closed') return 'Pending';
+      const allDone = entry.loading_site_at && entry.loading_point_in_at && entry.loading_point_out_at && 
+                      entry.unloading_site_at && entry.unloading_point_in_at && entry.unloading_point_out_at;
+      if (allDone) return 'Pending';
+      return 'OTW';
+  };
+
   const StageCell = ({ entry, field, index }) => {
       const isDone = !!entry[field];
       const isPreviousDone = index === 0 || !!entry[STAGES[index - 1].field];
       const hasPerm = user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('edit_transactions') || hasPermission('manage_logistics');
-      const isActive = !isDone && isPreviousDone && entry.status !== "Closed" && hasPerm;
+      const isActive = !isDone && isPreviousDone && entry.status !== "Closed" && entry.status !== "Completed" && hasPerm;
 
       return (
           <td className={`px-2 py-3 border-r border-zinc-100 text-center transition-all ${isActive ? 'bg-blue-50/30 cursor-pointer' : 'cursor-default'}`}
@@ -346,8 +353,8 @@ export default function LogisticDashboard() {
       <div className="space-y-6">
         {/* Header & Controls */}
         <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
+            <div className="px-6 py-5 border-b border-zinc-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
+                <div className="flex items-center gap-4 shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
                         <TruckSvgIcon className="h-6 w-6" />
                     </div>
@@ -362,52 +369,60 @@ export default function LogisticDashboard() {
                                 LIVE
                             </span>
                         </h2>
-                        <p className="text-sm text-zinc-500 font-medium">Manage independent logistic entries</p>
+                        <p className="text-sm text-zinc-500 font-medium whitespace-nowrap">Manage independent logistic entries</p>
                     </div>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <div className="flex items-center gap-2 bg-zinc-50 p-1.5 rounded-lg border border-zinc-200 w-full sm:w-auto overflow-x-auto">
-                      <DateFilter label="From" value={dateFilters.from} onChange={v => setDateFilters(prev => ({ ...prev, from: v }))} />
+                <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap items-stretch gap-3 w-full lg:w-auto">
+                    {/* Date Inputs (Tablet row 1 full-width, Mobile full-width, Desktop auto) */}
+                    <div className="flex items-center gap-2 bg-zinc-50 p-1.5 rounded-lg border border-zinc-200 w-full md:w-full lg:w-auto shrink-0">
+                      <DateFilter label="From" value={dateFilters.from} onChange={v => setDateFilters(prev => ({ ...prev, from: v }))} className="flex-1" />
                       <div className="w-px h-8 bg-zinc-200 shrink-0"></div>
-                      <DateFilter label="To" value={dateFilters.to} onChange={v => setDateFilters(prev => ({ ...prev, to: v }))} />
+                      <DateFilter label="To" value={dateFilters.to} onChange={v => setDateFilters(prev => ({ ...prev, to: v }))} className="flex-1" />
                     </div>
                     
-                    <div className="flex items-center bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+                    {/* Status Tabs (Tablet row 2 left, Mobile flex) */}
+                    <div className="flex items-center bg-zinc-100 p-1 rounded-lg border border-zinc-200 overflow-x-auto w-full md:w-auto shrink-0 min-w-0 hide-scrollbar scroll-smooth">
+                        <button 
+                            onClick={() => setStatusFilter("On the Way")}
+                            className={`flex-1 md:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap ${statusFilter === "On the Way" ? "bg-white text-purple-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
+                        >
+                            On the Way
+                        </button>
                         <button 
                             onClick={() => setStatusFilter("Pending")}
-                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Pending" ? "bg-white text-blue-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
+                            className={`flex-1 md:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap ${statusFilter === "Pending" ? "bg-white text-blue-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
                         >
                             Pending
                         </button>
                         <button 
                             onClick={() => setStatusFilter("Completed")}
-                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === "Completed" ? "bg-white text-emerald-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
+                            className={`flex-1 md:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap ${statusFilter === "Completed" ? "bg-white text-emerald-700 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}
                         >
                             Completed
                         </button>
                     </div>
-                    <div className="flex items-center gap-2 overflow-x-auto">
+
+                    {/* Action Buttons (Tablet row 2 right, Mobile grid layout) */}
+                    <div className="grid grid-cols-2 md:flex md:items-center gap-2 w-full md:w-auto shrink-0 flex-1 md:flex-none">
                         <button 
                              onClick={handleExport}
-                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-semibold rounded-lg text-sm transition-all shadow-sm h-[42px] whitespace-nowrap"
+                             className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-semibold rounded-lg text-sm transition-all shadow-sm h-[42px] whitespace-nowrap"
                         >
-                            <DownloadIcon className="h-4 w-4" />
-                            Export
+                            <DownloadIcon className="h-4 w-4" /> Export
                         </button>
                         <button 
                             onClick={() => router.push(user?.role_name === 'Logistics Manager' ? "/logistics/all" : "/admin/logistic-dashboard/all")}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-semibold rounded-lg text-sm transition-all shadow-sm h-[42px] whitespace-nowrap"
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-semibold rounded-lg text-sm transition-all shadow-sm h-[42px] whitespace-nowrap"
                         >
-                            <ListIcon className="h-4 w-4" />
-                            View All
+                            <ListIcon className="h-4 w-4" /> View All
                         </button>
                         {(user?.role_name === 'Admin' || user?.role_name === 'Logistics Manager' || hasPermission('edit_transactions') || hasPermission('manage_logistics')) && (
                           <button 
                               onClick={() => setIsComposeOpen(true)}
-                              className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-blue-500/20 shadow-lg text-sm transition-all active:scale-95 h-[42px] whitespace-nowrap"
+                              className="col-span-2 md:col-span-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-blue-500/20 shadow-lg text-sm transition-all active:scale-95 h-[42px] whitespace-nowrap"
                           >
-                              + New
+                              + New Entry
                           </button>
                         )}
                     </div>
@@ -509,8 +524,14 @@ export default function LogisticDashboard() {
                       ))}
 
                       <td className="px-4 py-3 text-center border-r border-zinc-100">
-                          <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${entry.status === 'Closed' ? 'bg-zinc-100 text-zinc-500' : 'bg-emerald-100 text-emerald-700'}`}>
-                              {entry.status}
+                          <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
+                              getDriveStatus(entry) === 'Completed' || entry.status === 'Closed'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : getDriveStatus(entry) === 'Pending'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : 'bg-purple-100 text-purple-700'
+                          }`}>
+                              {getDriveStatus(entry)}
                           </span>
                       </td>
                       
@@ -581,8 +602,14 @@ export default function LogisticDashboard() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="font-mono font-bold text-lg text-zinc-900">{entry.truck_no}</span>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${entry.status === 'Closed' ? 'bg-zinc-100 text-zinc-500' : 'bg-emerald-100 text-emerald-700'}`}>
-                                        {entry.status}
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
+                                        getDriveStatus(entry) === 'Completed' || entry.status === 'Closed'
+                                            ? 'bg-emerald-100 text-emerald-700'
+                                            : getDriveStatus(entry) === 'Pending'
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : 'bg-purple-100 text-purple-700'
+                                    }`}>
+                                        {getDriveStatus(entry)}
                                     </span>
                                 </div>
                                 <div className="text-xs text-zinc-500 font-medium">{fmtDate(entry.entry_date)}</div>
@@ -616,7 +643,7 @@ export default function LogisticDashboard() {
                             <div className="bg-zinc-50 rounded-lg p-3 border border-zinc-100">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-xs font-bold text-zinc-700">Current Stage</span>
-                                    {entry.status === "Closed" ? (
+                                    {entry.status === "Closed" || entry.status === "Completed" ? (
                                         <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                                             <TruckIcon className="h-3 w-3" /> Completed
                                         </span>
@@ -627,7 +654,7 @@ export default function LogisticDashboard() {
                                     )}
                                 </div>
                                 
-                                {entry.status !== "Closed" && activeStage && (
+                                {entry.status !== "Closed" && entry.status !== "Completed" && activeStage && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();

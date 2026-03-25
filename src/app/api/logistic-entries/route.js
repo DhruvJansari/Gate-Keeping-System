@@ -102,8 +102,8 @@ export async function GET(request) {
     }
 
     const status_filter = searchParams.get("status_filter");
-    if (status_filter === "Pending") {
-        query += ` AND (
+    if (status_filter === "On the Way") {
+        query += ` AND (le.status IS NULL OR le.status != 'Completed') AND (
             le.loading_site_at IS NULL OR 
             le.loading_point_in_at IS NULL OR 
             le.loading_point_out_at IS NULL OR 
@@ -111,8 +111,8 @@ export async function GET(request) {
             le.unloading_point_in_at IS NULL OR 
             le.unloading_point_out_at IS NULL
         )`;
-    } else if (status_filter === "Completed") {
-        query += ` AND (
+    } else if (status_filter === "Pending") {
+        query += ` AND (le.status IS NULL OR le.status != 'Completed') AND (
             le.loading_site_at IS NOT NULL AND 
             le.loading_point_in_at IS NOT NULL AND 
             le.loading_point_out_at IS NOT NULL AND 
@@ -120,6 +120,8 @@ export async function GET(request) {
             le.unloading_point_in_at IS NOT NULL AND 
             le.unloading_point_out_at IS NOT NULL
         )`;
+    } else if (status_filter === "Completed") {
+        query += ` AND le.status = 'Completed'`;
     }
 
     const orderParam = searchParams.get("order");

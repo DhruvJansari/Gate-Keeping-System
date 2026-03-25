@@ -91,11 +91,12 @@ export async function PATCH(request, context) {
 
         let val = body[key];
 
+        if (val === "" && (key.endsWith("_at") || key === "rec_date" || key.endsWith("_date"))) {
+          val = null;
+        }
+
         if (key.endsWith("_at") && val) {
-          val = new Date(val)
-            .toISOString()
-            .slice(0, 19)
-            .replace("T", " ");
+          val = new Date(val).toISOString().slice(0, 19).replace("T", " ");
         }
 
         values.push(val ?? null);  // ✅ prevent undefined
