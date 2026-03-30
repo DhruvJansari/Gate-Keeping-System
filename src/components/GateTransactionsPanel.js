@@ -7,7 +7,8 @@ import { NewGateEntryModal } from '@/components/NewGateEntryModal';
 import { GateTransactionDetailModal } from '@/components/GateTransactionDetailModal';
 import { useGatePassPrint } from '@/components/GatePassPrint';
 import { STAGES, getStageStatus } from '@/lib/stageUtils';
-import { TruckIcon, ClockIcon, DownloadIcon, EyeIcon } from '@/components/Icons';
+import { TruckIcon, ClockIcon, DownloadIcon, EyeIcon, SearchIcon } from '@/components/Icons';
+import { useDebounce } from '@/hooks/useDebounce';
 
 function StageBadge({ completed }) {
   return (
@@ -44,7 +45,20 @@ export function GateTransactionsPanel() {
   const [error, setError] = useState("");
   const [detailTxn, setDetailTxn] = useState(null);
 
+  // Pagination & Search
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+  // Reset page when search or filters change
+  useEffect(() => {
+    setPage(1);
+  }, [dateFrom, dateTo, filterType, statusType, debouncedSearch]);
 
   const fetchData = useCallback(async () => {
     const from = dateFrom || undefined;
@@ -56,6 +70,9 @@ export function GateTransactionsPanel() {
     if (to) params.set('to', to);
     if (type) params.set('type', type);
     if (statusType && statusType !== 'all') params.set('statusType', statusType);
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    params.set('page', page);
+    params.set('limit', limit);
 
     try {
       setLoading(true);
@@ -72,8 +89,17 @@ export function GateTransactionsPanel() {
          throw new Error(errData.error || `Error ${res.status}: Failed to fetch transactions`);
       }
       
+      
       const data = await res.json();
-      setTransactions(Array.isArray(data) ? data : []);
+      if (data && data.data) {
+        setTransactions(data.data);
+        setTotalPages(data.totalPages || 1);
+        setTotalRecords(data.total || 0);
+      } else {
+        setTransactions(Array.isArray(data) ? data : []);
+        setTotalPages(1);
+        setTotalRecords(Array.isArray(data) ? data.length : 0);
+      }
     } catch (err) {
       console.error("GateTransactionsPanel fetch error:", err);
       setError(err.message);
@@ -81,7 +107,7 @@ export function GateTransactionsPanel() {
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo, filterType, statusType, token]);
+  }, [dateFrom, dateTo, filterType, statusType, token, page, limit, debouncedSearch]);
 
   useEffect(() => {
     fetchData();
@@ -109,8 +135,24 @@ export function GateTransactionsPanel() {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <input
+          <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3">
+            
+            {/* Global Search */}
+            <div className="relative w-full sm:w-64">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <SearchIcon className="h-4 w-4 text-zinc-400" />
+                </span>
+                <input
+                    type="text"
+                    placeholder="Search TXN No, Truck No, Gate Pass..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+            </div>
+
+            <div className="flex items-center gap-2">
+                <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
@@ -123,6 +165,8 @@ export function GateTransactionsPanel() {
               onChange={(e) => setDateTo(e.target.value)}
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
             />
+            </div>
+            
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -245,6 +289,31 @@ export function GateTransactionsPanel() {
             )}
             {!loading && transactions.length === 0 && (
               <p className="py-12 text-center text-sm text-zinc-500">No transactions found</p>
+            )}
+            
+            {/* Pagination Controls */}
+            {!loading && totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-200 px-6 py-4 bg-zinc-50/50">
+                  <div className="text-sm text-zinc-600 font-medium">
+                      Showing <span className="font-bold text-zinc-900">{((page - 1) * limit) + 1}</span> to <span className="font-bold text-zinc-900">{Math.min(page * limit, totalRecords)}</span> of <span className="font-bold text-zinc-900">{totalRecords}</span> entries
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <button 
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                          className="px-4 py-2 text-sm font-semibold text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                      >
+                          Previous
+                      </button>
+                      <button 
+                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                          disabled={page === totalPages}
+                          className="px-4 py-2 text-sm font-semibold text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                      >
+                          Next
+                      </button>
+                  </div>
+              </div>
             )}
           </div>
         </div>

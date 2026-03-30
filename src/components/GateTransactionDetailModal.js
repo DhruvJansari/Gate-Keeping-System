@@ -55,9 +55,9 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl">
+      <div className="flex flex-col max-h-[90vh] w-full max-w-[95vw] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
+        <div className="flex-none flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
           <div>
             <h3 className="text-lg font-semibold text-zinc-900">Transaction Details</h3>
             <p className="text-sm text-zinc-500">Stage-wise progress view</p>
@@ -68,7 +68,7 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
         </div>
 
         {/* Cards Container */}
-        <div className="overflow-y-auto p-4 md:p-6" style={{ maxHeight: 'calc(90vh - 130px)' }}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             
             {/* Step-1 Card */}
@@ -248,22 +248,22 @@ export function GateTransactionDetailModal({ transaction, onClose, onPrint }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-3 border-t border-zinc-200 px-6 py-4 bg-zinc-50">
+        <div className="flex-none flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-zinc-200 px-6 py-4 bg-zinc-50">
           <button
             onClick={onClose}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition"
+            className="w-full sm:w-auto flex items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition"
           >
             Close
           </button>
           <button
             onClick={() => onPrint?.(transaction, 'entry')}
-            className="flex items-center gap-2 rounded-lg bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition"
           >
             <PrinterIcon className="h-4 w-4" /> Entry Pass
           </button>
           <button
             onClick={() => onPrint?.(transaction, 'gatepass')}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
           >
             <PrinterIcon className="h-4 w-4" /> Gate Pass
           </button>

@@ -104,13 +104,9 @@ export default function LogisticDashboard() {
   const [statusFilter, setStatusFilter] = useState("On the Way");
   const [filterOptions, setFilterOptions] = useState({ consignors: [], consignees: [], trucks: [], products: [], drivers: [] });
 
-  // Admin/Manager: default to today's date on first mount
+  // Date filters no longer default to today for Logistic Dashboard
   useEffect(() => {
-    if (!user) return;
-    if (user.role_name === 'Admin' || user.role_name === 'View Only Admin' || user.role_name === 'Manager') {
-      const today = new Date().toISOString().split('T')[0];
-      setDateFilters({ from: today, to: today });
-    }
+    // Intentionally left blank to preserve all entries across all dates by default
   }, [user?.role_name]); // eslint-disable-line react-hooks/exhaustive-deps
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -149,11 +145,8 @@ export default function LogisticDashboard() {
       setError("");
       
       const params = new URLSearchParams();
-      const isAdmin = user?.role_name === 'Admin' || user?.role_name === 'View Only Admin' || user?.role_name === 'Manager';
-      const d = new Date();
-      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      const fromDate = dateFilters.from || (isAdmin ? today : "");
-      const toDate = dateFilters.to || (isAdmin ? today : "");
+      const fromDate = dateFilters.from || "";
+      const toDate = dateFilters.to || "";
 
       if (filters.consignor) params.append("consignor", filters.consignor);
       if (filters.consignee) params.append("consignee", filters.consignee);
@@ -205,9 +198,9 @@ export default function LogisticDashboard() {
           if (statusFilter !== "All") params.append("status_filter", statusFilter);
           if (debouncedSearch) params.append("search", debouncedSearch);
 
-          // Show specific toast if no date selected (exporting today's data)
+          // Show specific toast if no date selected
           if (!dateFilters.from && !dateFilters.to) {
-             toast("Exporting today's records (Default)", { icon: "ℹ️" });
+             toast("Exporting all past records (No date filter)", { icon: "ℹ️" });
           } else {
              toast.loading("Exporting data...", { id: "export" });
           }

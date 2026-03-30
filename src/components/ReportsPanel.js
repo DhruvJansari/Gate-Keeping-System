@@ -5,9 +5,14 @@ import { PanelLayout } from '@/components/PanelLayout';
 import { useAuth } from '@/context/AuthContext';
 import { formatWeight } from '@/utils/formatters';
 import { STAGES, getNextStageToConfirm } from '@/lib/stageUtils';
+import { GateTransactionDetailModal } from '@/components/GateTransactionDetailModal';
+import { useGatePassPrint } from '@/components/GatePassPrint';
+import { EyeIcon } from '@/components/Icons';
 
 export function ReportsPanel() {
   const { user } = useAuth();
+  const { printGatePass, printEntryPass } = useGatePassPrint();
+  const [detailTxn, setDetailTxn] = useState(null);
   
   // Filter states
   const [loadingChecked, setLoadingChecked] = useState(true);
@@ -469,8 +474,9 @@ export function ReportsPanel() {
               ) : (
                 <table className="w-full min-w-[1400px]">
                   <thead>
-                    <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 text-left text-sm text-white">
+                    <tr className="bg-gradient-to-r from-zinc-800 to-zinc-900 text-left text-sm text-white whitespace-nowrap">
                       <th className="px-4 py-3 font-semibold">S/N</th>
+                      <th className="px-4 py-3 font-semibold text-center">Action</th>
                       <th className="px-4 py-3 font-semibold">Transaction No</th>
                       <th className="px-4 py-3 font-semibold">Type</th>
                       <th className="px-4 py-3 font-semibold">Party Name</th>
@@ -492,8 +498,16 @@ export function ReportsPanel() {
                         key={t.transaction_id}
                         className={`border-b border-zinc-100 hover:bg-blue-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                       >
-                        <td className="px-4 py-3 text-sm text-zinc-700">{idx + 1}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">{txnNo(t)}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700">{t.transaction_id}</td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => setDetailTxn(t)}
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-100 px-3 py-1.5 text-xs font-semibold text-teal-800 hover:bg-teal-200 transition-colors shadow-sm"
+                          >
+                            <EyeIcon className="h-3 w-3" /> View
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900 whitespace-nowrap">{txnNo(t)}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.transaction_type}</td>
                         <td className="px-4 py-3 text-sm text-zinc-700">{t.party_name}</td>
                         <td className="px-4 py-3 text-sm font-medium text-zinc-900">{t.item_name}</td>
@@ -515,6 +529,27 @@ export function ReportsPanel() {
           </div>
         )}
       </div>
+
+      {detailTxn && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setDetailTxn(null)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <GateTransactionDetailModal
+              transaction={detailTxn}
+              onClose={() => setDetailTxn(null)}
+              onPrint={(txn, type) => {
+                if (type === 'entry') {
+                  printEntryPass(txn);
+                } else {
+                  printGatePass(txn);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </PanelLayout>
   );
 }

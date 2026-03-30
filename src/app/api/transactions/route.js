@@ -28,6 +28,9 @@ export async function GET(request) {
     const type = searchParams.get('type');
     const item = searchParams.get('item');
     const statusType = searchParams.get('statusType'); // 'pending' or 'damaged'
+    const page = parseInt(searchParams.get('page'));
+    const limit = parseInt(searchParams.get('limit'));
+    const search = searchParams.get('search');
 
     // Role-based filtering logic
     const { roleId, userId, roleName } = user;
@@ -90,6 +93,13 @@ export async function GET(request) {
     // Common filters
     if (type && type !== 'all') { sql += ' AND t.transaction_type = ?'; params.push(type); }
     if (item) { sql += ' AND i.item_name = ?'; params.push(item); }
+    
+    // Global Search
+    if (search) {
+      sql += ' AND (t.transaction_id LIKE ? OR tr.truck_no LIKE ? OR t.gate_pass_no LIKE ? OR p.party_name LIKE ? OR i.item_name LIKE ?)';
+      const likeSearch = `%${search}%`;
+      params.push(likeSearch, likeSearch, likeSearch, likeSearch, likeSearch);
+    }
 
     // Status type filters & Role Specific Pending Scopes
     if (statusType === 'damaged') {
@@ -125,6 +135,26 @@ export async function GET(request) {
     const orderParam = searchParams.get('order');
     const sortDir = orderParam === 'asc' ? 'ASC' : 'DESC';
     sql += ` ORDER BY t.transaction_id ${sortDir}`;
+
+    if (page && limit) {
+      // First, count total matching rows avoiding regex collision through safe sub-queries
+      const countSql = `SELECT COUNT(*) as total FROM (${sql}) AS subquery`;
+      const [countRows] = await db.execute(countSql, params);
+      const total = countRows[0].total;
+
+      // Inject explicitly validated integers avoiding mysql2 execution driver crashes 
+      const offset = (page - 1) * limit;
+      sql += ` LIMIT ${Number(limit)} OFFSET ${Number(offset)}`;
+
+      const [rows] = await db.execute(sql, params);
+      return NextResponse.json({
+        data: rows,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
 
     const [rows] = await db.execute(sql, params);
     return NextResponse.json(rows);

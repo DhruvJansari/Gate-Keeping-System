@@ -303,24 +303,64 @@ export function AdminStageDetailModal({
                </div>
               
               {/* Weights Display (if relevant) */}
-              {(clickedStageKey.includes('weighbridge') || isGateOut || isFinalStage) && (
-                 <div className="bg-zinc-900 rounded-xl p-4 text-zinc-100 shadow-md border border-zinc-800">
-                    <div className="grid grid-cols-3 gap-2 text-center divide-x divide-zinc-700">
-                       <div>
-                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">First</p>
-                          <p className="text-base font-mono font-bold text-white">{formatWeight(txn.first_weight)} kg</p>
-                       </div>
-                       <div>
-                          <p className="text-[9px] uppercase tracking-wider text-zinc-400 mb-0.5 font-bold">Second</p>
-                          <p className="text-base font-mono font-bold text-white">{formatWeight(txn.second_weight)} kg</p>
-                       </div>
-                       <div>
-                          <p className="text-[9px] uppercase tracking-wider text-emerald-400 mb-0.5 font-bold">Net</p>
-                          <p className="text-base font-mono font-bold text-emerald-400">{formatWeight(txn.net_weight)} kg</p>
-                       </div>
-                    </div>
-                 </div>
-              )}
+              {(clickedStageKey.includes('weighbridge') || isGateOut || isFinalStage) && (() => {
+                  const isSecTyping = clickedStageKey === 'second_weighbridge' && secondWeight;
+                  const activeSecond = isSecTyping ? parseFloat(secondWeight) : parseFloat(txn.second_weight);
+                  const activeNet = isSecTyping ? Math.abs((parseFloat(txn.first_weight) || 0) - (parseFloat(secondWeight) || 0)) : parseFloat(txn.net_weight);
+                  
+                  const fw = parseFloat(txn.first_weight) || 0;
+                  const q = parseFloat(txn.invoice_quantity) || 0;
+                  
+                  let calcString = null;
+                  if (activeSecond && !isNaN(activeSecond)) {
+                     const diffVal = q - (fw - activeSecond);
+                     calcString = `${q} - [${fw} - ${activeSecond}] = ${diffVal.toFixed(3).replace(/\.?0+$/, '')}`;
+                  }
+
+                  return (
+<div className="bg-white rounded-xl p-4 text-zinc-800 shadow-sm border border-zinc-200">
+  <div className="grid grid-cols-3 gap-2 text-center divide-x divide-zinc-200">
+    
+    <div className="flex flex-col items-center justify-center">
+      <p className="text-[9px] uppercase tracking-wider text-zinc-500 mb-0.5 font-bold">
+        First
+      </p>
+      <p className="text-base font-mono font-bold text-zinc-900">
+        {formatWeight(txn.first_weight)} kg
+      </p>
+    </div>
+
+    <div className="flex flex-col items-center justify-center px-2">
+      <p className="text-[9px] uppercase tracking-wider text-zinc-500 mb-0.5 font-bold">
+        Second
+      </p>
+
+      <p className="text-base font-mono font-bold text-zinc-900">
+        {activeSecond ? `${formatWeight(activeSecond)} kg` : '— kg'}
+      </p>
+
+      {calcString && (
+        <div className="mt-2 w-full bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1">
+          <p className="text-[11px] font-mono font-semibold text-indigo-600 leading-snug break-words">
+            {calcString}
+          </p>
+        </div>
+      )}
+    </div>
+
+    <div className="flex flex-col items-center justify-center">
+      <p className="text-[9px] uppercase tracking-wider text-emerald-500 mb-0.5 font-bold">
+        Net
+      </p>
+      <p className="text-base font-mono font-bold text-emerald-600">
+        {activeNet ? `${formatWeight(activeNet)} kg` : '— kg'}
+      </p>
+    </div>
+
+  </div>
+</div>
+                  );
+              })()}
 
               {/* ACTION FORM - INCREASED INPUT CONTRAST */}
               {canConfirm && (
@@ -398,7 +438,7 @@ export function AdminStageDetailModal({
                   </div>
                 </div>
               )}
-            </div>
+            </div>  
           )}
 
           {/* 2. FULL DETAILS VIEW - RESTORED ORIGINAL RICH LAYOUT */}

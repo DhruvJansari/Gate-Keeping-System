@@ -223,7 +223,7 @@ console.log("transporters",transporters)
                 <div className="text-center py-12 text-red-500 bg-red-50 rounded-xl border border-red-100 mx-6">
                     <p className="font-semibold">Error loading entry</p>
                     <p className="text-sm mt-1">{error}</p>
-                </div>
+                </div>  
             ) : (
                 <div className="space-y-6">
                     {/* Section 1: HEADER DETAILS */}
