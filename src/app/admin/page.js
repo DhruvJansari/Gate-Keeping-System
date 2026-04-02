@@ -1214,7 +1214,13 @@ function AdminDashboard() {
       <tbody>
         {paginatedTransactions.map((t, idx) => {
           const status = getStageStatus(t);
-          const serialNumber = t.transaction_id;
+          const serialNumber = (() => {
+            if (t.gate_pass_no && t.gate_pass_no.startsWith('GP-')) {
+              const parts = t.gate_pass_no.split('-');
+              if (parts.length === 3) return parts[1];
+            }
+            return '—';
+          })();
 
           return (
             <tr

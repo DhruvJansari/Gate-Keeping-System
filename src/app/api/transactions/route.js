@@ -214,6 +214,21 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing required fields: truck_no, party_id, item_id, mobile_number' }, { status: 400 });
     }
 
+    // Duplicate Active Truck Validation (Ignore case and spaces)
+    const normalizedInputTruckNo = truck_no.replace(/\s+/g, '').toLowerCase();
+    const [activeTxnRows] = await db.execute(
+      `SELECT t.transaction_id 
+       FROM transactions t 
+       JOIN trucks tr ON t.truck_id = tr.truck_id 
+       WHERE LOWER(REPLACE(tr.truck_no, ' ', '')) = ? 
+       AND t.closed_at IS NULL AND t.is_damaged = 0`,
+      [normalizedInputTruckNo]
+    );
+
+    if (activeTxnRows.length > 0) {
+      return NextResponse.json({ error: 'This vehicle is already assigned to an active transaction.' }, { status: 400 });
+    }
+
     const remarks = [remark1, remark2].filter(Boolean).join(' | ') || null;
     // db already initialized
 
@@ -231,43 +246,79 @@ export async function POST(request) {
 
     const currentTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
     
-    const [result] = await db.execute(
-      `INSERT INTO transactions (
-        transaction_type, truck_id, party_id, item_id, transporter_id,
-        po_do_number, invoice_number, invoice_date, invoice_quantity,
-        lr_number, mobile_number, remark1, remark2, rate, created_by,
-        parking_confirmed_at, parking_confirmed_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        transaction_type === 'Unloading' ? 'Unloading' : 'Loading',
-        truckId,
-        party_id,
-        item_id,
-        transporter_id,
-        po_do_number || null,
-        invoice_number || null,
-        invoice_date || null,
-        invoice_quantity ? parseFloat(invoice_quantity) : null,
-        lr_number || null,
-        mobile_number,
-        remark1 || null,
-        remark2 || null,
-        rate ? parseFloat(rate) : null,
-        userId,
-        currentTimestamp,
-        userId
-      ]
-    );
+    // FY Boundary Mapping via UTC + 5:30 IST 
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(now.getTime() + istOffset);
+    const fy_start_year = istDate.getUTCMonth() >= 3 ? istDate.getUTCFullYear() : istDate.getUTCFullYear() - 1;
 
-    // Generate gate_pass_no after getting transaction_id
-    const transactionId = result.insertId;
-    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-    const gatePassNo = `GP-${transactionId}-${dateStr}`;
+    let transactionId = null;
+    let gatePassNo = null;
     
-    await db.execute(
-      'UPDATE transactions SET gate_pass_no = ? WHERE transaction_id = ?',
-      [gatePassNo, transactionId]
-    );
+    // Allocate single strict connection guaranteeing atomic transaction locks against parallel inserts natively
+    const conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    try {
+      // 1. Lock Row Sequentially 
+      const [rows] = await conn.execute('SELECT current_serial FROM transaction_counters WHERE fy_start_year = ? FOR UPDATE', [fy_start_year]);
+      
+      let nextSerial = 1;
+      if (rows.length > 0) {
+        nextSerial = rows[0].current_serial + 1;
+        await conn.execute('UPDATE transaction_counters SET current_serial = ? WHERE fy_start_year = ?', [nextSerial, fy_start_year]);
+      } else {
+        await conn.execute('INSERT INTO transaction_counters (fy_start_year, current_serial) VALUES (?, 1)', [fy_start_year]);
+      }
+      
+      // 2. Base Transaction Core
+      const [result] = await conn.execute(
+        `INSERT INTO transactions (
+          transaction_type, truck_id, party_id, item_id, transporter_id,
+          po_do_number, invoice_number, invoice_date, invoice_quantity,
+          lr_number, mobile_number, remark1, remark2, rate, created_by,
+          parking_confirmed_at, parking_confirmed_by,
+          fy_start_year, fy_serial
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          transaction_type === 'Unloading' ? 'Unloading' : 'Loading',
+          truckId,
+          party_id,
+          item_id,
+          transporter_id,
+          po_do_number || null,
+          invoice_number || null,
+          invoice_date || null,
+          invoice_quantity ? parseFloat(invoice_quantity) : null,
+          lr_number || null,
+          mobile_number,
+          remark1 || null,
+          remark2 || null,
+          rate ? parseFloat(rate) : null,
+          userId,
+          currentTimestamp,
+          userId,
+          fy_start_year,
+          nextSerial
+        ]
+      );
+
+      transactionId = result.insertId;
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+      gatePassNo = `GP-${String(nextSerial).padStart(2, '0')}-${dateStr}`;
+      
+      await conn.execute(
+        'UPDATE transactions SET gate_pass_no = ? WHERE transaction_id = ?',
+        [gatePassNo, transactionId]
+      );
+
+      await conn.commit();
+    } catch (dbErr) {
+      await conn.rollback();
+      throw dbErr;
+    } finally {
+      conn.release();
+    }
 
     return NextResponse.json({ success: true, transaction_id: transactionId, gate_pass_no: gatePassNo });
   } catch (err) {

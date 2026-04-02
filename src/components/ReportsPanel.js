@@ -498,7 +498,15 @@ export function ReportsPanel() {
                         key={t.transaction_id}
                         className={`border-b border-zinc-100 hover:bg-blue-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                       >
-                        <td className="px-4 py-3 text-sm text-zinc-700">{t.transaction_id}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-zinc-700">
+                          {(() => {
+                            if (t.gate_pass_no && t.gate_pass_no.startsWith('GP-')) {
+                              const parts = t.gate_pass_no.split('-');
+                              if (parts.length === 3) return parts[1];
+                            }
+                            return '—';
+                          })()}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => setDetailTxn(t)}

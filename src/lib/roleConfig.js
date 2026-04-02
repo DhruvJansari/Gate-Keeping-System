@@ -58,7 +58,7 @@ export const ROLE_NAV = {
       IconComponent: DashboardIcon,
       children: [
         { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
-        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        // { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
         { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: ['view_reports', '*'] },
       ]
     },
@@ -89,7 +89,7 @@ export const ROLE_NAV = {
       IconComponent: DashboardIcon,
       children: [
         { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: [] },
-        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: [] },
+        // { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: [] },
         { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: [] },
       ]
     },
@@ -126,7 +126,7 @@ export const ROLE_NAV = {
     },
   ],
   'Contract Manager': [
-    { path: '/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon },
+    // { path: '/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon },
   ],
   Manager: [
     { 
@@ -135,7 +135,7 @@ export const ROLE_NAV = {
       IconComponent: DashboardIcon,
       children: [
         { path: '/admin', label: 'Main Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
-        { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
+        // { path: '/admin/contracts', label: 'Contract Dashboard', IconComponent: ScrollIcon, requiredPermissions: ['manage_masters', '*'] },
         { path: '/admin/logistic-dashboard', label: 'Logistic Dashboard', IconComponent: TruckIcon, requiredPermissions: ['view_reports', '*'] },
       ]
     },

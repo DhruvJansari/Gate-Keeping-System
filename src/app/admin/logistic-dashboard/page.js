@@ -170,7 +170,7 @@ export default function LogisticDashboard() {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [filters, dateFilters, statusFilter, debouncedSearch]);
+  }, [filters, dateFilters, statusFilter, debouncedSearch, sortOrder]);
 
   useEffect(() => {
     fetchEntries();
