@@ -637,6 +637,37 @@ function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  // Secret Delete Mode Logic
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+
+  useEffect(() => {
+    // Keyboard shortcut (Ctrl + Shift + D)
+    const handleKeyDown = (e) => {
+      if (user?.role_name === 'Admin' && e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        setIsDeleteMode(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [user?.role_name]);
+
+  const handleSecretClick = () => {
+    if (user?.role_name !== 'Admin') return;
+    setClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setIsDeleteMode(prev => !prev);
+        return 0; // Reset after toggling
+      }
+      return newCount;
+    });
+    
+    // Auto reset click count if they don't click 5 times quickly
+    setTimeout(() => setClickCount(0), 1000);
+  };
+
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -825,7 +856,10 @@ function AdminDashboard() {
       <div className="space-y-6 relative z-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h2 
+              className="text-2xl font-bold text-slate-900 tracking-tight select-none cursor-default"
+              onClick={handleSecretClick}
+            >
               Dashboard
             </h2>
             <p className="text-sm text-slate-500 mt-1 font-medium">Monitor and manage all transactions</p>
@@ -1203,7 +1237,7 @@ function AdminDashboard() {
             </th>
           )}
           
-          {(user?.role_name === 'Admin' || hasPermission("delete_transactions")) && user?.role_name !== 'Logistics Manager' && user?.role_name !== 'Manager' && (
+          {(user?.role_name === 'Admin' && isDeleteMode) && (
             <th className="w-[70px] px-3 py-3 text-center font-semibold whitespace-nowrap">
               Delete
             </th>
@@ -1313,7 +1347,7 @@ function AdminDashboard() {
     </td>
 )}
 
-{(user?.role_name === 'Admin' || hasPermission("delete_transactions")) && user?.role_name !== 'Logistics Manager' && user?.role_name !== 'Manager' && (
+{(user?.role_name === 'Admin' && isDeleteMode) && (
     <td className="px-3 py-3 text-center whitespace-nowrap">
       <button
         onClick={() => setDeleteConfirm(t)}
