@@ -127,7 +127,7 @@ export function getGatePassHtml(transaction, options = {}) {
       <span class="sb-sep">|</span>
       <div class="sb-item">
         <span class="sb-label">Type</span>
-        <span class="sb-value">${transaction.transaction_type} (${transaction.transaction_type === 'Loading' ? 'Inward' : 'Outward'})</span>
+        <span class="sb-value">${transaction.transaction_type} (${transaction.transaction_type === 'Loading' ? 'Outward' : 'Inward'})</span>
       </div>
       <span class="sb-sep">|</span>
       <div class="sb-item">
