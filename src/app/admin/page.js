@@ -27,6 +27,7 @@ import { FaTruck } from "react-icons/fa";
 // import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/useToast";
 import { useFormValidation } from "@/hooks/useFormValidation";
+import { formatDate } from "@/utils/format";
 
 // Edit Transaction Modal Component
 function EditTransactionModal({ transaction, onClose, onSuccess, token }) {
@@ -1136,7 +1137,7 @@ function AdminDashboard() {
               )}
               
               {/* Status Filter Toggle Group */}
-              <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide gap-2 sm:gap-0 sm:border sm:border-zinc-300 sm:rounded-lg sm:bg-white/80 sm:backdrop-blur sm:shadow-sm flex-nowrap shrink-0 pb-2 sm:pb-0 mb-1 sm:mb-0">
+              <div className="flex items-center justify-center w-full sm:w-auto overflow-x-auto scrollbar-hide gap-2 sm:gap-0 sm:border sm:border-zinc-300 sm:rounded-lg sm:bg-white/80 sm:backdrop-blur sm:shadow-sm flex-nowrap shrink-0 pb-2 sm:pb-0 mb-1 sm:mb-0">
                 <button
                   onClick={() => { setStatusType('all'); setSelectedStage(null); }}
                   className={`px-4 sm:px-4 py-2 text-sm font-bold transition-colors whitespace-nowrap rounded-full sm:rounded-none border sm:border-0 flex-shrink-0 ${
@@ -1184,7 +1185,7 @@ function AdminDashboard() {
 
 <div className="overflow-x-auto bg-white rounded-xl border border-zinc-200 shadow-sm">
   {loading ? (
-    <div className="flex items-center justify-center p-12">
+    <div className="flex items-center justify-center p-4">
       <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
     </div>
   ) : (
@@ -1200,11 +1201,15 @@ function AdminDashboard() {
             S/N {sortOrder === 'desc' ? '↓' : '↑'}
           </th>
 
-          <th className="w-[200px] px-4 py-3 font-semibold whitespace-nowrap">
+                    <th className="w-[100px] px-4 py-3 font-semibold whitespace-nowrap">
+            Parking Date
+          </th>
+
+          <th className="w-[180px] px-4 py-3 font-semibold whitespace-nowrap">
             Product Name
           </th>
 
-          <th className="w-[170px] px-4 py-3 font-semibold whitespace-nowrap">
+          <th className="w-[150px] px-4 py-3 font-semibold whitespace-nowrap">
             Vehicle Number
           </th>
 
@@ -1259,14 +1264,18 @@ function AdminDashboard() {
           return (
             <tr
               key={t.transaction_id}
-              className={`border-b border-zinc-100 transition-colors hover:bg-blue-50/40 ${
+              className={`border-b border-zinc-100 transition-colors hover:bg-blue-50/90 ${
                 idx % 2 === 0 ? "bg-white" : "bg-slate-50"
               }`}
             >
+
               <td className="px-4 py-3 align-middle font-medium text-zinc-700 whitespace-nowrap">
                 {serialNumber}
               </td>
 
+              <td className="px-4 py-3 align-middle font-medium text-zinc-700 whitespace-nowrap">
+                {formatDate(t.parking_confirmed_at)}  
+              </td>
               <td
                 className="px-4 py-3 align-middle truncate whitespace-nowrap font-semibold text-zinc-900"
                 title={t.item_name}

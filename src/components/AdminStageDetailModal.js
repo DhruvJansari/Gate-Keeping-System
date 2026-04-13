@@ -32,6 +32,9 @@ export function AdminStageDetailModal({
   const [remark2, setRemark2] = useState('');
   const [error, setError] = useState('');
   const [selectedStageFilter, setSelectedStageFilter] = useState(null);
+  const [isAdjustmentMode, setIsAdjustmentMode] = useState(false);
+  const [adjustOp, setAdjustOp] = useState('+');
+  const [adjustVal, setAdjustVal] = useState('');
   const { printEntryPass } = useGatePassPrint();
 
   const txnNo = (t) => t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, '0')}`;
@@ -44,6 +47,22 @@ export function AdminStageDetailModal({
   const isGateOut = clickedStageKey === 'gate_out';
   const isFinalStage = status.gate_out;
 
+  const hasSecondWeight = (clickedStageKey === 'second_weighbridge' && secondWeight !== '');
+
+  // Hoist calculations
+  const isSecTyping = clickedStageKey === 'second_weighbridge' && secondWeight;
+  const activeSecond = isSecTyping ? parseFloat(secondWeight) : parseFloat(txn.second_weight);
+  const activeNet = isSecTyping ? Math.abs((parseFloat(txn.first_weight) || 0) - (parseFloat(secondWeight) || 0)) : parseFloat(txn.net_weight);
+
+  let previewNetValue = activeNet;
+  if (isAdjustmentMode && hasSecondWeight) {
+    const adjustAmount = parseFloat(adjustVal);
+    if (!isNaN(adjustAmount)) {
+      if (adjustOp === '+') previewNetValue = activeNet + adjustAmount;
+      if (adjustOp === '-') previewNetValue = Math.max(0, activeNet - adjustAmount);
+    }
+  }
+
   useEffect(() => {
     if (!transaction?.transaction_id) return;
     fetch(`/api/transactions/${transaction.transaction_id}`)
@@ -51,6 +70,20 @@ export function AdminStageDetailModal({
       .then((data) => setTxn(data))
       .catch(() => setTxn(transaction));
   }, [transaction, transaction?.transaction_id]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl + Shift + F
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        if (hasSecondWeight) {
+          setIsAdjustmentMode(prev => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasSecondWeight]);
 
   async function handleConfirm() {
     setError('');
@@ -75,7 +108,12 @@ export function AdminStageDetailModal({
     const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
     const body = { stage: clickedStageKey };
     if (clickedStageKey === 'first_weighbridge' && firstWeight !== '') body.first_weight = firstWeight;
-    if (clickedStageKey === 'second_weighbridge' && secondWeight !== '') body.second_weight = secondWeight;
+    if (clickedStageKey === 'second_weighbridge' && secondWeight !== '') {
+       body.second_weight = secondWeight;
+       if (isAdjustmentMode && hasSecondWeight && !isNaN(parseFloat(adjustVal))) {
+          body.net_weight = previewNetValue;
+       }
+    }
     if (clickedStageKey === 'campus_out' && remark2 !== '') body.remark2 = remark2;
     try {
       const res = await fetch(`/api/transactions/${txn.transaction_id}/confirm-stage`, {
@@ -304,17 +342,13 @@ export function AdminStageDetailModal({
               
               {/* Weights Display (if relevant) */}
               {(clickedStageKey.includes('weighbridge') || isGateOut || isFinalStage) && (() => {
-                  const isSecTyping = clickedStageKey === 'second_weighbridge' && secondWeight;
-                  const activeSecond = isSecTyping ? parseFloat(secondWeight) : parseFloat(txn.second_weight);
-                  const activeNet = isSecTyping ? Math.abs((parseFloat(txn.first_weight) || 0) - (parseFloat(secondWeight) || 0)) : parseFloat(txn.net_weight);
-                  
                   const fw = parseFloat(txn.first_weight) || 0;
                   const q = parseFloat(txn.invoice_quantity) || 0;
                   
                   let calcString = null;
                   if (activeSecond && !isNaN(activeSecond)) {
                      const diffVal = q - (fw - activeSecond);
-                     calcString = `${q} - [${fw} - ${activeSecond}] = ${diffVal.toFixed(3).replace(/\.?0+$/, '')}`;
+                     calcString = `${diffVal.toFixed(3).replace(/\.?0+$/, '')}`;
                   }
 
                   return (
@@ -340,8 +374,8 @@ export function AdminStageDetailModal({
       </p>
 
       {calcString && (
-        <div className="mt-2 w-full bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1">
-          <p className="text-[11px] font-mono font-semibold text-indigo-600 leading-snug break-words">
+        <div className="mt-2 w-full bg-indigo-50 border border-indigo-100 rounded-md px-2 py-2">
+          <p className="text-[14px] font-mono font-semibold text-indigo-600 leading-snug break-words">
             {calcString}
           </p>
         </div>
@@ -352,9 +386,34 @@ export function AdminStageDetailModal({
       <p className="text-[9px] uppercase tracking-wider text-emerald-500 mb-0.5 font-bold">
         Net
       </p>
-      <p className="text-base font-mono font-bold text-emerald-600">
-        {activeNet ? `${formatWeight(activeNet)} kg` : '— kg'}
-      </p>
+      {isAdjustmentMode && hasSecondWeight ? (
+          <div className="flex flex-col items-center gap-2 mt-1 relative w-[110px]">
+             <p className="text-base font-mono font-bold text-emerald-600 mb-1">
+               {previewNetValue !== undefined && !isNaN(previewNetValue) ? `${formatWeight(previewNetValue)} kg` : '— kg'}
+             </p>
+
+             <div className="flex w-full overflow-hidden border border-emerald-300 rounded text-xs bg-white focus-within:ring-1 focus-within:ring-emerald-500 shadow-inner">
+               <button 
+                  onClick={() => setAdjustOp(prev => prev === '+' ? '-' : '+')}
+                  className="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold border-r border-emerald-300 hover:bg-emerald-100"
+               >
+                 {adjustOp}
+               </button>
+               <input
+                  type="number"
+                  step="any"
+                  value={adjustVal}
+                  onChange={(e) => setAdjustVal(e.target.value)}
+                  placeholder="0"
+                  className="w-full text-center outline-none bg-transparent"
+               />
+             </div>
+          </div>
+      ) : (
+        <p className="text-base font-mono font-bold text-emerald-600">
+          {activeNet ? `${formatWeight(activeNet)} kg` : '— kg'}
+        </p>
+      )}
     </div>
 
   </div>
@@ -423,7 +482,7 @@ export function AdminStageDetailModal({
 
                      <button
                         onClick={handleConfirm}
-                        disabled={confirming}
+                        disabled={confirming || (clickedStageKey === 'second_weighbridge' && !secondWeight)}
                         className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                      >
                         {confirming ? (

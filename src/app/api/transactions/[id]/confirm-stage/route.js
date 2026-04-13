@@ -131,7 +131,7 @@ export async function POST(request, { params }) {
     const userPermissions = permRows.map(r => r.code);
 
     const body = await request.json();
-    const { stage, first_weight, second_weight, remark2 } = body;
+    const { stage, first_weight, second_weight, net_weight, remark2 } = body;
 
     // Define required permissions for each stage
     // Step 1: Gate
@@ -248,7 +248,7 @@ export async function POST(request, { params }) {
         }
       }
 
-      const net = fw !== null && sw !== null ? Math.abs(sw - fw) : null;
+      const net = net_weight !== undefined ? Number(net_weight) : (fw !== null && sw !== null ? Math.abs(sw - fw) : null);
 
       await db.execute(
         `UPDATE transactions

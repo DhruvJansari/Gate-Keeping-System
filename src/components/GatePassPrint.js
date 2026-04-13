@@ -55,7 +55,7 @@ export function getGatePassHtml(transaction, options = {}) {
 
     /* Info table — label narrow, value gets the space */
     .info-table { width: 100%; border-collapse: collapse; font-size: 7.5pt; table-layout: fixed; }
-    .info-table td { padding: 3px 4px; vertical-align: middle; border: 1px solid #000; overflow: hidden; white-space: nowrap; }
+    .info-table td { padding: 3px 4px; vertical-align: middle; border: 1px solid #000; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .info-table .label { font-weight: bold; width: 15%; background: #f5f5f5; font-size: 6.5pt; white-space: nowrap; }
     .info-table .value { width: 28%; }
 
@@ -185,8 +185,12 @@ export function getGatePassHtml(transaction, options = {}) {
         <tr>
           <td class="label">Rate</td>
           <td class="value hl">${formatQty(transaction.rate !== null) && formatQty(transaction.rate !== undefined) ? '₹' + formatQty(transaction.rate) : '—'}</td>
-          <td class="label"></td>
-          <td class="value"></td>
+        </tr>
+          <tr>
+          <td class="label">Remark 1</td>
+          <td class="value">${remark1}</td>
+          <td class="label">Remark 2</td>
+          <td class="value">${remark2}</td>
         </tr>
       </table>
     </div>
@@ -218,7 +222,10 @@ export function getGatePassHtml(transaction, options = {}) {
           const isDone = status[s.key];
           const conf = confirmationMap[s.key];
           const user = transaction[conf?.userKey] || '—';
-          const time = transaction[conf?.dateKey] ? formatDateTime(transaction[conf?.dateKey]) : '—';
+          let time = transaction[conf?.dateKey] ? formatDateTime(transaction[conf?.dateKey]) : '—';
+          if (s.key === 'gate_pass' && isDone) {
+            time = transaction.created_at ? formatDateTime(transaction.created_at) : '—';
+          }
           return `
           <tr>
             <td>${s.label}</td>
@@ -231,13 +238,6 @@ export function getGatePassHtml(transaction, options = {}) {
       </table>
     </div>
 
-    ${(remark1 || remark2) ? `
-    <div class="red-box">
-      <div class="section-title">REMARKS</div>
-      ${remark1 ? `<div style="padding: 2px;"><strong>Remark 1:</strong> ${remark1}</div>` : ''}
-      ${remark2 ? `<div style="padding: 2px;"><strong>Remark 2:</strong> ${remark2}</div>` : ''}
-    </div>
-    ` : ''}
 
     <div class="red-box" style="margin-top: 10px;">
       <div><strong>Current Status:</strong> ${transaction.current_status}</div>
@@ -258,6 +258,15 @@ export function getGatePassHtml(transaction, options = {}) {
 }
 
 export function getEntryPassHtml(transaction, options = {}) {
+    //remarks table of full a4 print
+    // ${(remark1 || remark2) ? `
+    // <div class="red-box">
+    //   <div class="section-title">REMARKS</div>
+    //   ${remark1 ? `<div style="padding: 2px;"><strong>Remark 1:</strong> ${remark1}</div>` : ''}
+    //   ${remark2 ? `<div style="padding: 2px;"><strong>Remark 2:</strong> ${remark2}</div>` : ''}
+    // </div>
+    // ` : ''}
+
   const { forPrint = false } = options;
   const displayId = String(transaction.gate_pass_no).padStart(5, '0');
 
