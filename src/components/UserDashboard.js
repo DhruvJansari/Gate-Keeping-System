@@ -984,8 +984,8 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
         {/* Stats Section - Responsive */}
         {user?.role_name === 'Gatekeeper' && (
           <div className="space-y-4">
-            {/* Stats Items */}
-            <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-4 md:gap-4 md:pb-0 scrollbar-hide px-1">
+          
+            {/* <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-4 md:gap-4 md:pb-0 scrollbar-hide px-1">
               {[
                 { label: "Gate Passes", value: counts.loading + counts.unloading, icon: ClipboardIcon, gradient: "from-pink-500 to-pink-600" },
                 { label: "Transporters", value: counts.transporters, icon: UsersIcon, gradient: "from-violet-500 to-violet-600" },
@@ -1002,22 +1002,20 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                    </div>
                 </div>
               ))}
-            </div>
+            </div> */}
 
-            {/* Category Filters - Responsive Wrapper */}
             <>
-              {/* Mobile View (Compact) */}
+ 
               <div className="md:hidden grid grid-cols-2 gap-3">
-                 {/* Unloading - Light Theme */}
                  <div className="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
                     <button 
                        onClick={() => handleFilterClick("Unloading", "")}
                        className={`w-full p-3 text-left transition-colors ${filterType === "Unloading" && !filterItem ? "bg-rose-100" : "hover:bg-rose-100/50"}`}
                     >
-                       <p className="text-xs text-rose-600 font-bold uppercase tracking-wider">Inward</p>
+                       <p className="text-xs text-rose-600 font-bold text-lg  uppercase tracking-wider">Inward</p>
                        <div className="flex items-center justify-between mt-0.5">
-                         <span className="text-sm font-bold text-rose-900">Unloading</span>
-                         <span className="bg-rose-200 text-rose-800 text-xs px-2 py-0.5 rounded-full font-bold">{totalUnloading}</span>
+                         <span className="text-lg font-bold text-rose-900">Unloading</span>
+                         <span className="bg-rose-200 text-rose-800 text-lg px-2 py-0.5 rounded-full font-bold">{totalUnloading}</span>
                        </div>
                     </button>
                     {filterType === "Unloading" && (
@@ -1030,24 +1028,23 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                                    filterItem === item.item_name ? "bg-rose-200 font-bold text-rose-900" : "hover:bg-rose-100/50 text-rose-800"
                                 }`}
                              >
-                                <span className="truncate mr-2">{item.item_name}</span>
-                                <span>{item.count}</span>
+                                <span className="truncate text-lg font-bold mr-2">{item.item_name}</span>
+                                <span className="text-lg font-bold">{item.count}</span>
                              </button>
                           ))}
                        </div>
                     )}
                  </div>
 
-                 {/* Loading - Light Theme */}
-                 <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden shadow-sm">
+                 <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden  shadow-sm">
                     <button 
                        onClick={() => handleFilterClick("Loading", "")}
                        className={`w-full p-3 text-left transition-colors ${filterType === "Loading" && !filterItem ? "bg-blue-100" : "hover:bg-blue-100/50"}`}
                     >
                        <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Outward</p>
                        <div className="flex items-center justify-between mt-0.5">
-                         <span className="text-sm font-bold text-blue-900">Loading</span>
-                         <span className="bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded-full font-bold">{totalLoading}</span>
+                         <span className="text-xl font-bold text-blue-900">Loading</span>
+                         <span className="bg-blue-200 text-blue-800 text-lg px-2 py-0.5 rounded-full font-bold">{totalLoading}</span>
                        </div>
                     </button>
                     {filterType === "Loading" && (
@@ -1056,12 +1053,12 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                              <button
                                 key={idx}
                                 onClick={() => handleFilterClick("Loading", item.item_name)}
-                                className={`w-full flex justify-between px-3 py-2 text-xs border-b border-blue-100 last:border-0 ${
+                                className={`w-full flex justify-between px-3 py-2 text-lg border-b border-blue-100 last:border-0 ${
                                    filterItem === item.item_name ? "bg-blue-200 font-bold text-blue-900" : "hover:bg-blue-100/50 text-blue-800"
                                 }`}
                              >
-                                <span className="truncate mr-2">{item.item_name}</span>
-                                <span>{item.count}</span>
+                                <span className="truncate text-lg font-bold mr-2">{item.item_name}</span>
+                                <span className="text-lg font-bold">{item.count}</span>
                              </button>
                           ))}
                        </div>
@@ -1082,10 +1079,10 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-rose-100 p-2 text-rose-600 shadow-sm">
+                      <div className="rounded-lg bg-rose-100 p-2 text-lg text-rose-600 shadow-sm">
                         <UnloadingGoodsIcon className="h-6 w-6" />
                       </div>
-                      <span className="font-bold text-rose-900">
+                      <span className="font-bold text-lg text-rose-900">
                         Unloading - {totalUnloading}
                       </span>
                     </div>
@@ -1106,7 +1103,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       <button
                         key={idx}
                         onClick={() => handleFilterClick("Unloading", item.item_name)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-md font-semibold transition-all ${
                           filterType === "Unloading" && filterItem === item.item_name
                             ? "bg-rose-100 text-rose-900 font-bold border border-rose-200 shadow-sm"
                             : "text-zinc-600 hover:bg-zinc-50 hover:text-rose-700 hover:pl-4"
@@ -1114,7 +1111,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       >
                          <div className="flex justify-between items-center">
                             <span className="truncate pr-2">{item.item_name}</span>
-                            <span className="font-medium bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-xs border border-rose-100">{String(item.count).padStart(2, "0")}</span>
+                            <span className="font-medium bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded text-md border border-rose-100">{String(item.count).padStart(2, "0")}</span>
                          </div>
                       </button>
                     ))}
@@ -1132,10 +1129,10 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-blue-100 p-2 text-blue-600 shadow-sm">
+                      <div className="rounded-lg bg-blue-100 p-2 text-blue-600 shadow-lg">
                         <LoadingGoodsIcon className="h-6 w-6" />
                       </div>
-                      <span className="font-semibold text-emerald-900">
+                      <span className="font-bold text-emerald-900 text-lg">
                   Loading - {totalLoading}
                 </span>
               </div>
@@ -1156,7 +1153,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       <button
                         key={idx}
                         onClick={() => handleFilterClick("Loading", item.item_name)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-md font-semibold transition-all ${
                           filterType === "Loading" && filterItem === item.item_name
                             ? "bg-blue-100 text-blue-900 font-bold border border-blue-200 shadow-sm"
                             : "text-zinc-600 hover:bg-zinc-50 hover:text-blue-700 hover:pl-4"
@@ -1164,7 +1161,7 @@ export default function UserDashboard({ roleName = "Dashboard" }) {
                       >
                          <div className="flex justify-between items-center">
                             <span className="truncate pr-2">{item.item_name}</span>
-                            <span className="font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs border border-blue-100">{String(item.count).padStart(2, "0")}</span>
+                            <span className="font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-md border border-blue-100">{String(item.count).padStart(2, "0")}</span>
                          </div>
                       </button>
                     ))}

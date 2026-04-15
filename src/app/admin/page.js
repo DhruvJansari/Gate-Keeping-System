@@ -901,7 +901,7 @@ function AdminDashboard() {
         </div>
 
         {/* Stats Cards - Top Row */}
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        {/* <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {[
             { label: "Total Employee", value: counts.users, icon: UsersIcon, gradient: "from-blue-500 to-blue-600" },
             { label: "Total Items", value: counts.items, icon: ClipboardIcon, gradient: "from-indigo-500 to-indigo-600" },
@@ -919,7 +919,7 @@ function AdminDashboard() {
               <stat.icon className="absolute right-2 bottom-2 h-16 w-16 opacity-10" />
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Category Filter Sections */}
 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -937,7 +937,7 @@ function AdminDashboard() {
         <div className="rounded-lg bg-rose-500 p-2 shadow-sm text-white">
           <UnloadingGoodsIcon className="h-5 w-5" />
         </div>
-        <span className="font-semibold text-rose-900">
+        <span className="font-semibold text-rose-900 text-lg">
           Unloading Goods [Inward] - {totalUnloading}
         </span>
       </div>
@@ -955,10 +955,10 @@ function AdminDashboard() {
           }`}
         >
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-base">
+            <span className="font-semibold text-lg">
               {item.item_name}
             </span>
-            <span className="bg-rose-200/60 px-2 py-0.5 rounded text-xs font-medium">
+            <span className="bg-rose-200/60 px-2 py-0.5 rounded text-md font-bold">
               ({item.count})
             </span>
           </div>
@@ -981,7 +981,7 @@ function AdminDashboard() {
         <div className="rounded-lg bg-blue-500 p-2 shadow-sm text-white">
           <LoadingGoodsIcon className="h-5 w-5" />
         </div>
-        <span className="font-semibold text-blue-900">
+        <span className="font-semibold text-blue-900 text-lg">
           Loading Goods [Outward] - {totalLoading}
         </span>
       </div>
@@ -999,10 +999,10 @@ function AdminDashboard() {
           }`}
         >
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-base">
+            <span className="font-semibold text-lg">
               {item.item_name}
             </span>
-            <span className="bg-blue-200/60 px-2 py-0.5 rounded text-xs font-medium">
+            <span className="bg-blue-200/60 px-2 py-0.5 rounded text-md font-bold">
               ({item.count})
             </span>
           </div>
