@@ -1,37 +1,77 @@
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import { STAGES, getStageStatus } from '@/lib/stageUtils';
-import { formatWeight } from '@/utils/formatters';
+import { useCallback } from "react";
+import { STAGES, getStageStatus } from "@/lib/stageUtils";
+import { formatWeight } from "@/utils/formatters";
 
 export function getGatePassHtml(transaction, options = {}) {
   const { forPrint = false } = options;
-  console.log("transaction",transaction);
-  const txnNo = (t) => t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, '0')}`;
-  const formatDate = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—');
-  const formatDateTime = (d) => (d ? new Date(d).toLocaleString('en-IN') : '—');
+  console.log("transaction", transaction);
+  const txnNo = (t) =>
+    t.gate_pass_no || `TRN${String(t.transaction_id).padStart(5, "0")}`;
+  const formatDate = (d) =>
+    d
+      ? new Date(d).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      : "—";
+  const formatDateTime = (d) => (d ? new Date(d).toLocaleString("en-IN") : "—");
 
-  const remark1 = transaction.remark1 || '';
-  const remark2 = transaction.remark2 || '';
+  const remark1 = transaction.remark1 || "";
+  const remark2 = transaction.remark2 || "";
 
   const confirmationMap = {
-    parking: { label: 'Parking', userKey: 'parking_confirmed_by_name', dateKey: 'parking_confirmed_at' },
-    gate_in: { label: 'Gate In', userKey: 'gate_in_confirmed_by_name', dateKey: 'gate_in_at' },
-    first_weighbridge: { label: 'First Weighbridge', userKey: 'first_weigh_confirmed_by_name', dateKey: 'first_weigh_at' },
-    campus_in: { label: 'Campus In', userKey: 'campus_in_confirmed_by_name', dateKey: 'campus_in_at' },
-    campus_out: { label: 'Campus Out', userKey: 'campus_out_confirmed_by_name', dateKey: 'campus_out_at' },
-    second_weighbridge: { label: 'Second Weighbridge', userKey: 'second_weigh_confirmed_by_name', dateKey: 'second_weigh_at' },
-    gate_pass: { label: 'Gate Pass', userKey: 'gate_pass_confirmed_by_name', dateKey: 'gate_pass_finalized_at' },
-    gate_out: { label: 'Gate Out', userKey: 'gate_out_confirmed_by_name', dateKey: 'gate_out_at' },
+    parking: {
+      label: "Parking",
+      userKey: "parking_confirmed_by_name",
+      dateKey: "parking_confirmed_at",
+    },
+    gate_in: {
+      label: "Gate In",
+      userKey: "gate_in_confirmed_by_name",
+      dateKey: "gate_in_at",
+    },
+    first_weighbridge: {
+      label: "First Weighbridge",
+      userKey: "first_weigh_confirmed_by_name",
+      dateKey: "first_weigh_at",
+    },
+    campus_in: {
+      label: "Campus In",
+      userKey: "campus_in_confirmed_by_name",
+      dateKey: "campus_in_at",
+    },
+    campus_out: {
+      label: "Campus Out",
+      userKey: "campus_out_confirmed_by_name",
+      dateKey: "campus_out_at",
+    },
+    second_weighbridge: {
+      label: "Second Weighbridge",
+      userKey: "second_weigh_confirmed_by_name",
+      dateKey: "second_weigh_at",
+    },
+    gate_pass: {
+      label: "Gate Pass",
+      userKey: "gate_pass_confirmed_by_name",
+      dateKey: "gate_pass_finalized_at",
+    },
+    gate_out: {
+      label: "Gate Out",
+      userKey: "gate_out_confirmed_by_name",
+      dateKey: "gate_out_at",
+    },
   };
 
   const status = getStageStatus(transaction);
   const completedCount = STAGES.filter((s) => status[s.key]).length;
- function formatQty(value) {
-  const num = parseFloat(value);
-  if (isNaN(num)) return "0";
-  return num.toFixed(0);
-}
+  function formatQty(value) {
+    const num = parseFloat(value);
+    if (isNaN(num)) return "0";
+    return num.toFixed(0);
+  }
   // Fields that should appear bigger and bolder throughout
   const highlight = `font-size: 9pt; font-weight: bold;`;
 
@@ -122,17 +162,17 @@ export function getGatePassHtml(transaction, options = {}) {
       <span class="sb-sep">|</span>
       <div class="sb-item">
         <span class="sb-label">Date</span>
-        <span class="sb-value">${formatDate(transaction.created_at)}</span>
+        <span class="sb-value">${formatDate(transaction.gate_pass_finalized_at)}</span>
       </div>
       <span class="sb-sep">|</span>
       <div class="sb-item">
         <span class="sb-label">Type</span>
-        <span class="sb-value">${transaction.transaction_type} (${transaction.transaction_type === 'Loading' ? 'Outward' : 'Inward'})</span>
+        <span class="sb-value">${transaction.transaction_type} (${transaction.transaction_type === "Loading" ? "Outward" : "Inward"})</span>
       </div>
       <span class="sb-sep">|</span>
       <div class="sb-item">
         <span class="sb-label">Gate In Time</span>
-        <span class="sb-value" style="font-size: 8pt;">${transaction.gate_in_at ? formatDateTime(transaction.gate_in_at) : '—'}</span>
+        <span class="sb-value" style="font-size: 8pt;">${transaction.gate_in_at ? formatDateTime(transaction.gate_in_at) : "—"}</span>
       </div>
       <span class="sb-sep">|</span>
       <div class="sb-item">
@@ -153,7 +193,7 @@ export function getGatePassHtml(transaction, options = {}) {
         </tr>
         <tr>
           <td class="label">Item</td>
-          <td class="value hl">${transaction.item_name || 'N/A'}</td>
+          <td class="value hl">${transaction.item_name || "N/A"}</td>
           <td class="label">Transporter</td>
           <td class="value hl">${transaction.transporter_name}</td>
         </tr>
@@ -161,7 +201,7 @@ export function getGatePassHtml(transaction, options = {}) {
           <td class="label">Driver Mobile</td>
           <td class="value hl">${transaction.mobile_number}</td>
           <td class="label">LR No</td>
-          <td class="value hl">${transaction.lr_number || '—'}</td>
+          <td class="value hl">${transaction.lr_number || "—"}</td>
         </tr>
       </table>
     </div>
@@ -180,11 +220,11 @@ export function getGatePassHtml(transaction, options = {}) {
           <td class="label">Invoice Qty</td>
           <td class="value hl">${formatQty(transaction.invoice_quantity)}</td>
           <td class="label">PO/DO No</td>
-          <td class="value hl">${transaction.po_do_number || '—'}</td>
+          <td class="value hl">${transaction.po_do_number || "—"}</td>
         </tr>
         <tr>
           <td class="label">Rate</td>
-          <td class="value hl">${formatQty(transaction.rate !== null) && formatQty(transaction.rate !== undefined) ? '₹' + formatQty(transaction.rate) : '—'}</td>
+          <td class="value hl">${formatQty(transaction.rate !== null) && formatQty(transaction.rate !== undefined) ? "₹" + formatQty(transaction.rate) : "—"}</td>
         </tr>
           <tr>
           <td class="label">Remark 1</td>
@@ -219,21 +259,26 @@ export function getGatePassHtml(transaction, options = {}) {
         </thead>
         <tbody>
         ${STAGES.map((s) => {
+          console.log("trsn", transaction.gate_pass);
           const isDone = status[s.key];
           const conf = confirmationMap[s.key];
-          const user = transaction[conf?.userKey] || '—';
-          let time = transaction[conf?.dateKey] ? formatDateTime(transaction[conf?.dateKey]) : '—';
-          if (s.key === 'gate_pass' && isDone) {
-            time = transaction.created_at ? formatDateTime(transaction.created_at) : '—';
+          const user = transaction[conf?.userKey] || "—";
+          let time = transaction[conf?.dateKey]
+            ? formatDateTime(transaction[conf?.dateKey])
+            : "—";
+          if (s.key === "gate_pass" && isDone) {
+            time = transaction.gate_pass_finalized_at
+              ? formatDateTime(transaction.gate_pass_finalized_at)
+              : "—";
           }
           return `
           <tr>
             <td>${s.label}</td>
-            <td class="${isDone ? 'stage-done' : 'stage-pending'}">${isDone ? 'COMPLETED' : 'PENDING'}</td>
-            <td>${isDone ? user : ''}</td>
-            <td>${isDone ? time : ''}</td>
+            <td class="${isDone ? "stage-done" : "stage-pending"}">${isDone ? "COMPLETED" : "PENDING"}</td>
+            <td>${isDone ? user : ""}</td>
+            <td>${isDone ? time : ""}</td>
           </tr>`;
-        }).join('')}
+        }).join("")}
         </tbody>
       </table>
     </div>
@@ -252,32 +297,32 @@ export function getGatePassHtml(transaction, options = {}) {
       </div>
     </div>
   </div>
-  ${forPrint ? `<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>` : ''}
+  ${forPrint ? `<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>` : ""}
 </body>
 </html>`;
 }
 
 export function getEntryPassHtml(transaction, options = {}) {
-    //remarks table of full a4 print
-    // ${(remark1 || remark2) ? `
-    // <div class="red-box">
-    //   <div class="section-title">REMARKS</div>
-    //   ${remark1 ? `<div style="padding: 2px;"><strong>Remark 1:</strong> ${remark1}</div>` : ''}
-    //   ${remark2 ? `<div style="padding: 2px;"><strong>Remark 2:</strong> ${remark2}</div>` : ''}
-    // </div>
-    // ` : ''}
+  //remarks table of full a4 print
+  // ${(remark1 || remark2) ? `
+  // <div class="red-box">
+  //   <div class="section-title">REMARKS</div>
+  //   ${remark1 ? `<div style="padding: 2px;"><strong>Remark 1:</strong> ${remark1}</div>` : ''}
+  //   ${remark2 ? `<div style="padding: 2px;"><strong>Remark 2:</strong> ${remark2}</div>` : ''}
+  // </div>
+  // ` : ''}
 
   const { forPrint = false } = options;
-  const displayId = String(transaction.gate_pass_no).padStart(5, '0');
+  const displayId = String(transaction.gate_pass_no).padStart(5, "0");
 
   const formatDateTime = (isoString) => {
-    if (!isoString) return 'N/A';
+    if (!isoString) return "N/A";
     const date = new Date(isoString);
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
     const yyyy = date.getFullYear();
-    const hh = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
     return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   };
 
@@ -380,7 +425,7 @@ export function getEntryPassHtml(transaction, options = {}) {
     <div class="txn-id">${displayId}</div>
     <div class="divider"></div>
 
-    <div class="item-name">${transaction.item_name || 'N/A'}</div>
+    <div class="item-name">${transaction.item_name || "N/A"}</div>
     <div class="divider"></div>
 
     <div class="truck-no">${transaction.truck_no}</div>
@@ -389,12 +434,12 @@ export function getEntryPassHtml(transaction, options = {}) {
     <div class="timing-block">
       <div class="timing-row">
         <span class="label">Driver Mobile</span>
-        <span class="value driver-mobile">${transaction.mobile_number || 'N/A'}</span>
+        <span class="value driver-mobile">${transaction.mobile_number || "N/A"}</span>
       </div>
     </div>
 
   </div>
-  ${forPrint ? `<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>` : ''}
+  ${forPrint ? `<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>` : ""}
 </body>
 </html>`;
 }
@@ -402,28 +447,28 @@ export function getEntryPassHtml(transaction, options = {}) {
 export function useGatePassPrint() {
   const printGatePass = useCallback((transaction) => {
     const html = getGatePassHtml(transaction, { forPrint: true });
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    const printWindow = window.open("", "_blank", "width=800,height=600");
     if (printWindow) {
-        printWindow.document.write(html);
-        printWindow.document.close();
+      printWindow.document.write(html);
+      printWindow.document.close();
     }
   }, []);
 
   const printEntryPass = useCallback((transaction) => {
     const html = getEntryPassHtml(transaction, { forPrint: true });
     // Open a smaller window for the thermal print preview
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    const printWindow = window.open("", "_blank", "width=400,height=600");
     if (printWindow) {
-        printWindow.document.write(html);
-        printWindow.document.close();
+      printWindow.document.write(html);
+      printWindow.document.close();
     }
   }, []);
 
   const downloadGatePass = useCallback((transaction) => {
     const html = getGatePassHtml(transaction, { forPrint: false });
-    const blob = new Blob([html], { type: 'text/html' });
+    const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `gate-pass-${transaction.gate_pass_no || transaction.transaction_id}.html`;
     a.click();
