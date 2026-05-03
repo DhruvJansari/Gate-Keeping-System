@@ -1480,21 +1480,43 @@ function AdminDashboard() {
                 </div>
               </button>
 
-              <button
-                onClick={() => {
-                   printGatePass(printModal);
-                   setPrintModal(null);
-                }}
-                className="flex items-center justify-center gap-3 rounded-lg border-2 border-zinc-200 p-4 hover:border-amber-500 hover:bg-amber-50 transition-all group"
-              >
-                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-zinc-100 group-hover:bg-amber-200">
-                  <PrinterIcon className="h-5 w-5 text-zinc-600 group-hover:text-amber-700" />
-                </div>
-                <div className="text-left flex-1">
-                   <span className="block font-bold text-zinc-900 group-hover:text-amber-900">Gate Pass</span>
-                   <span className="block text-xs text-zinc-500">Full A4 page format</span>
-                </div>
-              </button>
+              {(() => {
+                const status = getStageStatus(printModal);
+                const isGatePassEnabled = status.second_weighbridge;
+                return (
+                  <button
+                    disabled={!isGatePassEnabled}
+                    onClick={() => {
+                       if (!isGatePassEnabled) return;
+                       printGatePass(printModal);
+                       setPrintModal(null);
+                    }}
+                    className={`flex items-center justify-center gap-3 rounded-lg border-2 p-4 transition-all ${
+                      isGatePassEnabled 
+                        ? 'border-zinc-200 hover:border-amber-500 hover:bg-amber-50 group' 
+                        : 'border-zinc-100 bg-zinc-50 opacity-75 cursor-not-allowed'
+                    }`}
+                  >
+                    <div className={`h-10 w-10 flex items-center justify-center rounded-full ${
+                      isGatePassEnabled ? 'bg-zinc-100 group-hover:bg-amber-200' : 'bg-zinc-100'
+                    }`}>
+                      <PrinterIcon className={`h-5 w-5 ${
+                        isGatePassEnabled ? 'text-zinc-600 group-hover:text-amber-700' : 'text-zinc-400'
+                      }`} />
+                    </div>
+                    <div className="text-left flex-1">
+                       <span className={`block font-bold ${
+                         isGatePassEnabled ? 'text-zinc-900 group-hover:text-amber-900' : 'text-zinc-500'
+                       }`}>Gate Pass</span>
+                       {isGatePassEnabled ? (
+                         <span className="block text-xs text-zinc-500">Full A4 page format</span>
+                       ) : (
+                         <span className="block text-xs text-rose-500 font-medium">Available only on Gate Pass stage</span>
+                       )}
+                    </div>
+                  </button>
+                );
+              })()}
             </div>
 
             <button
